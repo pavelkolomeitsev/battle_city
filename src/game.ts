@@ -1,23 +1,29 @@
+import BootScene from "./scenes/BootScene";
+import PreloadScene from "./scenes/PreloadScene";
+import GameScene from "./scenes/GameScene";
+
 const config = {
     type: Phaser.AUTO,
-    backgroundColor: '#000000',
-    // width: 1280, // need to config!!!
-    // height: 720, // need to config!!!
+    width: 1280, // set according to background image size / map`s size!!!
+    height: 750, // set according to background image size / map`s size!!!
     scene: [
-        // new BootScene(),
-        // new PreloadScene(),
+        new BootScene(),
+        new PreloadScene(),
         // new StartScene(),
-        // new GameScene()
+        new GameScene()
     ],
     scale: {
         mode: Phaser.Scale.FIT, // auto scaling of all sprites
-        autoCenter: Phaser.Scale.CENTER_BOTH, // canvas centering in the center of the screen
-        width: 1300,
-        height: 700
+        autoCenter: Phaser.Scale.CENTER_BOTH // canvas centering in the center of the screen
     },
     physics: {
-        default: "arcade",
-        arcade: { debug: false} // if true -> shows objects` frames
+        // default: "arcade",
+        // arcade: { debug: false} // if true -> shows objects` frames
+        default: "matter",
+        matter: {
+            debug: false,
+            gravity: {x: 0, y: 0}
+        }
     }
 };
 
