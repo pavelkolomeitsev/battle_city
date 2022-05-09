@@ -2,6 +2,41 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/classes/BangAnimation.ts":
+/*!**************************************!*\
+  !*** ./src/classes/BangAnimation.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+class BangAnimation extends Phaser.GameObjects.GameObject {
+    constructor(scene, position) {
+        super(scene, "objects");
+        this._scene = null;
+        this._sprite = null;
+        this._scene = scene;
+        this._sprite = this._scene.matter.add.sprite(position.x, position.y, "objects", "explosion1");
+        this._sprite.setSensor(true);
+        this.bangAnimation();
+    }
+    bangAnimation() {
+        this._sprite.play(utils_1.BANG_ANIMATION);
+        this._sprite.once(Phaser.Animations.Events.ANIMATION_COMPLETE, function () {
+            this._sprite.destroy();
+            this.destroy();
+        }, this);
+    }
+    static generateBang(scene, position) {
+        new BangAnimation(scene, position);
+    }
+}
+exports["default"] = BangAnimation;
+
+
+/***/ }),
+
 /***/ "./src/classes/GroupOfShells.ts":
 /*!**************************************!*\
   !*** ./src/classes/GroupOfShells.ts ***!
@@ -15,28 +50,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const Shell_1 = __importDefault(__webpack_require__(/*! ./Shell */ "./src/classes/Shell.ts"));
 class GroupOfShells extends Phaser.GameObjects.Group {
-    constructor(scene, vehicle, map) {
+    constructor(scene, parentSprite, map, texture, enemy = true) {
         super(scene);
         this._scene = null;
-        this._vehicle = null;
+        this._parentSprite = null;
         this._map = null;
+        this._texture = "";
+        this._enemy = 1;
         this._nextShoot = 0;
         this._scene = scene;
-        this._vehicle = vehicle;
+        this._parentSprite = parentSprite;
         this._map = map;
+        this._texture = texture;
+        this._enemy = enemy ? 1 : -1;
     }
     createFire() {
         if (this._nextShoot > this._scene.time.now)
             return;
         let shell = this.getFirstDead();
         if (!shell) {
-            shell = new Shell_1.default(this._scene, this._vehicle, this._map, "bulletRed1_outline.png");
+            shell = new Shell_1.default(this._scene, this._parentSprite, this._map, this._texture);
             this.add(shell);
         }
         else {
             shell.reset();
         }
-        shell.flyOut();
+        shell.flyOut(this._enemy);
         this._nextShoot = this._scene.time.now + 500;
     }
 }
@@ -87,6 +126,11 @@ class Map {
     getPlayer() {
         return this.tilemap.findObject("player", playerObject => playerObject.name === "player");
     }
+    getTurretPosition() {
+        const turret = this.tilemap.findObject("enemy", playerObject => playerObject.name === "enemy");
+        const position = { x: turret.x, y: turret.y };
+        return position;
+    }
     getTileFriction(car) {
         for (const roadType in utils_1.ROADS_FRICTION) {
             const tile = this.tilemap.getTileAtWorldXY(car.x, car.y, false, this._scene.cameras.main, roadType);
@@ -115,8 +159,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const Vehicle_1 = __importDefault(__webpack_require__(/*! ./Vehicle */ "./src/classes/Vehicle.ts"));
 const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
 class Player extends Vehicle_1.default {
-    constructor(scene, map, config) {
-        super(scene, map, config);
+    constructor(scene, position, texture, map, shellTexture, enemy) {
+        super(scene, position, texture, map, shellTexture, enemy);
         this._scene = null;
         this._map = null;
         this._cursor = null;
@@ -160,15 +204,17 @@ exports["default"] = Player;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class Shell extends Phaser.GameObjects.GameObject {
-    constructor(scene, vehicle, map, texture) {
+    constructor(scene, parentSprite, map, texture) {
         super(scene, texture);
         this._scene = null;
-        this._vehicle = null;
+        this._parentSprite = null;
         this._map = null;
+        this._texture = "";
         this._sprite = null;
         this._scene = scene;
-        this._vehicle = vehicle;
+        this._parentSprite = parentSprite;
         this._map = map;
+        this._texture = texture;
         this._scene.events.on("update", this.update, this);
     }
     update() {
@@ -184,11 +230,11 @@ class Shell extends Phaser.GameObjects.GameObject {
         this._sprite.setActive(status);
         this.setActive(status);
     }
-    flyOut() {
+    flyOut(direction) {
         const vector = new Phaser.Math.Vector2();
-        vector.setToPolar(this._vehicle.sprite.rotation - Math.PI / 2, 30);
-        this._sprite = this._scene.matter.add.sprite(this._vehicle.sprite.x + vector.x, this._vehicle.sprite.y + vector.y, "objects", "bulletRed1_outline.png");
-        this._sprite.angle = this._vehicle.sprite.angle;
+        vector.setToPolar(this._parentSprite.rotation + (direction * Math.PI / 2), 30);
+        this._sprite = this._scene.matter.add.sprite(this._parentSprite.x + vector.x, this._parentSprite.y + vector.y, "objects", this._texture);
+        this._sprite.angle = this._parentSprite.angle;
         this._sprite.setVelocity(vector.x * 0.9, vector.y * 0.9);
     }
     reset() {
@@ -196,6 +242,50 @@ class Shell extends Phaser.GameObjects.GameObject {
     }
 }
 exports["default"] = Shell;
+
+
+/***/ }),
+
+/***/ "./src/classes/Turret.ts":
+/*!*******************************!*\
+  !*** ./src/classes/Turret.ts ***!
+  \*******************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const GroupOfShells_1 = __importDefault(__webpack_require__(/*! ./GroupOfShells */ "./src/classes/GroupOfShells.ts"));
+class Turret extends Phaser.GameObjects.GameObject {
+    constructor(scene, position, map, shellTexture, enemy) {
+        super(scene, "platform");
+        this._scene = null;
+        this._platform = null;
+        this._turret = null;
+        this._scene = scene;
+        this.init(position, map, shellTexture, enemy);
+    }
+    init(position, map, shellTexture, enemy) {
+        this._platform = this._scene.matter.add.sprite(position.x, position.y, "objects", "platform");
+        this._platform.setStatic(true);
+        this._turret = this._scene.matter.add.sprite(position.x, position.y, "objects", "turret");
+        this._turret.setStatic(true);
+        this._groupOfShells = new GroupOfShells_1.default(this._scene, this._turret, map, shellTexture, enemy);
+    }
+    watch(player) {
+        const angle = Phaser.Math.Angle.Between(this._turret.x, this._turret.y, player.sprite.x, player.sprite.y);
+        this._turret.rotation = angle - Math.PI / 2;
+        this.fire();
+    }
+    fire() {
+        if (this._groupOfShells) {
+            this._groupOfShells.createFire();
+        }
+    }
+}
+exports["default"] = Turret;
 
 
 /***/ }),
@@ -214,17 +304,16 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
 const GroupOfShells_1 = __importDefault(__webpack_require__(/*! ./GroupOfShells */ "./src/classes/GroupOfShells.ts"));
 class Vehicle {
-    constructor(scene, map, config) {
+    constructor(scene, position, texture, map, shellTexture, enemy) {
         this._scene = null;
         this._map = null;
         this.sprite = null;
         this._scene = scene;
         this._map = map;
         this._velocity = 0;
-        const player = this._map.getPlayer();
-        this.sprite = this._scene.matter.add.sprite(player.x, player.y, "objects", config.sprite);
+        this.sprite = this._scene.matter.add.sprite(position.x, position.y, "objects", texture);
         this.sprite.setFixedRotation();
-        this._groupOfShells = new GroupOfShells_1.default(this._scene, this, this._map);
+        this._groupOfShells = new GroupOfShells_1.default(this._scene, this.sprite, this._map, shellTexture, enemy);
     }
     get direction() {
         let direction = utils_1.DIRECTIONS.NONE;
@@ -360,27 +449,54 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const BangAnimation_1 = __importDefault(__webpack_require__(/*! ../classes/BangAnimation */ "./src/classes/BangAnimation.ts"));
 const Map_1 = __importDefault(__webpack_require__(/*! ../classes/Map */ "./src/classes/Map.ts"));
 const Player_1 = __importDefault(__webpack_require__(/*! ../classes/Player */ "./src/classes/Player.ts"));
+const Turret_1 = __importDefault(__webpack_require__(/*! ../classes/Turret */ "./src/classes/Turret.ts"));
 const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: "game-scene" });
         this._map = null;
         this._player1 = null;
+        this._turret = null;
     }
     preload() {
         this.add.sprite(0, 0, "background").setOrigin(0);
+        const frames = this.anims.generateFrameNames("objects", {
+            prefix: "explosion",
+            start: 1,
+            end: 5
+        });
+        this.anims.create({
+            key: utils_1.BANG_ANIMATION,
+            frames: frames,
+            frameRate: 5,
+            duration: 800,
+            repeat: 0,
+        });
     }
     create() {
         this._map = new Map_1.default(this);
         const vehicle = this.getVehicleConfig();
-        this._player1 = new Player_1.default(this, this._map, vehicle.player1);
+        const player = this._map.getPlayer();
+        const position = { x: player.x, y: player.y };
+        this._player1 = new Player_1.default(this, position, vehicle.player1.sprite, this._map, "bulletRed1_outline", false);
+        this.matter.world.on("collisionstart", (event, box, shell) => {
+            if (box.gameObject.frame.name === "crateWood" && shell.gameObject.frame.name === "bulletRed1_outline") {
+                const position = box.position;
+                box.gameObject.destroy();
+                shell.gameObject.destroy();
+                BangAnimation_1.default.generateBang(this, position);
+            }
+        }, this);
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
         this.cameras.main.startFollow(this._player1.sprite);
+        this._turret = new Turret_1.default(this, this._map.getTurretPosition(), this._map, "bulletDark1_outline", true);
     }
     update(time, delta) {
         this._player1.move();
+        this._turret.watch(this._player1);
     }
     getVehicleConfig() {
         let config = { player1: utils_1.TANKS.RED, player2: utils_1.TANKS.BLUE };
@@ -478,7 +594,7 @@ exports.LoadingBar = LoadingBar;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TANKS = exports.ROADS_FRICTION = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.DIRECTIONS = void 0;
+exports.BANG_ANIMATION = exports.TANKS = exports.ROADS_FRICTION = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.DIRECTIONS = void 0;
 var DIRECTIONS;
 (function (DIRECTIONS) {
     DIRECTIONS[DIRECTIONS["NONE"] = 0] = "NONE";
@@ -506,7 +622,7 @@ exports.ROADS_FRICTION = {
 };
 exports.TANKS = {
     RED: {
-        sprite: "tank_red.png",
+        sprite: "tank_red",
         position: "player"
     },
     BLUE: {
@@ -514,6 +630,7 @@ exports.TANKS = {
         position: "player"
     }
 };
+exports.BANG_ANIMATION = "BANG_ANIMATION";
 
 
 /***/ })

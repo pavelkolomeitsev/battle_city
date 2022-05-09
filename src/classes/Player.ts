@@ -1,15 +1,14 @@
 import Vehicle from "./Vehicle";
 import Map from "./Map";
-import { DIRECTIONS, TURNS } from "../utils/utils";
-import GroupOfShells from "./GroupOfShells";
+import { DIRECTIONS, StartPosition, TURNS } from "../utils/utils";
 
 export default class Player extends Vehicle {
     protected _scene: Phaser.Scene = null;
     protected _map: Map = null;
     private _cursor: Phaser.Types.Input.Keyboard.CursorKeys = null;
 
-    constructor(scene: Phaser.Scene, map: Map, config: any) {
-        super(scene, map, config);
+    constructor(scene: Phaser.Scene, position: StartPosition, texture: string, map: Map, shellTexture: string, enemy: boolean) {
+        super(scene, position, texture, map, shellTexture, enemy);
         this._scene = scene;
         this._map = map;
         this._cursor = this._scene.input.keyboard.createCursorKeys(); // take control from keyboard, exactly up and down keys
@@ -37,11 +36,4 @@ export default class Player extends Vehicle {
         super.move();
         if (this._cursor.space.isDown) this.fire();
     }
-
-    // protected fire(): void {
-    //     const groupOfShells = new GroupOfShells(this._scene, this, this._map);
-    //     if (groupOfShells) {
-    //         groupOfShells.createFire();
-    //     }
-    // }
 }

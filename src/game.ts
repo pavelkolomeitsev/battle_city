@@ -22,7 +22,7 @@ const config = {
         default: "matter",
         matter: {
             debug: false,
-            gravity: {x: 0, y: 0}
+            gravity: { x: 0, y: 0 }
         }
     }
 };

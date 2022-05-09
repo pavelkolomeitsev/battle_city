@@ -23,7 +23,7 @@ export const ROADS_FRICTION = {
 
 export const TANKS = {
     RED: {
-        sprite: "tank_red.png",
+        sprite: "tank_red",
         position: "player"
     },
     BLUE: {
@@ -34,6 +34,7 @@ export const TANKS = {
 
 export type StartPosition = {
     x: number,
-    y: number,
-    angle?: number
+    y: number
 };
+
+export const BANG_ANIMATION: string = "BANG_ANIMATION";

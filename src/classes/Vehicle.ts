@@ -1,4 +1,4 @@
-import { SPEED, DIRECTIONS, TURNS } from "../utils/utils";
+import { SPEED, DIRECTIONS, TURNS, StartPosition } from "../utils/utils";
 import GroupOfShells from "./GroupOfShells";
 import Map from "./Map";
 
@@ -9,15 +9,15 @@ export default class Vehicle {
     private _groupOfShells: GroupOfShells;
     public sprite: Phaser.Physics.Matter.Sprite = null;
 
-    constructor(scene: Phaser.Scene, map: Map, config: any) {
+    constructor(scene: Phaser.Scene, position: StartPosition, texture: string, map: Map, shellTexture: string, enemy: boolean) {
         this._scene = scene;
         this._map = map;
         this._velocity = 0; // current car`s direction
-        // this._checkpoint = 0;
-        const player = this._map.getPlayer();
-        this.sprite = this._scene.matter.add.sprite(player.x, player.y, "objects", config.sprite); // add sprite to the scene
+        this.sprite = this._scene.matter.add.sprite(position.x, position.y, "objects", texture); // add sprite to the scene
         this.sprite.setFixedRotation(); // avoid the vehicle`s spinning on its axis
-        this._groupOfShells = new GroupOfShells(this._scene, this, this._map);
+
+        // test checking
+        this._groupOfShells = new GroupOfShells(this._scene, this.sprite, this._map, shellTexture, enemy);
     }
 
     protected get direction(): number {
@@ -118,9 +118,5 @@ export default class Vehicle {
     //     } else if (checkpoint === this._checkpoint + 1) { // when the player is crossing one checkpoint
     //         ++this._checkpoint;
     //     }
-    // }
-
-    // public slide(): void {
-    //     this.car.angle += SLIDE_ANGLE;
     // }
 }

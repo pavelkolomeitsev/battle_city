@@ -1,4 +1,4 @@
-import { GROUND_FRICTION, ROADS_FRICTION } from "../utils/utils";
+import { GROUND_FRICTION, ROADS_FRICTION, StartPosition } from "../utils/utils";
 
 export default class Map {
     private _scene: Phaser.Scene = null;
@@ -25,13 +25,13 @@ export default class Map {
         // this.createChekpoints();
     }
     
-    createLayers(): void {
+    private createLayers(): void {
         // create 2 layers
         this.tilemap.createLayer("ground", this._tileset);
         this.tilemap.createLayer("road", this._tileset);
     }
 
-    createCollisions(): void {
+    private createCollisions(): void {
         // first param - name of object`s layer in tilemap
         // second param - callback function, which called for every image in tileset
         this.tilemap.findObject("collisions", collisionObject => {
@@ -61,9 +61,15 @@ export default class Map {
         // });
     }
 
-    getPlayer(): Phaser.Types.Tilemaps.TiledObject {
+    public getPlayer(): Phaser.Types.Tilemaps.TiledObject {
         // find a player object in tilemap
         return this.tilemap.findObject("player", playerObject => playerObject.name === "player");
+    }
+
+    public getTurretPosition(): StartPosition {
+        const turret: Phaser.Types.Tilemaps.TiledObject = this.tilemap.findObject("enemy", playerObject => playerObject.name === "enemy");
+        const position: StartPosition = {x: turret.x, y: turret.y};
+        return position;
     }
 
     getTileFriction(car: Phaser.Physics.Matter.Sprite): number {

@@ -1,17 +1,18 @@
 import Map from "./Map";
-import Vehicle from "./Vehicle";
 
 export default class Shell extends Phaser.GameObjects.GameObject {
     private _scene: Phaser.Scene = null;
-    private _vehicle: Vehicle = null;
+    private _parentSprite: Phaser.Physics.Matter.Sprite = null;
     private _map: Map = null;
+    private _texture: string = "";
     public _sprite: Phaser.Physics.Matter.Sprite = null;
 
-    constructor(scene: Phaser.Scene, vehicle: Vehicle, map: Map, texture: string) {
+    constructor(scene: Phaser.Scene, parentSprite: Phaser.Physics.Matter.Sprite, map: Map, texture: string) {
         super(scene, texture);
         this._scene = scene;
-        this._vehicle = vehicle;
+        this._parentSprite = parentSprite;
         this._map = map;
+        this._texture = texture;
         this._scene.events.on("update", this.update, this);
     }
 
@@ -31,11 +32,12 @@ export default class Shell extends Phaser.GameObjects.GameObject {
         // if (!status) this.emit("object_killed");
     }
 
-    public flyOut() {
+    // direction has to be among 1 and -1. 1 for enemies, -1 for player
+    public flyOut(direction: number) {
         const vector: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
-        vector.setToPolar(this._vehicle.sprite.rotation - Math.PI / 2, 30); // (this._tank.vehicle.rotation - Math.PI) - correct side from where shell throws, 30 - distance from tank`s core and shell
-        this._sprite = this._scene.matter.add.sprite(this._vehicle.sprite.x + vector.x, this._vehicle.sprite.y + vector.y, "objects", "bulletRed1_outline.png");
-        this._sprite.angle = this._vehicle.sprite.angle; // tank and shell sprites should be on the same direction
+        vector.setToPolar(this._parentSprite.rotation + (direction * Math.PI / 2), 30); // (this._tank.vehicle.rotation - Math.PI) - correct side from where shell throws, 30 - distance from tank`s core and shell
+        this._sprite = this._scene.matter.add.sprite(this._parentSprite.x + vector.x, this._parentSprite.y + vector.y, "objects", this._texture);
+        this._sprite.angle = this._parentSprite.angle; // tank and shell sprites should be on the same direction
         this._sprite.setVelocity(vector.x * 0.9, vector.y * 0.9); // shell`s speed
     }
 
