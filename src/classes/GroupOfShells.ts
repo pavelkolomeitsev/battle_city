@@ -1,16 +1,17 @@
+import { StartPosition } from "../utils/utils";
 import Map from "./Map";
 import Shell from "./Shell";
 
-export default class GroupOfShells extends Phaser.GameObjects.Group {
+export default class GroupOfShells extends Phaser.Physics.Arcade.Group {
     private _scene: Phaser.Scene = null;
-    private _parentSprite: Phaser.Physics.Matter.Sprite = null;
+    private _parentSprite: Phaser.GameObjects.Sprite = null;
     private _map: Map = null;
     private _texture: string = "";
     private _enemy: number = 1;
     private _nextShoot: number = 0;
 
-    constructor(scene: Phaser.Scene, parentSprite: Phaser.Physics.Matter.Sprite, map: Map, texture: string, enemy: boolean = true) {
-        super(scene);
+    constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, parentSprite: Phaser.GameObjects.Sprite, map: Map, texture: string, enemy: boolean = true) {
+        super(world, scene);
         this._scene = scene;
         this._parentSprite = parentSprite;
         this._map = map;
@@ -25,7 +26,9 @@ export default class GroupOfShells extends Phaser.GameObjects.Group {
         let shell: Shell = this.getFirstDead();
         
         if (!shell) {
-            shell = new Shell(this._scene, this._parentSprite, this._map, this._texture);
+            const vector: Phaser.Math.Vector2 = this._scene.physics.velocityFromAngle(this._parentSprite.angle + 270, 30); // +270 - trick to set shell just before barrel
+            const position: StartPosition = { x: this._parentSprite.x + vector.x, y: this._parentSprite.y + vector.y };
+            shell = new Shell(this._scene, position, "objects", this._texture, this._parentSprite, this._map);
             this.add(shell);
         } else {
             shell.reset();

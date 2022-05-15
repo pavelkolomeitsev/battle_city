@@ -17,13 +17,13 @@ const config = {
         autoCenter: Phaser.Scale.CENTER_BOTH // canvas centering in the center of the screen
     },
     physics: {
-        // default: "arcade",
-        // arcade: { debug: false} // if true -> shows objects` frames
-        default: "matter",
-        matter: {
-            debug: false,
-            gravity: { x: 0, y: 0 }
-        }
+        default: "arcade",
+        arcade: { debug: false} // if true -> shows objects` frames
+        // default: "matter",
+        // matter: {
+        //     debug: false,
+        //     gravity: { x: 0, y: 0 }
+        // }
     }
 };
 

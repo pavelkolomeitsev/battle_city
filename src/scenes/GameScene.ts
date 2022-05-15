@@ -1,6 +1,7 @@
 import BangAnimation from "../classes/BangAnimation";
 import Map from "../classes/Map";
 import Player from "../classes/Player";
+import Shell from "../classes/Shell";
 import Turret from "../classes/Turret";
 import { BANG_ANIMATION, StartPosition, TANKS } from "../utils/utils";
 
@@ -8,7 +9,7 @@ export default class GameScene extends Phaser.Scene {
     private _map: Map = null;
     private _player1: Player = null;
     // testing turret
-    private _turret: Turret = null;
+    // private _turret: Turret = null;
 
     constructor() {super({key: "game-scene"});}
 
@@ -36,26 +37,36 @@ export default class GameScene extends Phaser.Scene {
         const vehicle: any = this.getVehicleConfig();
         const player = this._map.getPlayer();
         const position: StartPosition = {x: player.x, y: player.y};
-        this._player1 = new Player(this, position, vehicle.player1.sprite, this._map, "bulletRed1_outline", false);
-        this.matter.world.on("collisionstart", (event, box, shell) => {
-            if (box.gameObject.frame.name === "crateWood" && shell.gameObject.frame.name === "bulletRed1_outline") {
-                const position: StartPosition = box.position;
-                box.gameObject.destroy();
-                shell.gameObject.destroy();
-                BangAnimation.generateBang(this, position);
-            }
-        }, this);
-        this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels); // set map`s bounds as camera`s bounds
-        this.cameras.main.startFollow(this._player1.sprite); // set camera to center on the player`s car
+        this._player1 = new Player(this, position, "objects", "tank_red", this._map, "bulletRed1_outline", false);
 
+        this.handleCollisions();
         // testing turret
-        this._turret = new Turret(this, this._map.getTurretPosition(), this._map, "bulletDark1_outline", true);
+        // this._turret = new Turret(this, this._map.getTurretPosition(), this._map, "bulletDark1_outline", true);
+        // this.matter.world.on("player_killed", this.stopFiring, this);
+        
+        this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels); // set map`s bounds as camera`s bounds
+        this.cameras.main.startFollow(this._player1); // set camera to center on the player`s car
+    }
+
+    private handleCollisions(): void {
+        this.physics.add.overlap(this._player1.groupOfShells, this._map.boxes, this.boxesShellsCollision, null, this);
+    }
+
+    private boxesShellsCollision(shell: Shell, box: Phaser.GameObjects.Sprite): void {
+        const position: StartPosition = { x: shell.x, y: shell.y };
+        BangAnimation.generateBang(this, position);
+        shell.destroy();
+        box.destroy();
     }
 
     // see docs -> Scene.Methods
     update(time: number, delta: number): void {
-        this._player1.move();
-        this._turret.watch(this._player1);
+        if (this._player1) {
+            this._player1.move();
+        }
+        // if (this._turret && this._player1) {
+        //     this._turret.runTurret(this._player1, this._map.isInDefenceArea(this._player1));
+        // }
     }
 
     private getVehicleConfig(): any {
@@ -66,5 +77,11 @@ export default class GameScene extends Phaser.Scene {
         //     config = { player1: CARS.BLUE, player2: CARS.RED };
         // }
         return config;
+    }
+
+    private stopFiring(): void {
+        // if (this._turret) {
+        //     this._turret.isFiring = false;
+        // }
     }
 }

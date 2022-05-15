@@ -4,6 +4,8 @@ export default class Map {
     private _scene: Phaser.Scene = null;
     private _tileset: Phaser.Tilemaps.Tileset = null;
     public tilemap: Phaser.Tilemaps.Tilemap = null;
+    public boxes: Phaser.GameObjects.Sprite[] = [];
+    public defenceArea: Phaser.Geom.Rectangle = null;
 
     constructor(scene: Phaser.Scene) {
         this._scene = scene;
@@ -22,7 +24,7 @@ export default class Map {
     create(): void {
         this.createLayers();
         this.createCollisions();
-        // this.createChekpoints();
+        this.createDefenceArea();
     }
     
     private createLayers(): void {
@@ -35,30 +37,25 @@ export default class Map {
         // first param - name of object`s layer in tilemap
         // second param - callback function, which called for every image in tileset
         this.tilemap.findObject("collisions", collisionObject => {
-            // with the help of 'matter' engine we add every image to the scene
-
             // we have to cast implicitly
             // collisionObject - GameObject, but we need Sprite!
-            const castedObject = collisionObject as Phaser.Physics.Matter.Sprite;
-            const sprite: Phaser.Physics.Matter.Sprite = this._scene.matter.add.sprite(
-                castedObject.x + castedObject.width / 2, // with the help of this trick
-                castedObject.y - castedObject.height / 2, // we fixed incorrect displacement (смещение) of sprites on the map
-                "objects", // key from 'PreloadScene -> this.load.atlas("objects"...'
-                collisionObject.name // it`s to distinct each item in objects image collection
-            );
-            sprite.setStatic(true); // make the sprite static physical object
+            const castedObject: Phaser.GameObjects.Sprite = collisionObject as Phaser.GameObjects.Sprite;
+            let sprite: Phaser.GameObjects.Sprite = new Phaser.GameObjects.Sprite(this._scene, castedObject.x, castedObject.y, "objects", "crateWood");
+            // let sprite: Phaser.GameObjects.Sprite = new Phaser.GameObjects.Sprite(this._scene, castedObject.x, castedObject.y, "objects", "crateWood");
+            this._scene.add.existing(sprite);
+            this._scene.physics.add.existing(sprite, true); // true -> to make it static
+            sprite.body.enable = true;
+            this.boxes.push(sprite);
         });
     }
 
-    createChekpoints(): void {
-        // // get all game objects with name "checkpoint"
-        // const array: Phaser.Types.Tilemaps.TiledObject[] = this.tilemap.filterObjects("checkpoints", checkpoint => checkpoint.name === "checkpoint");
-        // // fill this._chekpoints-array with rectangle objects
-        // array.forEach(item => {
-        //     const rectangle: Checkpoint = new Checkpoint(item.x, item.y, item.width, item.height);
-        //     rectangle.index = item.properties.find((prop: Phaser.Types.Tilemaps.TiledObject) => prop.name === "value").value;
-        //     this.chekpoints.push(rectangle);
-        // });
+    private createDefenceArea(): void {
+        // get all game objects with name "checkpoint"
+        const array: Phaser.Types.Tilemaps.TiledObject[] = this.tilemap.filterObjects("defence_area", checkpoint => checkpoint.name === "defence_area");
+        // create rectangle phaser object
+        array.forEach((item: Phaser.Types.Tilemaps.TiledObject) => {
+            this.defenceArea = new Phaser.Geom.Rectangle(item.x, item.y, item.width, item.height);
+        });
     }
 
     public getPlayer(): Phaser.Types.Tilemaps.TiledObject {
@@ -72,21 +69,22 @@ export default class Map {
         return position;
     }
 
-    getTileFriction(car: Phaser.Physics.Matter.Sprite): number {
+    getTileFriction(vehicle: Phaser.GameObjects.Sprite): number {
         for (const roadType in ROADS_FRICTION) {
             // match different road`s types where the car is running now
             // if it`s in ROADS_FRICTION, return appropriate road`s type
             // important!!! road`s types have to match exactly with layers` names in the map
-            const tile: Phaser.Tilemaps.Tile = this.tilemap.getTileAtWorldXY(car.x, car.y, false, this._scene.cameras.main, roadType);
+            const tile: Phaser.Tilemaps.Tile = this.tilemap.getTileAtWorldXY(vehicle.x, vehicle.y, false, this._scene.cameras.main, roadType);
             if (tile) return ROADS_FRICTION[roadType];
         }    
         // if it`s not -> return GRASS_FRICTION
         return GROUND_FRICTION;
     }
 
-    // getCheckpoint(car: Phaser.Physics.Matter.Sprite): number | boolean {
-    //     const checkpoint = this.chekpoints.find(item => item.contains(car.x, car.y));
-    //     // check if the car is in the exact checkpoint or car isn`t in the checkpoint area
-    //     return checkpoint ? Number.parseInt(checkpoint.index) : false;
-    // }
+    public isInDefenceArea(playersTank: Phaser.GameObjects.Sprite): boolean {
+        // check if player is in the defence area or not
+        if (playersTank) {
+            return this.defenceArea.contains(playersTank.x, playersTank.y);
+        } else return false;
+    }
 }

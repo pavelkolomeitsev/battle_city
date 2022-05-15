@@ -1,7 +1,7 @@
 export enum DIRECTIONS {
     NONE = 0,
-    FORWARD = 1,
-    BACKWARD = -1
+    FORWARD = 100,
+    BACKWARD = -100
 };
 
 export enum TURNS {
@@ -11,12 +11,12 @@ export enum TURNS {
 };
 
 export enum SPEED {
-    BASIC = 3,
-    FASTER = 5,
-    FASTEST = 7
+    BASIC = 150,
+    FASTER = 200,
+    FASTEST = 300
 };
 
-export const GROUND_FRICTION = 0.5;
+export const GROUND_FRICTION = 0.4;
 export const ROADS_FRICTION = {
     road: 1
 };
@@ -38,3 +38,10 @@ export type StartPosition = {
 };
 
 export const BANG_ANIMATION: string = "BANG_ANIMATION";
+
+export default class Checkpoint extends Phaser.Geom.Rectangle{
+    public index: string;
+    constructor(x: number, y: number, width: number, height: number) {
+        super(x, y, width, height);
+    }
+}
