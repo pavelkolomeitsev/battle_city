@@ -36,7 +36,7 @@ export default class Player extends Vehicle {
     }
 
     public setAlive(status: boolean): void {
-        this.body. enable = status;
+        this.body.enable = status;
         this.setVisible(status);
         this.setActive(status);
         // this.emit("player_killed");

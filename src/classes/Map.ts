@@ -83,7 +83,7 @@ export default class Map {
 
     public isInDefenceArea(playersTank: Phaser.GameObjects.Sprite): boolean {
         // check if player is in the defence area or not
-        if (playersTank) {
+        if (playersTank.active) {
             return this.defenceArea.contains(playersTank.x, playersTank.y);
         } else return false;
     }

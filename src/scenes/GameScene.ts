@@ -9,7 +9,7 @@ export default class GameScene extends Phaser.Scene {
     private _map: Map = null;
     private _player1: Player = null;
     // testing turret
-    // private _turret: Turret = null;
+    private _turret: Turret = null;
 
     constructor() {super({key: "game-scene"});}
 
@@ -39,34 +39,49 @@ export default class GameScene extends Phaser.Scene {
         const position: StartPosition = {x: player.x, y: player.y};
         this._player1 = new Player(this, position, "objects", "tank_red", this._map, "bulletRed1_outline", false);
 
-        this.handleCollisions();
         // testing turret
-        // this._turret = new Turret(this, this._map.getTurretPosition(), this._map, "bulletDark1_outline", true);
-        // this.matter.world.on("player_killed", this.stopFiring, this);
+        this._turret = new Turret(this, this._map.getTurretPosition(), this._map, "bulletDark1_outline", true);
+
+        this.handleCollisions();
         
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels); // set map`s bounds as camera`s bounds
         this.cameras.main.startFollow(this._player1); // set camera to center on the player`s car
     }
 
     private handleCollisions(): void {
-        this.physics.add.overlap(this._player1.groupOfShells, this._map.boxes, this.boxesShellsCollision, null, this);
+        this.physics.add.overlap(this._turret.platform, this._player1.groupOfShells, this.shellsTurretCollision, null, this);
+        this.physics.add.overlap(this._map.boxes, this._player1.groupOfShells, this.boxesShellsCollision, null, this);
+        this.physics.add.overlap(this._turret.groupOfShells, this._player1, this.shellsPlayerCollision, null, this);
     }
 
-    private boxesShellsCollision(shell: Shell, box: Phaser.GameObjects.Sprite): void {
+    private boxesShellsCollision(box: Phaser.GameObjects.Sprite, shell: Shell): void {
+        const position: StartPosition = { x: box.x, y: box.y };
+        BangAnimation.generateBang(this, position);
+        box.destroy();
+        shell.setAlive(false);
+    }
+
+    private shellsPlayerCollision(shell: Shell, player: Player): void {
         const position: StartPosition = { x: shell.x, y: shell.y };
         BangAnimation.generateBang(this, position);
-        shell.destroy();
-        box.destroy();
+        shell.setAlive(false);
+        player.setAlive(false);
+        // this._player1 = null; ?
+    }
+
+    private shellsTurretCollision(turretPlatform: Phaser.GameObjects.Sprite, shell: Shell): void {
+        const position: StartPosition = { x: turretPlatform.x, y: turretPlatform.y };
+        BangAnimation.generateBang(this, position);
+        this._turret.destroyTurret();
+        shell.setAlive(false);
     }
 
     // see docs -> Scene.Methods
     update(time: number, delta: number): void {
-        if (this._player1) {
-            this._player1.move();
+        if (this._player1.active) this._player1.move();
+        if (this._turret.turret.active && this._player1.active) {
+            this._turret.runTurret(this._player1, this._map.isInDefenceArea(this._player1));
         }
-        // if (this._turret && this._player1) {
-        //     this._turret.runTurret(this._player1, this._map.isInDefenceArea(this._player1));
-        // }
     }
 
     private getVehicleConfig(): any {

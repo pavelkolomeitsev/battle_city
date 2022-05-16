@@ -16,17 +16,7 @@ export default class Vehicle extends Phaser.GameObjects.Sprite {
         this.groupOfShells = new GroupOfShells(this._scene.physics.world, this._scene, this, this._map, shellTexture, enemy);
         this.init();
     }
-    // constructor(scene: Phaser.Scene, position: StartPosition, texture: string, map: Map, shellTexture: string, enemy: boolean) {
-    //     this._scene = scene;
-    //     this._map = map;
-    //     this._velocity = 0; // current car`s direction
-    //     this.sprite = this._scene.add.existing(position.x, position.y, "objects", texture); // add sprite to the scene
-    //     this.sprite.setFixedRotation(); // avoid the vehicle`s spinning on its axis
-
-    //     // test checking
-    //     this.groupOfShells = new GroupOfShells(this._scene, this.sprite, this._map, shellTexture, enemy);
-    // }
-
+    
     protected init() {
         this._scene.add.existing(this); // add sprite to the scene
         this._scene.physics.add.existing(this); // add sprite as physic object to Phaser engine
@@ -89,11 +79,13 @@ export default class Vehicle extends Phaser.GameObjects.Sprite {
         // the vehicle is moving with account of turn`s angle
         this.setAngle(this.getAngle());
         const velocity = this.getVelocityFromAngle();
-        this.body.setVelocity(velocity.x, velocity.y);
+        this.body?.setVelocity(velocity.x, velocity.y);
         // this.checkPosition();
     }
 
     private checkOutOfBounds(): void {
+        if (!this.body) return;
+
         if (this.body.y > this._map.tilemap.heightInPixels) {
             this.body.y = this._map.tilemap.heightInPixels - 20;
         };

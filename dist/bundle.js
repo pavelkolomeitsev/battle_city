@@ -51,28 +51,35 @@ class GroupOfShells extends Phaser.Physics.Arcade.Group {
         this._parentSprite = null;
         this._map = null;
         this._texture = "";
-        this._enemy = 1;
+        this._enemy = false;
+        this._direction = 1;
         this._nextShoot = 0;
         this._scene = scene;
         this._parentSprite = parentSprite;
         this._map = map;
         this._texture = texture;
-        this._enemy = enemy ? 1 : -1;
+        this._enemy = enemy;
+        this._direction = enemy ? 1 : -1;
     }
     createFire() {
         if (this._nextShoot > this._scene.time.now)
             return;
         let shell = this.getFirstDead();
+        const side = this._enemy ? -35 : 30;
         if (!shell) {
-            const vector = this._scene.physics.velocityFromAngle(this._parentSprite.angle + 270, 30);
+            const vector = this._scene.physics.velocityFromAngle(this._parentSprite.angle + 270, side);
             const position = { x: this._parentSprite.x + vector.x, y: this._parentSprite.y + vector.y };
             shell = new Shell_1.default(this._scene, position, "objects", this._texture, this._parentSprite, this._map);
             this.add(shell);
         }
         else {
-            shell.reset();
+            const vector = this._scene.physics.velocityFromAngle(this._parentSprite.angle + 270, side);
+            const position = { x: this._parentSprite.x + vector.x - 6, y: this._parentSprite.y + vector.y - 6 };
+            shell.body.x = position.x;
+            shell.body.y = position.y;
+            shell.setAlive(true);
         }
-        shell.flyOut(this._enemy);
+        shell.flyOut(this._direction);
         this._nextShoot = this._scene.time.now + 500;
     }
 }
@@ -147,7 +154,7 @@ class Map {
         return utils_1.GROUND_FRICTION;
     }
     isInDefenceArea(playersTank) {
-        if (playersTank) {
+        if (playersTank.active) {
             return this.defenceArea.contains(playersTank.x, playersTank.y);
         }
         else
@@ -254,15 +261,76 @@ class Shell extends Phaser.GameObjects.Sprite {
         this.angle = this._parentSprite.angle;
         this.body.setVelocity(vector.x * utils_1.SPEED.FASTEST * 3, vector.y * utils_1.SPEED.FASTEST * 3);
     }
-    reset() {
-        const vector = this._scene.physics.velocityFromAngle(this._parentSprite.angle + 270, 30);
-        const position = { x: this._parentSprite.x + vector.x - 6, y: this._parentSprite.y + vector.y - 6 };
-        this.body.x = position.x;
-        this.body.y = position.y;
-        this.setAlive(true);
-    }
 }
 exports["default"] = Shell;
+
+
+/***/ }),
+
+/***/ "./src/classes/Turret.ts":
+/*!*******************************!*\
+  !*** ./src/classes/Turret.ts ***!
+  \*******************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const GroupOfShells_1 = __importDefault(__webpack_require__(/*! ./GroupOfShells */ "./src/classes/GroupOfShells.ts"));
+class Turret {
+    constructor(scene, position, map, shellTexture, enemy) {
+        this._scene = null;
+        this.platform = null;
+        this.turret = null;
+        this.isFiring = true;
+        this._scene = scene;
+        this.init(position, map, shellTexture, enemy);
+    }
+    init(position, map, shellTexture, enemy) {
+        this.platform = new Phaser.GameObjects.Sprite(this._scene, position.x, position.y, "objects", "platform");
+        this._scene.add.existing(this.platform);
+        this._scene.physics.add.existing(this.platform);
+        this.platform.body.enable = true;
+        this.turret = new Phaser.GameObjects.Sprite(this._scene, position.x, position.y, "objects", "turret");
+        this._scene.add.existing(this.turret);
+        this._scene.physics.add.existing(this.turret);
+        this.turret.body.enable = true;
+        this.groupOfShells = new GroupOfShells_1.default(this._scene.physics.world, this._scene, this.turret, map, shellTexture, enemy);
+    }
+    runTurret(player, isPlayerNear) {
+        isPlayerNear ? this.watchAndFire(player) : this.watch(player);
+    }
+    watch(player) {
+        this.getCorrectAngle(player);
+    }
+    watchAndFire(player) {
+        this.getCorrectAngle(player);
+        this.fire();
+    }
+    getCorrectAngle(player) {
+        if (this.turret && player) {
+            const angle = Phaser.Math.Angle.Between(this.turret.x, this.turret.y, player.x, player.y);
+            this.turret.rotation = angle - Math.PI / 2;
+        }
+    }
+    fire() {
+        if (this.groupOfShells && this.isFiring)
+            this.groupOfShells.createFire();
+    }
+    destroyTurret() {
+        this.turret.body.enable = false;
+        this.turret.setVisible(false);
+        this.turret.setActive(false);
+        this.platform.body.enable = false;
+        this.platform.setVisible(false);
+        this.platform.setActive(false);
+        this._scene = null;
+        this.groupOfShells = null;
+    }
+}
+exports["default"] = Turret;
 
 
 /***/ }),
@@ -326,12 +394,15 @@ class Vehicle extends Phaser.GameObjects.Sprite {
         return vector2.setToPolar(this.rotation - Math.PI / 2, this.velocity);
     }
     move() {
+        var _a;
         this.checkOutOfBounds();
         this.setAngle(this.getAngle());
         const velocity = this.getVelocityFromAngle();
-        this.body.setVelocity(velocity.x, velocity.y);
+        (_a = this.body) === null || _a === void 0 ? void 0 : _a.setVelocity(velocity.x, velocity.y);
     }
     checkOutOfBounds() {
+        if (!this.body)
+            return;
         if (this.body.y > this._map.tilemap.heightInPixels) {
             this.body.y = this._map.tilemap.heightInPixels - 20;
         }
@@ -430,12 +501,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const BangAnimation_1 = __importDefault(__webpack_require__(/*! ../classes/BangAnimation */ "./src/classes/BangAnimation.ts"));
 const Map_1 = __importDefault(__webpack_require__(/*! ../classes/Map */ "./src/classes/Map.ts"));
 const Player_1 = __importDefault(__webpack_require__(/*! ../classes/Player */ "./src/classes/Player.ts"));
+const Turret_1 = __importDefault(__webpack_require__(/*! ../classes/Turret */ "./src/classes/Turret.ts"));
 const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: "game-scene" });
         this._map = null;
         this._player1 = null;
+        this._turret = null;
     }
     preload() {
         this.add.sprite(0, 0, "background").setOrigin(0);
@@ -458,22 +531,39 @@ class GameScene extends Phaser.Scene {
         const player = this._map.getPlayer();
         const position = { x: player.x, y: player.y };
         this._player1 = new Player_1.default(this, position, "objects", "tank_red", this._map, "bulletRed1_outline", false);
+        this._turret = new Turret_1.default(this, this._map.getTurretPosition(), this._map, "bulletDark1_outline", true);
         this.handleCollisions();
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
         this.cameras.main.startFollow(this._player1);
     }
     handleCollisions() {
-        this.physics.add.overlap(this._player1.groupOfShells, this._map.boxes, this.boxesShellsCollision, null, this);
+        this.physics.add.overlap(this._turret.platform, this._player1.groupOfShells, this.shellsTurretCollision, null, this);
+        this.physics.add.overlap(this._map.boxes, this._player1.groupOfShells, this.boxesShellsCollision, null, this);
+        this.physics.add.overlap(this._turret.groupOfShells, this._player1, this.shellsPlayerCollision, null, this);
     }
-    boxesShellsCollision(shell, box) {
+    boxesShellsCollision(box, shell) {
+        const position = { x: box.x, y: box.y };
+        BangAnimation_1.default.generateBang(this, position);
+        box.destroy();
+        shell.setAlive(false);
+    }
+    shellsPlayerCollision(shell, player) {
         const position = { x: shell.x, y: shell.y };
         BangAnimation_1.default.generateBang(this, position);
-        shell.destroy();
-        box.destroy();
+        shell.setAlive(false);
+        player.setAlive(false);
+    }
+    shellsTurretCollision(turretPlatform, shell) {
+        const position = { x: turretPlatform.x, y: turretPlatform.y };
+        BangAnimation_1.default.generateBang(this, position);
+        this._turret.destroyTurret();
+        shell.setAlive(false);
     }
     update(time, delta) {
-        if (this._player1) {
+        if (this._player1.active)
             this._player1.move();
+        if (this._turret.turret.active && this._player1.active) {
+            this._turret.runTurret(this._player1, this._map.isInDefenceArea(this._player1));
         }
     }
     getVehicleConfig() {

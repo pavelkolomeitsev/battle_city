@@ -43,12 +43,4 @@ export default class Shell extends Phaser.GameObjects.Sprite {
         this.angle = this._parentSprite.angle; // tank and shell sprites should be on the same direction
         this.body.setVelocity(vector.x * SPEED.FASTEST * 3, vector.y * SPEED.FASTEST * 3); // shell`s speed
     }
-
-    public reset(): void {
-        const vector: Phaser.Math.Vector2 = this._scene.physics.velocityFromAngle(this._parentSprite.angle + 270, 30); // +270 - trick to set shell just before barrel
-        const position: StartPosition = { x: this._parentSprite.x + vector.x - 6, y: this._parentSprite.y + vector.y - 6 };
-        this.body.x = position.x;
-        this.body.y = position.y;
-        this.setAlive(true);
-    }
 }
