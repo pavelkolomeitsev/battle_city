@@ -102,8 +102,9 @@ class Map {
         this._scene = null;
         this._tileset = null;
         this.tilemap = null;
+        this._defenceArea = null;
+        this._baseArea = null;
         this.boxes = [];
-        this.defenceArea = null;
         this._scene = scene;
         this.init();
         this.create();
@@ -115,7 +116,7 @@ class Map {
     create() {
         this.createLayers();
         this.createCollisions();
-        this.createDefenceArea();
+        this.createAreas();
     }
     createLayers() {
         this.tilemap.createLayer("ground", this._tileset);
@@ -131,18 +132,28 @@ class Map {
             this.boxes.push(sprite);
         });
     }
-    createDefenceArea() {
-        const array = this.tilemap.filterObjects("defence_area", checkpoint => checkpoint.name === "defence_area");
+    createAreas() {
+        let array = this.tilemap.filterObjects("defence_area", checkpoint => checkpoint.name === "defence_area");
         array.forEach((item) => {
-            this.defenceArea = new Phaser.Geom.Rectangle(item.x, item.y, item.width, item.height);
+            this._defenceArea = new Phaser.Geom.Rectangle(item.x, item.y, item.width, item.height);
+        });
+        array = null;
+        array = this.tilemap.filterObjects("base_area", checkpoint => checkpoint.name === "base_area");
+        array.forEach((item) => {
+            this._baseArea = new Phaser.Geom.Rectangle(item.x, item.y, item.width, item.height);
         });
     }
     getPlayer() {
         return this.tilemap.findObject("player", playerObject => playerObject.name === "player");
     }
     getTurretPosition() {
-        const turret = this.tilemap.findObject("enemy", playerObject => playerObject.name === "enemy");
+        const turret = this.tilemap.findObject("enemies", playerObject => playerObject.name === "turret");
         const position = { x: turret.x, y: turret.y };
+        return position;
+    }
+    getRadarPosition() {
+        const radar = this.tilemap.findObject("enemies", playerObject => playerObject.name === "radar");
+        const position = { x: radar.x, y: radar.y };
         return position;
     }
     getTileFriction(vehicle) {
@@ -153,9 +164,26 @@ class Map {
         }
         return utils_1.GROUND_FRICTION;
     }
+    checkPlayersPosition(radar, playersTank) {
+        if (radar.active && playersTank.active) {
+            return this.isInDefenceArea(playersTank);
+        }
+        else if (!radar.active && playersTank.active) {
+            return this.isInBaseArea(playersTank);
+        }
+        else
+            return false;
+    }
     isInDefenceArea(playersTank) {
         if (playersTank.active) {
-            return this.defenceArea.contains(playersTank.x, playersTank.y);
+            return this._defenceArea.contains(playersTank.x, playersTank.y);
+        }
+        else
+            return false;
+    }
+    isInBaseArea(playersTank) {
+        if (playersTank.active) {
+            return this._baseArea.contains(playersTank.x, playersTank.y);
         }
         else
             return false;
@@ -213,6 +241,37 @@ class Player extends Vehicle_1.default {
     }
 }
 exports["default"] = Player;
+
+
+/***/ }),
+
+/***/ "./src/classes/Radar.ts":
+/*!******************************!*\
+  !*** ./src/classes/Radar.ts ***!
+  \******************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+class Radar extends Phaser.GameObjects.Sprite {
+    constructor(scene, position, atlasName, textureName) {
+        super(scene, position.x, position.y, atlasName, textureName);
+        this._scene = null;
+        this._scene = scene;
+        this.init();
+        this.runRadar();
+    }
+    init() {
+        this._scene.add.existing(this);
+        this._scene.physics.add.existing(this);
+        this.body.enable = true;
+    }
+    runRadar() {
+        this.play(utils_1.RADAR_ANIMATION);
+    }
+}
+exports["default"] = Radar;
 
 
 /***/ }),
@@ -320,12 +379,10 @@ class Turret {
             this.groupOfShells.createFire();
     }
     destroyTurret() {
-        this.turret.body.enable = false;
-        this.turret.setVisible(false);
-        this.turret.setActive(false);
-        this.platform.body.enable = false;
-        this.platform.setVisible(false);
-        this.platform.setActive(false);
+        this.turret.destroy();
+        this.turret = null;
+        this.platform.destroy();
+        this.platform = null;
         this._scene = null;
         this.groupOfShells = null;
     }
@@ -501,6 +558,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const BangAnimation_1 = __importDefault(__webpack_require__(/*! ../classes/BangAnimation */ "./src/classes/BangAnimation.ts"));
 const Map_1 = __importDefault(__webpack_require__(/*! ../classes/Map */ "./src/classes/Map.ts"));
 const Player_1 = __importDefault(__webpack_require__(/*! ../classes/Player */ "./src/classes/Player.ts"));
+const Radar_1 = __importDefault(__webpack_require__(/*! ../classes/Radar */ "./src/classes/Radar.ts"));
 const Turret_1 = __importDefault(__webpack_require__(/*! ../classes/Turret */ "./src/classes/Turret.ts"));
 const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
 class GameScene extends Phaser.Scene {
@@ -509,20 +567,33 @@ class GameScene extends Phaser.Scene {
         this._map = null;
         this._player1 = null;
         this._turret = null;
+        this._radar = null;
     }
     preload() {
         this.add.sprite(0, 0, "background").setOrigin(0);
-        const frames = this.anims.generateFrameNames("objects", {
+        const bangFrames = this.anims.generateFrameNames("objects", {
             prefix: "explosion",
             start: 1,
             end: 5
         });
         this.anims.create({
             key: utils_1.BANG_ANIMATION,
-            frames: frames,
+            frames: bangFrames,
             frameRate: 5,
             duration: 800,
             repeat: 0,
+        });
+        const frames = this.anims.generateFrameNames("objects", {
+            prefix: "platform",
+            start: 1,
+            end: 8
+        });
+        this.anims.create({
+            key: utils_1.RADAR_ANIMATION,
+            frames: frames,
+            frameRate: 7,
+            duration: 1000,
+            repeat: -1,
         });
     }
     create() {
@@ -532,13 +603,14 @@ class GameScene extends Phaser.Scene {
         const position = { x: player.x, y: player.y };
         this._player1 = new Player_1.default(this, position, "objects", "tank_red", this._map, "bulletRed1_outline", false);
         this._turret = new Turret_1.default(this, this._map.getTurretPosition(), this._map, "bulletDark1_outline", true);
+        this._radar = new Radar_1.default(this, this._map.getRadarPosition(), "objects", "platform1");
         this.handleCollisions();
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
         this.cameras.main.startFollow(this._player1);
     }
     handleCollisions() {
-        this.physics.add.overlap(this._turret.platform, this._player1.groupOfShells, this.shellsTurretCollision, null, this);
-        this.physics.add.overlap(this._map.boxes, this._player1.groupOfShells, this.boxesShellsCollision, null, this);
+        this.physics.add.overlap([this._turret.platform, this._radar], this._player1.groupOfShells, this.shellsEnemiesCollision, null, this);
+        this.physics.add.overlap(this._map.boxes, [this._player1.groupOfShells, this._turret.groupOfShells], this.boxesShellsCollision, null, this);
         this.physics.add.overlap(this._turret.groupOfShells, this._player1, this.shellsPlayerCollision, null, this);
     }
     boxesShellsCollision(box, shell) {
@@ -553,24 +625,28 @@ class GameScene extends Phaser.Scene {
         shell.setAlive(false);
         player.setAlive(false);
     }
-    shellsTurretCollision(turretPlatform, shell) {
-        const position = { x: turretPlatform.x, y: turretPlatform.y };
+    shellsEnemiesCollision(enemy, shell) {
+        const position = { x: enemy.x, y: enemy.y };
         BangAnimation_1.default.generateBang(this, position);
-        this._turret.destroyTurret();
+        if (enemy instanceof Radar_1.default) {
+            this._radar.destroy();
+        }
+        else if (enemy.frame.name === "platform") {
+            this._turret.destroyTurret();
+        }
         shell.setAlive(false);
     }
     update(time, delta) {
         if (this._player1.active)
             this._player1.move();
-        if (this._turret.turret.active && this._player1.active) {
-            this._turret.runTurret(this._player1, this._map.isInDefenceArea(this._player1));
+        if (this._turret.turret && this._player1.active) {
+            const isPlayerNear = this._map.checkPlayersPosition(this._radar, this._player1);
+            this._turret.runTurret(this._player1, isPlayerNear);
         }
     }
     getVehicleConfig() {
         let config = { player1: utils_1.TANKS.RED, player2: utils_1.TANKS.BLUE };
         return config;
-    }
-    stopFiring() {
     }
 }
 exports["default"] = GameScene;
@@ -664,7 +740,7 @@ exports.LoadingBar = LoadingBar;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.BANG_ANIMATION = exports.TANKS = exports.ROADS_FRICTION = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.DIRECTIONS = void 0;
+exports.RADAR_ANIMATION = exports.BANG_ANIMATION = exports.TANKS = exports.ROADS_FRICTION = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.DIRECTIONS = void 0;
 var DIRECTIONS;
 (function (DIRECTIONS) {
     DIRECTIONS[DIRECTIONS["NONE"] = 0] = "NONE";
@@ -701,6 +777,7 @@ exports.TANKS = {
     }
 };
 exports.BANG_ANIMATION = "BANG_ANIMATION";
+exports.RADAR_ANIMATION = "RADAR_ANIMATION";
 class Checkpoint extends Phaser.Geom.Rectangle {
     constructor(x, y, width, height) {
         super(x, y, width, height);

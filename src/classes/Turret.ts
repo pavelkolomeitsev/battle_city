@@ -2,6 +2,7 @@ import { StartPosition } from "../utils/utils";
 import GroupOfShells from "./GroupOfShells";
 import Map from "./Map";
 import Player from "./Player";
+import Radar from "./Radar";
 
 export default class Turret {
     private _scene: Phaser.Scene = null;
@@ -52,17 +53,17 @@ export default class Turret {
     }
 
     public destroyTurret(): void {
-        this.turret.body.enable = false;
-        this.turret.setVisible(false);
-        this.turret.setActive(false);
+        // this.turret.body.enable = false;
+        // this.turret.setVisible(false);
+        // this.turret.setActive(false);
 
-        // this.turret.destroy();
-        // this.turret = null;
-        // this.platform.destroy();
-        // this.platform = null;
-        this.platform.body.enable = false;
-        this.platform.setVisible(false);
-        this.platform.setActive(false);
+        this.turret.destroy();
+        this.turret = null;
+        this.platform.destroy();
+        this.platform = null;
+        // this.platform.body.enable = false;
+        // this.platform.setVisible(false);
+        // this.platform.setActive(false);
 
         this._scene = null;
         this.groupOfShells = null;

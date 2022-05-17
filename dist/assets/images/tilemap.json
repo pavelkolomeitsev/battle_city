@@ -173,19 +173,31 @@
         {
          "draworder":"topdown",
          "id":5,
-         "name":"enemy",
+         "name":"enemies",
          "objects":[
                 {
                  "height":0,
                  "id":16,
-                 "name":"enemy",
+                 "name":"turret",
                  "point":true,
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":608,
-                 "y":374
+                 "x":674,
+                 "y":124
+                }, 
+                {
+                 "height":0,
+                 "id":18,
+                 "name":"radar",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":256,
+                 "y":260
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -211,12 +223,34 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":7,
+         "name":"base_area",
+         "objects":[
+                {
+                 "height":388,
+                 "id":21,
+                 "name":"base_area",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":1280,
+                 "x":2,
+                 "y":0
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
          "x":0,
          "y":0
         }],
- "nextlayerid":7,
- "nextobjectid":18,
+ "nextlayerid":8,
+ "nextobjectid":23,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.4",

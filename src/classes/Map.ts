@@ -1,11 +1,13 @@
 import { GROUND_FRICTION, ROADS_FRICTION, StartPosition } from "../utils/utils";
+import Radar from "./Radar";
 
 export default class Map {
     private _scene: Phaser.Scene = null;
     private _tileset: Phaser.Tilemaps.Tileset = null;
     public tilemap: Phaser.Tilemaps.Tilemap = null;
+    private _defenceArea: Phaser.Geom.Rectangle = null;
+    private _baseArea: Phaser.Geom.Rectangle = null;
     public boxes: Phaser.GameObjects.Sprite[] = [];
-    public defenceArea: Phaser.Geom.Rectangle = null;
 
     constructor(scene: Phaser.Scene) {
         this._scene = scene;
@@ -24,7 +26,7 @@ export default class Map {
     create(): void {
         this.createLayers();
         this.createCollisions();
-        this.createDefenceArea();
+        this.createAreas();
     }
     
     private createLayers(): void {
@@ -49,12 +51,18 @@ export default class Map {
         });
     }
 
-    private createDefenceArea(): void {
-        // get all game objects with name "checkpoint"
-        const array: Phaser.Types.Tilemaps.TiledObject[] = this.tilemap.filterObjects("defence_area", checkpoint => checkpoint.name === "defence_area");
+    private createAreas(): void {
+        let array: Phaser.Types.Tilemaps.TiledObject[] = this.tilemap.filterObjects("defence_area", checkpoint => checkpoint.name === "defence_area");
         // create rectangle phaser object
         array.forEach((item: Phaser.Types.Tilemaps.TiledObject) => {
-            this.defenceArea = new Phaser.Geom.Rectangle(item.x, item.y, item.width, item.height);
+            this._defenceArea = new Phaser.Geom.Rectangle(item.x, item.y, item.width, item.height);
+        });
+
+        array = null;
+        array = this.tilemap.filterObjects("base_area", checkpoint => checkpoint.name === "base_area");
+        // create rectangle phaser object
+        array.forEach((item: Phaser.Types.Tilemaps.TiledObject) => {
+            this._baseArea = new Phaser.Geom.Rectangle(item.x, item.y, item.width, item.height);
         });
     }
 
@@ -64,8 +72,14 @@ export default class Map {
     }
 
     public getTurretPosition(): StartPosition {
-        const turret: Phaser.Types.Tilemaps.TiledObject = this.tilemap.findObject("enemy", playerObject => playerObject.name === "enemy");
+        const turret: Phaser.Types.Tilemaps.TiledObject = this.tilemap.findObject("enemies", playerObject => playerObject.name === "turret");
         const position: StartPosition = {x: turret.x, y: turret.y};
+        return position;
+    }
+
+    public getRadarPosition(): StartPosition {
+        const radar: Phaser.Types.Tilemaps.TiledObject = this.tilemap.findObject("enemies", playerObject => playerObject.name === "radar");
+        const position: StartPosition = {x: radar.x, y: radar.y};
         return position;
     }
 
@@ -81,10 +95,25 @@ export default class Map {
         return GROUND_FRICTION;
     }
 
-    public isInDefenceArea(playersTank: Phaser.GameObjects.Sprite): boolean {
+    public checkPlayersPosition(radar: Radar, playersTank: Phaser.GameObjects.Sprite): boolean {
+        if (radar.active && playersTank.active) {
+            return this.isInDefenceArea(playersTank);
+        } else if (!radar.active && playersTank.active) {
+            return this.isInBaseArea(playersTank);
+        } else return false;
+    }
+
+    private isInDefenceArea(playersTank: Phaser.GameObjects.Sprite): boolean {
         // check if player is in the defence area or not
         if (playersTank.active) {
-            return this.defenceArea.contains(playersTank.x, playersTank.y);
+            return this._defenceArea.contains(playersTank.x, playersTank.y);
+        } else return false;
+    }
+
+    private isInBaseArea(playersTank: Phaser.GameObjects.Sprite): boolean {
+        // check if player is in the base area or not
+        if (playersTank.active) {
+            return this._baseArea.contains(playersTank.x, playersTank.y);
         } else return false;
     }
 }

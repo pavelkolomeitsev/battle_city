@@ -73,6 +73,70 @@
 	"sourceSize": {"w":64,"h":64}
 },
 {
+	"filename": "platform1",
+	"frame": {"x":143,"y":121,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "platform2",
+	"frame": {"x":5,"y":190,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "platform3",
+	"frame": {"x":74,"y":190,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "platform4",
+	"frame": {"x":143,"y":190,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "platform5",
+	"frame": {"x":5,"y":259,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "platform6",
+	"frame": {"x":74,"y":259,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "platform7",
+	"frame": {"x":143,"y":259,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "platform8",
+	"frame": {"x":5,"y":328,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+{
 	"filename": "tank_red",
 	"frame": {"x":64,"y":5,"w":38,"h":46},
 	"rotated": false,
@@ -82,7 +146,7 @@
 },
 {
 	"filename": "turret",
-	"frame": {"x":143,"y":121,"w":64,"h":64},
+	"frame": {"x":74,"y":328,"w":64,"h":64},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -93,8 +157,8 @@
 	"version": "1.0",
 	"image": "objects.png",
 	"format": "RGBA8888",
-	"size": {"w":212,"h":190},
+	"size": {"w":212,"h":397},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:d6ee006239dfd271e153a479512856ae:77b19439f35bedd70372ea584e2d4437:8d6d12ff4d5234f2a4b19e0a906dbf52$"
+	"smartupdate": "$TexturePacker:SmartUpdate:c394bbd5425ffbb66c226778cb364e5e:385dcf3161c0ad662f57956a986c2273:8d6d12ff4d5234f2a4b19e0a906dbf52$"
 }
 }

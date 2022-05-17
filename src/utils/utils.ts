@@ -38,6 +38,7 @@ export type StartPosition = {
 };
 
 export const BANG_ANIMATION: string = "BANG_ANIMATION";
+export const RADAR_ANIMATION: string = "RADAR_ANIMATION";
 
 export default class Checkpoint extends Phaser.Geom.Rectangle{
     public index: string;
