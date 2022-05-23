@@ -1,22 +1,23 @@
-import { StartPosition } from "../utils/utils";
-import GroupOfShells from "./GroupOfShells";
-import Map from "./Map";
-import Player from "./Player";
-import Radar from "./Radar";
+import { StartPosition } from "../../utils/utils";
+import GroupOfShells from "../shells/GroupOfShells";
+import Map from "../Map";
+import Player from "../Player";
 
 export default class Turret {
     private _scene: Phaser.Scene = null;
+    private _health: number = 0;
     public groupOfShells: GroupOfShells;
     public platform: Phaser.GameObjects.Sprite = null;
     public turret: Phaser.GameObjects.Sprite = null;
     public isFiring: boolean = true;
 
-    constructor(scene: Phaser.Scene, position: StartPosition, map: Map, shellTexture: string, enemy: boolean) {
+    constructor(scene: Phaser.Scene, position: StartPosition, map: Map, shellTexture: string) {
         this._scene = scene;
-        this.init(position, map, shellTexture, enemy);
+        this._health = 3;
+        this.init(position, map, shellTexture);
     }
 
-    private init(position: StartPosition, map: Map, shellTexture: string, enemy: boolean): void {
+    private init(position: StartPosition, map: Map, shellTexture: string): void {
         this.platform = new Phaser.GameObjects.Sprite(this._scene, position.x, position.y, "objects", "platform");
         this._scene.add.existing(this.platform);
         this._scene.physics.add.existing(this.platform);
@@ -25,7 +26,7 @@ export default class Turret {
         this._scene.add.existing(this.turret);
         this._scene.physics.add.existing(this.turret);
         this.turret.body.enable = true;
-        this.groupOfShells = new GroupOfShells(this._scene.physics.world, this._scene, this.turret, map, shellTexture, enemy);
+        this.groupOfShells = new GroupOfShells(this._scene.physics.world, this._scene, map, shellTexture);
     }
 
     public runTurret(player: Player, isPlayerNear: boolean): void {
@@ -49,23 +50,26 @@ export default class Turret {
     }
 
     private fire(): void {
-        if (this.groupOfShells && this.isFiring) this.groupOfShells.createFire();
+        if (this.groupOfShells && this.isFiring) this.groupOfShells.createFire(this.turret);
     }
 
     public destroyTurret(): void {
+        --this._health;
         // this.turret.body.enable = false;
         // this.turret.setVisible(false);
         // this.turret.setActive(false);
-
-        this.turret.destroy();
-        this.turret = null;
-        this.platform.destroy();
-        this.platform = null;
+        if (this._health > 0) {
+            this.turret.setTexture("objects", `turret_${this._health}`);
+        } else {
+            this.turret.destroy();
+            this.turret = null;
+            this.platform.destroy();
+            this.platform = null;
+            this._scene = null;
+            this.groupOfShells = null;
+        }
         // this.platform.body.enable = false;
         // this.platform.setVisible(false);
         // this.platform.setActive(false);
-
-        this._scene = null;
-        this.groupOfShells = null;
     }
 }

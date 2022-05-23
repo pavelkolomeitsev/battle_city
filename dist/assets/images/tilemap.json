@@ -198,6 +198,41 @@
                  "width":0,
                  "x":256,
                  "y":260
+                }, 
+                {
+                 "height":0,
+                 "id":28,
+                 "name":"base_1",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":352,
+                 "y":548
+                }, 
+                {
+                 "height":0,
+                 "id":29,
+                 "name":"base_2",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":1182,
+                 "y":552
+                }, 
+                {
+                 "height":46,
+                 "id":30,
+                 "name":"check_zone",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":1274,
+                 "x":4,
+                 "y":548
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -211,15 +246,15 @@
          "name":"defence_area",
          "objects":[
                 {
-                 "height":640,
-                 "id":17,
+                 "height":582,
+                 "id":26,
                  "name":"defence_area",
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":1280,
-                 "x":0,
-                 "y":0
+                 "x":2,
+                 "y":-2
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -233,15 +268,15 @@
          "name":"base_area",
          "objects":[
                 {
-                 "height":388,
-                 "id":21,
+                 "height":352,
+                 "id":27,
                  "name":"base_area",
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":1280,
                  "x":2,
-                 "y":0
+                 "y":-2
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -250,7 +285,7 @@
          "y":0
         }],
  "nextlayerid":8,
- "nextobjectid":23,
+ "nextobjectid":31,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.4",

@@ -1,5 +1,4 @@
-import Map from "./Map";
-import { RADAR_ANIMATION, StartPosition } from "../utils/utils";
+import { RADAR_ANIMATION, StartPosition } from "../../utils/utils";
 
 export default class Radar extends Phaser.GameObjects.Sprite {
     private _scene: Phaser.Scene = null;

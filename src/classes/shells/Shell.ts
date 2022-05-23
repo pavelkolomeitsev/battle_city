@@ -1,5 +1,5 @@
-import { StartPosition, SPEED } from "../utils/utils";
-import Map from "./Map";
+import { StartPosition, SPEED } from "../../utils/utils";
+import Map from "../Map";
 
 export default class Shell extends Phaser.GameObjects.Sprite {
     private _scene: Phaser.Scene = null;
