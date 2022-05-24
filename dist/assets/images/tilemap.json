@@ -231,8 +231,8 @@
                  "type":"",
                  "visible":true,
                  "width":1274,
-                 "x":4,
-                 "y":548
+                 "x":3.33333333333337,
+                 "y":593.333333333333
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -283,9 +283,80 @@
          "visible":true,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":8,
+         "name":"stones",
+         "objects":[
+                {
+                 "gid":233,
+                 "height":64,
+                 "id":54,
+                 "name":"stone_big",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":576,
+                 "y":836
+                }, 
+                {
+                 "gid":233,
+                 "height":64,
+                 "id":56,
+                 "name":"stone_big",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":1153.33333333333,
+                 "y":801.333333333333
+                }, 
+                {
+                 "gid":234,
+                 "height":64,
+                 "id":57,
+                 "name":"stone_middle",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":320,
+                 "y":898.666666666667
+                }, 
+                {
+                 "gid":234,
+                 "height":64,
+                 "id":58,
+                 "name":"stone_middle",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":668,
+                 "y":857.333333333333
+                }, 
+                {
+                 "gid":235,
+                 "height":64,
+                 "id":59,
+                 "name":"stone_small",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":64,
+                 "x":481.333333333333,
+                 "y":842.666666666667
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":8,
- "nextobjectid":31,
+ "nextlayerid":9,
+ "nextobjectid":60,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.4",
@@ -316,16 +387,34 @@
          "margin":0,
          "name":"objects",
          "spacing":0,
-         "tilecount":1,
-         "tileheight":28,
+         "tilecount":4,
+         "tileheight":64,
          "tiles":[
                 {
                  "id":191,
                  "image":"PNG\/Default size\/crateWood.png",
                  "imageheight":28,
                  "imagewidth":28
+                }, 
+                {
+                 "id":192,
+                 "image":"objects\/stone_big.png",
+                 "imageheight":64,
+                 "imagewidth":64
+                }, 
+                {
+                 "id":193,
+                 "image":"objects\/stone_middle.png",
+                 "imageheight":64,
+                 "imagewidth":64
+                }, 
+                {
+                 "id":194,
+                 "image":"objects\/stone_small.png",
+                 "imageheight":64,
+                 "imagewidth":64
                 }],
-         "tilewidth":28
+         "tilewidth":64
         }],
  "tilewidth":64,
  "type":"map",

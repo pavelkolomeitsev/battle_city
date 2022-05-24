@@ -14,6 +14,7 @@ export default class Radar extends Phaser.GameObjects.Sprite {
         this._scene.add.existing(this); // add sprite to the scene
         this._scene.physics.add.existing(this); // add sprite as physic object to Phaser engine
         this.body.enable = true; // the physic body of "dragon" will be available for physic impacts
+        this.body.setImmovable(true);
     }
 
     private runRadar(): void {

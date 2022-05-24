@@ -1,3 +1,5 @@
+import EnemyVehicle from "../classes/enemies/EnemyVehicle";
+
 export enum DIRECTIONS {
     NONE = 0,
     FORWARD = 100,
@@ -39,10 +41,35 @@ export type StartPosition = {
 
 export const BANG_ANIMATION: string = "BANG_ANIMATION";
 export const RADAR_ANIMATION: string = "RADAR_ANIMATION";
+export const SPARKLE_ANIMATION: string = "SPARKLE_ANIMATION";
 
 export default class Checkpoint extends Phaser.Geom.Rectangle{
     public index: string;
     constructor(x: number, y: number, width: number, height: number) {
         super(x, y, width, height);
+    }
+}
+
+export enum DIRECTION {
+    RIGHT = "RIGHT",
+    DOWN = "DOWN",
+    LEFT = "LEFT",
+    UP = "UP"
+};
+
+export function handleDirection(enemy: EnemyVehicle): void {
+    switch (enemy.direction) {
+        case DIRECTION.DOWN:
+            enemy.body.y -= 10;
+            break;
+        case DIRECTION.LEFT:
+            enemy.body.x += 10;
+            break;
+        case DIRECTION.UP:
+            enemy.body.y += 10;
+            break;
+        case DIRECTION.RIGHT:
+            enemy.body.x -= 10;
+            break;
     }
 }

@@ -22,6 +22,7 @@ export default class Turret {
         this._scene.add.existing(this.platform);
         this._scene.physics.add.existing(this.platform);
         this.platform.body.enable = true;
+        this.platform.body.setImmovable(true);
         this.turret = new Phaser.GameObjects.Sprite(this._scene, position.x, position.y, "objects", "turret");
         this._scene.add.existing(this.turret);
         this._scene.physics.add.existing(this.turret);

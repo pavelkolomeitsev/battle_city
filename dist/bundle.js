@@ -50,6 +50,7 @@ class Map {
         this._baseArea = null;
         this._checkZone = null;
         this.boxes = [];
+        this.stones = [];
         this._scene = scene;
         this.init();
         this.create();
@@ -75,6 +76,14 @@ class Map {
             this._scene.physics.add.existing(sprite, true);
             sprite.body.enable = true;
             this.boxes.push(sprite);
+        });
+        this.tilemap.findObject("stones", gameObject => {
+            const castedObject = gameObject;
+            const sprite = new Phaser.GameObjects.Sprite(this._scene, castedObject.x + castedObject.width / 2, castedObject.y - castedObject.height / 2, "objects", gameObject.name);
+            this._scene.add.existing(sprite);
+            this._scene.physics.add.existing(sprite, true);
+            sprite.body.enable = true;
+            this.stones.push(sprite);
         });
     }
     createAreas() {
@@ -164,9 +173,11 @@ class Player extends Vehicle_1.default {
     constructor(scene, position, atlasName, textureName, map, shellTexture, enemy) {
         super(scene, position, atlasName, textureName, map);
         this._cursor = null;
+        this.groupOfShells = null;
         this._velocity = 0;
         this._cursor = this._scene.input.keyboard.createCursorKeys();
         this.groupOfShells = new GroupOfShells_1.default(this._scene.physics.world, this._scene, this._map, shellTexture, false);
+        this.setSize(400, 400);
     }
     get direction() {
         let direction = utils_1.DIRECTIONS.NONE;
@@ -229,6 +240,36 @@ exports["default"] = Player;
 
 /***/ }),
 
+/***/ "./src/classes/SparkleAnimation.ts":
+/*!*****************************************!*\
+  !*** ./src/classes/SparkleAnimation.ts ***!
+  \*****************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+class SparkleAnimation extends Phaser.GameObjects.Sprite {
+    constructor(scene, position, textureType) {
+        super(scene, position.x, position.y, textureType);
+        this._scene = null;
+        this._scene = scene;
+        this._scene.add.existing(this);
+        this.sparkleAnimation();
+    }
+    sparkleAnimation() {
+        this.play(utils_1.SPARKLE_ANIMATION);
+        this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => this.destroy(), this);
+    }
+    static generateBang(scene, position) {
+        new SparkleAnimation(scene, position, "sparkle1");
+    }
+}
+exports["default"] = SparkleAnimation;
+
+
+/***/ }),
+
 /***/ "./src/classes/Vehicle.ts":
 /*!********************************!*\
   !*** ./src/classes/Vehicle.ts ***!
@@ -269,8 +310,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const utils_1 = __webpack_require__(/*! ../../utils/utils */ "./src/utils/utils.ts");
 const BangAnimation_1 = __importDefault(__webpack_require__(/*! ../BangAnimation */ "./src/classes/BangAnimation.ts"));
 const GroupOfShells_1 = __importDefault(__webpack_require__(/*! ../shells/GroupOfShells */ "./src/classes/shells/GroupOfShells.ts"));
+const SparkleAnimation_1 = __importDefault(__webpack_require__(/*! ../SparkleAnimation */ "./src/classes/SparkleAnimation.ts"));
 const Vehicle_1 = __importDefault(__webpack_require__(/*! ../Vehicle */ "./src/classes/Vehicle.ts"));
 class EnemyVehicle extends Vehicle_1.default {
     constructor(scene, position, atlasName, textureName, map, player) {
@@ -279,8 +322,10 @@ class EnemyVehicle extends Vehicle_1.default {
         this._timer = null;
         this._player = null;
         this.isAppear = true;
+        this.direction = utils_1.DIRECTION.DOWN;
         this._vehicleSpeed = 70;
         this._player = player;
+        this.direction = "down";
         this._groupOfShells = new GroupOfShells_1.default(this._scene.physics.world, this._scene, this._map, "bulletDark1_outline");
         this._timer = this._scene.time.addEvent({
             delay: 4000,
@@ -288,7 +333,8 @@ class EnemyVehicle extends Vehicle_1.default {
             callback: this.changeDirection,
             callbackScope: this
         });
-        this._scene.physics.add.overlap(this._groupOfShells, this._player, this.shellsPlayerCollision, null, this);
+        this._scene.physics.add.overlap([this._player, ...this._map.boxes], this._groupOfShells, this.shellsPlayerCollision, null, this);
+        this._scene.physics.add.overlap(this._map.stones, this._groupOfShells, this.shellsStoneCollision, null, this);
         this._scene.events.on("update", this.fire, this);
     }
     get velocity() {
@@ -309,14 +355,19 @@ class EnemyVehicle extends Vehicle_1.default {
         const direction = Math.floor(Math.random() * 4) + 1;
         switch (direction) {
             case 1:
+                this.direction = utils_1.DIRECTION.UP;
                 return [0, -this.velocity, 180];
             case 2:
+                this.direction = utils_1.DIRECTION.RIGHT;
                 return [this.velocity, 0, -90];
             case 3:
+                this.direction = utils_1.DIRECTION.DOWN;
                 return [0, this.velocity, 0];
             case 4:
+                this.direction = utils_1.DIRECTION.LEFT;
                 return [-this.velocity, 0, 90];
             default:
+                this.direction = utils_1.DIRECTION.DOWN;
                 return [0, this.velocity, 0];
         }
     }
@@ -328,12 +379,23 @@ class EnemyVehicle extends Vehicle_1.default {
         if (this._groupOfShells) {
             this._groupOfShells.createFire(this);
         }
+        if ((Phaser.Math.Distance.BetweenPoints(this, this._player) < 300) && this.body) {
+            this.body.stop();
+            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player.x, this._player.y);
+            this.rotation = angle - Math.PI / 2;
+        }
     }
-    shellsPlayerCollision(shell, player) {
+    shellsPlayerCollision(target, shell) {
         const position = { x: shell.x, y: shell.y };
         BangAnimation_1.default.generateBang(this._scene, position);
         shell.setAlive(false);
-        player.setAlive(false);
+        target.destroy();
+    }
+    shellsStoneCollision(target, shell) {
+        const vector = this._scene.physics.velocityFromAngle(shell.angle + 270, -20);
+        const position = { x: shell.x + vector.x, y: shell.y + vector.y };
+        SparkleAnimation_1.default.generateBang(this._scene, position);
+        shell.setAlive(false);
     }
 }
 exports["default"] = EnemyVehicle;
@@ -353,6 +415,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const EnemyVehicle_1 = __importDefault(__webpack_require__(/*! ./EnemyVehicle */ "./src/classes/enemies/EnemyVehicle.ts"));
+const utils_1 = __webpack_require__(/*! ../../utils/utils */ "./src/utils/utils.ts");
 class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     constructor(world, scene, map, enemiesAmount, player) {
         super(world, scene);
@@ -392,8 +455,10 @@ class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
         ++this.counter;
     }
     handleEnemyVehicleCollision(firstEnemy, secondEnemy) {
+        (0, utils_1.handleDirection)(firstEnemy);
+        (0, utils_1.handleDirection)(secondEnemy);
         firstEnemy.changeDirection();
-        secondEnemy.changeDirection();
+        secondEnemy.body.stop();
     }
     update() {
         if (this.children.size > 0) {
@@ -433,6 +498,7 @@ class Radar extends Phaser.GameObjects.Sprite {
         this._scene.add.existing(this);
         this._scene.physics.add.existing(this);
         this.body.enable = true;
+        this.body.setImmovable(true);
     }
     runRadar() {
         this.play(utils_1.RADAR_ANIMATION);
@@ -471,6 +537,7 @@ class Turret {
         this._scene.add.existing(this.platform);
         this._scene.physics.add.existing(this.platform);
         this.platform.body.enable = true;
+        this.platform.body.setImmovable(true);
         this.turret = new Phaser.GameObjects.Sprite(this._scene, position.x, position.y, "objects", "turret");
         this._scene.add.existing(this.turret);
         this._scene.physics.add.existing(this.turret);
@@ -699,6 +766,7 @@ const Turret_1 = __importDefault(__webpack_require__(/*! ../classes/enemies/Turr
 const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
 const GroupOfEnemies_1 = __importDefault(__webpack_require__(/*! ../classes/enemies/GroupOfEnemies */ "./src/classes/enemies/GroupOfEnemies.ts"));
 const EnemyVehicle_1 = __importDefault(__webpack_require__(/*! ../classes/enemies/EnemyVehicle */ "./src/classes/enemies/EnemyVehicle.ts"));
+const SparkleAnimation_1 = __importDefault(__webpack_require__(/*! ../classes/SparkleAnimation */ "./src/classes/SparkleAnimation.ts"));
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: "game-scene" });
@@ -710,34 +778,10 @@ class GameScene extends Phaser.Scene {
     }
     preload() {
         this.add.sprite(0, 0, "background").setOrigin(0);
-        const bangFrames = this.anims.generateFrameNames("objects", {
-            prefix: "explosion",
-            start: 1,
-            end: 5
-        });
-        this.anims.create({
-            key: utils_1.BANG_ANIMATION,
-            frames: bangFrames,
-            frameRate: 5,
-            duration: 800,
-            repeat: 0,
-        });
-        const frames = this.anims.generateFrameNames("objects", {
-            prefix: "platform",
-            start: 1,
-            end: 8
-        });
-        this.anims.create({
-            key: utils_1.RADAR_ANIMATION,
-            frames: frames,
-            frameRate: 7,
-            duration: 1000,
-            repeat: -1,
-        });
+        this.loadAnimation();
     }
     create() {
         this._map = new Map_1.default(this);
-        const vehicle = this.getVehicleConfig();
         const player = this._map.getPlayer();
         const position = { x: player.x, y: player.y };
         this._player1 = new Player_1.default(this, position, "objects", "tank_red", this._map, "bulletRed1_outline", false);
@@ -752,13 +796,21 @@ class GameScene extends Phaser.Scene {
         this.physics.add.overlap([this._turret.platform, this._radar], this._player1.groupOfShells, this.shellsEnemiesCollision, null, this);
         this.physics.add.overlap(this._enemies, this._player1.groupOfShells, this.shellsEnemiesCollision, null, this);
         this.physics.add.overlap(this._map.boxes, [this._player1.groupOfShells, this._turret.groupOfShells], this.boxesShellsCollision, null, this);
+        this.physics.add.overlap(this._map.stones, [this._player1.groupOfShells, this._turret.groupOfShells], this.stonesShellsCollision, null, this);
         this.physics.add.overlap(this._turret.groupOfShells, this._player1, this.shellsPlayerCollision, null, this);
-        this.physics.add.collider([this._turret.platform, this._radar, this._player1, ...this._map.boxes], this._enemies, this.handleEnemiesCollision, null, this);
+        this.physics.add.collider([this._turret.platform, this._radar, this._player1, ...this._map.boxes, ...this._map.stones], this._enemies, this.handleEnemiesCollision, null, this);
+        this.physics.add.collider([this._turret.platform, this._radar, ...this._enemies.children.getArray(), ...this._map.boxes, ...this._map.stones], this._player1, this.handlePlayerCollision, null, this);
     }
     boxesShellsCollision(box, shell) {
         const position = { x: box.x, y: box.y };
         BangAnimation_1.default.generateBang(this, position);
         box.destroy();
+        shell.setAlive(false);
+    }
+    stonesShellsCollision(stone, shell) {
+        const vector = this.physics.velocityFromAngle(shell.angle + 270, +20);
+        const position = { x: shell.x + vector.x, y: shell.y + vector.y };
+        SparkleAnimation_1.default.generateBang(this, position);
         shell.setAlive(false);
     }
     shellsPlayerCollision(shell, player) {
@@ -784,7 +836,11 @@ class GameScene extends Phaser.Scene {
         shell.setAlive(false);
     }
     handleEnemiesCollision(gameObject, enemy) {
+        (0, utils_1.handleDirection)(enemy);
         enemy.changeDirection();
+    }
+    handlePlayerCollision(gameObject, player) {
+        player.body.stop();
     }
     update(time, delta) {
         if (this._player1.active)
@@ -818,6 +874,44 @@ class GameScene extends Phaser.Scene {
                 }
             }
         }
+    }
+    loadAnimation() {
+        const bangFrames = this.anims.generateFrameNames("objects", {
+            prefix: "explosion",
+            start: 1,
+            end: 5
+        });
+        this.anims.create({
+            key: utils_1.BANG_ANIMATION,
+            frames: bangFrames,
+            frameRate: 5,
+            duration: 800,
+            repeat: 0,
+        });
+        const frames = this.anims.generateFrameNames("objects", {
+            prefix: "platform",
+            start: 1,
+            end: 8
+        });
+        this.anims.create({
+            key: utils_1.RADAR_ANIMATION,
+            frames: frames,
+            frameRate: 7,
+            duration: 1000,
+            repeat: -1,
+        });
+        const sparkleFrame = this.anims.generateFrameNames("objects", {
+            prefix: "sparkle",
+            start: 1,
+            end: 1
+        });
+        this.anims.create({
+            key: utils_1.SPARKLE_ANIMATION,
+            frames: sparkleFrame,
+            frameRate: 7,
+            duration: 500,
+            repeat: 0,
+        });
     }
 }
 exports["default"] = GameScene;
@@ -911,7 +1005,7 @@ exports.LoadingBar = LoadingBar;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.RADAR_ANIMATION = exports.BANG_ANIMATION = exports.TANKS = exports.ROADS_FRICTION = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.DIRECTIONS = void 0;
+exports.handleDirection = exports.DIRECTION = exports.SPARKLE_ANIMATION = exports.RADAR_ANIMATION = exports.BANG_ANIMATION = exports.TANKS = exports.ROADS_FRICTION = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.DIRECTIONS = void 0;
 var DIRECTIONS;
 (function (DIRECTIONS) {
     DIRECTIONS[DIRECTIONS["NONE"] = 0] = "NONE";
@@ -949,12 +1043,38 @@ exports.TANKS = {
 };
 exports.BANG_ANIMATION = "BANG_ANIMATION";
 exports.RADAR_ANIMATION = "RADAR_ANIMATION";
+exports.SPARKLE_ANIMATION = "SPARKLE_ANIMATION";
 class Checkpoint extends Phaser.Geom.Rectangle {
     constructor(x, y, width, height) {
         super(x, y, width, height);
     }
 }
 exports["default"] = Checkpoint;
+var DIRECTION;
+(function (DIRECTION) {
+    DIRECTION["RIGHT"] = "RIGHT";
+    DIRECTION["DOWN"] = "DOWN";
+    DIRECTION["LEFT"] = "LEFT";
+    DIRECTION["UP"] = "UP";
+})(DIRECTION = exports.DIRECTION || (exports.DIRECTION = {}));
+;
+function handleDirection(enemy) {
+    switch (enemy.direction) {
+        case DIRECTION.DOWN:
+            enemy.body.y -= 10;
+            break;
+        case DIRECTION.LEFT:
+            enemy.body.x += 10;
+            break;
+        case DIRECTION.UP:
+            enemy.body.y += 10;
+            break;
+        case DIRECTION.RIGHT:
+            enemy.body.x -= 10;
+            break;
+    }
+}
+exports.handleDirection = handleDirection;
 
 
 /***/ })

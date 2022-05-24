@@ -9,6 +9,7 @@ export default class Map {
     private _baseArea: Phaser.Geom.Rectangle = null;
     private _checkZone: Phaser.Geom.Rectangle = null;
     public boxes: Phaser.GameObjects.Sprite[] = [];
+    public stones: Phaser.GameObjects.Sprite[] = [];
 
     constructor(scene: Phaser.Scene) {
         this._scene = scene;
@@ -44,11 +45,20 @@ export default class Map {
             // collisionObject - GameObject, but we need Sprite!
             const castedObject: Phaser.GameObjects.Sprite = collisionObject as Phaser.GameObjects.Sprite;
             let sprite: Phaser.GameObjects.Sprite = new Phaser.GameObjects.Sprite(this._scene, castedObject.x, castedObject.y, "objects", "crateWood");
-            // let sprite: Phaser.GameObjects.Sprite = new Phaser.GameObjects.Sprite(this._scene, castedObject.x, castedObject.y, "objects", "crateWood");
             this._scene.add.existing(sprite);
             this._scene.physics.add.existing(sprite, true); // true -> to make it static
             sprite.body.enable = true;
             this.boxes.push(sprite);
+        });
+
+        this.tilemap.findObject("stones", gameObject => {
+            const castedObject: Phaser.GameObjects.Sprite = gameObject as Phaser.GameObjects.Sprite;
+            // gameObject.name should be the same in "objects.json" and tilemap.json files
+            const sprite: Phaser.GameObjects.Sprite = new Phaser.GameObjects.Sprite(this._scene, castedObject.x + castedObject.width / 2, castedObject.y - castedObject.height / 2, "objects", gameObject.name);
+            this._scene.add.existing(sprite);
+            this._scene.physics.add.existing(sprite, true); // true -> to make it static
+            sprite.body.enable = true;
+            this.stones.push(sprite);
         });
     }
 

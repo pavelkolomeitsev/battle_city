@@ -1,6 +1,6 @@
 import Map from "../Map";
 import EnemyVehicle from "./EnemyVehicle";
-import { StartPosition } from "../../utils/utils";
+import { DIRECTION, handleDirection, StartPosition } from "../../utils/utils";
 import Player from "../Player";
 
 export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
@@ -49,8 +49,10 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     }
 
     private handleEnemyVehicleCollision(firstEnemy: EnemyVehicle, secondEnemy: EnemyVehicle): void {
+        handleDirection(firstEnemy);
+        handleDirection(secondEnemy);
         firstEnemy.changeDirection();
-        secondEnemy.changeDirection();
+        secondEnemy.body.stop();
     }
 
     private update(): void {

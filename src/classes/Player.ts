@@ -6,13 +6,15 @@ import GroupOfShells from "./shells/GroupOfShells";
 export default class Player extends Vehicle {
     private _velocity: number;
     private _cursor: Phaser.Types.Input.Keyboard.CursorKeys = null;
-    public groupOfShells: GroupOfShells;
+    public groupOfShells: GroupOfShells = null;
 
     constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, shellTexture: string, enemy: boolean) {
         super(scene, position, atlasName, textureName, map);
         this._velocity = 0;
         this._cursor = this._scene.input.keyboard.createCursorKeys(); // take control from keyboard, exactly up and down keys
         this.groupOfShells = new GroupOfShells(this._scene.physics.world, this._scene, this._map, shellTexture, false);
+        // const area = new Phaser.Geom.Rectangle(this.x, this.y, 400, 400);
+        this.setSize(400, 400);
     }
 
     protected get direction(): number {
