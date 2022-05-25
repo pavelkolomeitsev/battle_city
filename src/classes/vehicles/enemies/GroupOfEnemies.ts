@@ -1,22 +1,21 @@
-import Map from "../Map";
+import Map from "../../Map";
 import EnemyVehicle from "./EnemyVehicle";
-import { DIRECTION, handleDirection, StartPosition } from "../../utils/utils";
-import Player from "../Player";
+import { handleDirection, StartPosition } from "../../../utils/utils";
+import Player from "../player/Player";
 
 export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     private _scene: Phaser.Scene = null;
     private _map: Map = null;
     private _timer: Phaser.Time.TimerEvent = null;
-    private _enemiesAmount: number = 0;
-    private _createdEnemies: number = 0;
+    private _enemies: number[] = [];
     private _player: Player = null;
     public counter: number = 0;
 
-    constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, map: Map, enemiesAmount: number, player: Player) {
+    constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, map: Map, enemies: number[], player: Player) {
         super(world, scene);
         this._scene = scene;
         this._map = map;
-        this._enemiesAmount = enemiesAmount;
+        this._enemies = enemies;
         this._player = player;
         this._timer = this._scene.time.addEvent({ // add new enemy every 3 seconds
             delay: 3000,
@@ -30,22 +29,35 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     }
 
     private addEnemy(): void {
-        if (this.counter < 6) {
-            this._createdEnemies < this._enemiesAmount ? this.createEnemy() : this._timer?.remove();
+        if (this.counter < 6) { // hold no more than 6 enemies on the map at one time
+            this._enemies.length > 0 ? this.createEnemy() : this._timer?.remove();
         }
     }
 
     private createEnemy(): void {
-        // let enemy: EnemyVehicle = this.getFirstDead();
         const baseNumber: number = Math.floor(Math.random() * 2) + 1;
         const position: StartPosition = this._map.getBasePosition(baseNumber); // there are two places on the map where enemies appear
-        
-        const enemy: EnemyVehicle = new EnemyVehicle(this._scene, position, "objects", "tank_sand", this._map, this._player);
+        // get last el from array
+        // transform el into texture
+        // delete last el from array
+        // const enemiesTexture: string = this.getEnemyVehicleTexture(this._enemies[this._enemies.length - 1]);
+        const enemiesTexture: string = this.getEnemyVehicleTexture(this._enemies.pop());
+        const enemy: EnemyVehicle = new EnemyVehicle(this._scene, position, "objects", enemiesTexture, this._map, this._player);
         this.add(enemy);
 
         enemy.moveOut();
-        ++this._createdEnemies;
         ++this.counter;
+    }
+
+    private getEnemyVehicleTexture(index: number): string {
+        switch (index) {
+            case 1:
+                return "tank_blue"; // BTR
+            case 2:
+                return "tank_dark"; // BMP
+            case 3:
+                return "tank_sand"; // tank
+        }
     }
 
     private handleEnemyVehicleCollision(firstEnemy: EnemyVehicle, secondEnemy: EnemyVehicle): void {

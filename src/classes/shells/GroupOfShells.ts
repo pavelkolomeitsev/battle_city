@@ -1,4 +1,4 @@
-import { StartPosition } from "../../utils/utils";
+import { ENEMY, StartPosition } from "../../utils/utils";
 import Map from "../Map";
 import Shell from "./Shell";
 
@@ -9,6 +9,7 @@ export default class GroupOfShells extends Phaser.Physics.Arcade.Group {
     private _enemy: boolean = false;
     private _direction: number = 1;
     private _nextShoot: number = 0;
+    private _pauseBetweenShoots: number = 0;
 
     constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, map: Map, texture: string, enemy: boolean = true) {
         super(world, scene);
@@ -17,6 +18,7 @@ export default class GroupOfShells extends Phaser.Physics.Arcade.Group {
         this._texture = texture;
         this._enemy = enemy;
         this._direction = enemy ? 1 : -1;
+        this.setPauseBetweenShoots();
     }
 
     // mechanism for sprites` reusing for better performance
@@ -40,6 +42,27 @@ export default class GroupOfShells extends Phaser.Physics.Arcade.Group {
         }
         shell.flyOut(this._direction);
 
-        this._nextShoot = this._scene.time.now + 500; // instead one fire per 0.5 second
+        // this._nextShoot = this._scene.time.now + this._pauseBetweenShoots; // instead one fire per 0.5 second
+        this._nextShoot = this._scene.time.now + this._pauseBetweenShoots; // instead one fire per 0.5 second
+    }
+
+    private setPauseBetweenShoots(): void {
+        switch (this._texture) {
+            case ENEMY.TANK.SHELL_TYPE:
+                this._pauseBetweenShoots = 1200; // enemy`s tank
+                break;
+            case ENEMY.BMP.SHELL_TYPE:
+                this._pauseBetweenShoots = 600; // enemy`s BMP
+                break;
+            case ENEMY.BTR.SHELL_TYPE:
+                this._pauseBetweenShoots = 300; // enemy`s BTR
+                break;
+            case "bulletRed1":
+                this._pauseBetweenShoots = 500; // player`s BMP
+                break;
+            case "bulletRed2":
+                this._pauseBetweenShoots = 1000; // player`s tank
+                break;
+        }
     }
 }

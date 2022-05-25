@@ -1,6 +1,6 @@
-import EnemyVehicle from "../classes/enemies/EnemyVehicle";
+import EnemyVehicle from "../classes/vehicles/enemies/EnemyVehicle";
 
-export enum DIRECTIONS {
+export enum PLAYER_SPEED {
     NONE = 0,
     FORWARD = 100,
     BACKWARD = -100
@@ -14,11 +14,11 @@ export enum TURNS {
 
 export enum SPEED {
     BASIC = 150,
-    FASTER = 200,
-    FASTEST = 300
+    FASTER = 690, // enemy shell`s speed
+    FASTEST = 900 // player shell`s speed
 };
 
-export const GROUND_FRICTION = 0.4;
+export const GROUND_FRICTION = 0.5;
 export const ROADS_FRICTION = {
     road: 1
 };
@@ -55,6 +55,50 @@ export enum DIRECTION {
     DOWN = "DOWN",
     LEFT = "LEFT",
     UP = "UP"
+};
+
+export const ENEMY = {
+    TANK: {
+        TYPE: "TANK",
+        SPEED: 60,
+        ARMOUR: 100,
+        SHELL_POWER: 45,
+        SHELL_TYPE: "bulletDark3"
+    },
+    BMP: {
+        TYPE: "BMP",
+        SPEED: 120,
+        ARMOUR: 70,
+        SHELL_POWER: 26,
+        SHELL_TYPE: "bulletDark2"
+    },
+    BTR: {
+        TYPE: "BTR",
+        SPEED: 190,
+        ARMOUR: 56,
+        SHELL_POWER: 13,
+        SHELL_TYPE: "bulletDark1"
+    },
+    TURRET: {
+        ARMOUR: 200,
+        SHELL_POWER: 45,
+        SHELL_TYPE: "bulletDark3"
+    }
+};
+
+export const PLAYER = {
+    TANK: {
+        // SPEED: 60,
+        ARMOUR: 100,
+        SHELL_POWER: 60,
+        SHELL_TYPE: "bulletRed2"
+    },
+    BMP: {
+        // SPEED: 120,
+        ARMOUR: 77,
+        SHELL_POWER: 30,
+        SHELL_TYPE: "bulletRed1"
+    },
 };
 
 export function handleDirection(enemy: EnemyVehicle): void {

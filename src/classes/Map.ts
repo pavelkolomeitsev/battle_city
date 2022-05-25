@@ -1,5 +1,5 @@
 import { GROUND_FRICTION, ROADS_FRICTION, StartPosition } from "../utils/utils";
-import Radar from "./enemies/Radar";
+import Radar from "./vehicles/enemies/Radar";
 
 export default class Map {
     private _scene: Phaser.Scene = null;

@@ -1,4 +1,4 @@
-import { BANG_ANIMATION, StartPosition } from "../utils/utils";
+import { BANG_ANIMATION, StartPosition } from "../../utils/utils";
 
 export default class BangAnimation extends Phaser.GameObjects.Sprite {
     private _scene: Phaser.Scene = null;

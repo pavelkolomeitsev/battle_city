@@ -1,5 +1,5 @@
-import { StartPosition } from "../utils/utils";
-import Map from "./Map";
+import { StartPosition } from "../../utils/utils";
+import Map from "../Map";
 
 export default class Vehicle extends Phaser.GameObjects.Sprite {
     protected _scene: Phaser.Scene = null;

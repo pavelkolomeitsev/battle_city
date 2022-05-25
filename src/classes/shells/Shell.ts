@@ -1,24 +1,68 @@
-import { StartPosition, SPEED } from "../../utils/utils";
+import { StartPosition, SPEED, ENEMY, PLAYER } from "../../utils/utils";
 import Map from "../Map";
 
 export default class Shell extends Phaser.GameObjects.Sprite {
     private _scene: Phaser.Scene = null;
     private _parentSprite: Phaser.GameObjects.Sprite = null;
     private _map: Map = null;
+    private _shellSpeed: number = 0;
+    private _shellPower: number = 0;
 
     constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, parentSprite: Phaser.GameObjects.Sprite, map: Map) {
         super(scene, position.x, position.y, atlasName, textureName);
         this._scene = scene;
         this._parentSprite = parentSprite;
         this._map = map;
-        this.init();
+        this.init(textureName);
+        // this.setShellSpeed(textureName);
         this._scene.events.on("update", this.update, this);
     }
 
-    protected init() {
+    protected init(textureName: string) {
         this._scene.add.existing(this); // add sprite to the scene
         this._scene.physics.add.existing(this); // add sprite as physic object to Phaser engine
         this.body.enable = true; // the physic body of "dragon" will be available for physic impacts
+
+        switch (textureName) {
+            case ENEMY.BTR.SHELL_TYPE:
+                this._shellSpeed = SPEED.FASTER;
+                this._shellPower = ENEMY.BTR.SHELL_POWER;
+                break;
+            case ENEMY.BMP.SHELL_TYPE:
+                this._shellSpeed = SPEED.FASTER;
+                this._shellPower = ENEMY.BMP.SHELL_POWER;
+                break;
+            case ENEMY.TANK.SHELL_TYPE:
+                this._shellSpeed = SPEED.FASTER;
+                this._shellPower = ENEMY.TANK.SHELL_POWER;
+                break;
+            case PLAYER.BMP.SHELL_TYPE:
+                this._shellSpeed = SPEED.FASTEST;
+                this._shellPower = PLAYER.BMP.SHELL_POWER;
+                break;
+            case PLAYER.TANK.SHELL_TYPE:
+                this._shellSpeed = SPEED.FASTEST;
+                this._shellPower = PLAYER.TANK.SHELL_POWER;
+                break;
+        }
+    }
+
+    public get damage(): number {
+        return this._shellPower;
+    }
+
+    private setShellSpeed(textureName: string): void {
+        // switch (textureName) {
+        //     case ENEMY.BTR.SHELL_TYPE:
+        //     case ENEMY.BMP.SHELL_TYPE:
+        //     case ENEMY.TANK.SHELL_TYPE:
+        //         this._shellSpeed = SPEED.FASTER;
+        //         break;
+        //     case "bulletRed1":
+        //     case "bulletRed2":
+        //         this._shellSpeed = SPEED.FASTEST;
+        //         break;
+        // }
     }
 
     // check if shell is out of boarders
@@ -41,6 +85,6 @@ export default class Shell extends Phaser.GameObjects.Sprite {
         const vector: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
         vector.setToPolar(this._parentSprite.rotation + (direction * Math.PI / 2)); // (this._tank.vehicle.rotation - Math.PI) - correct side from where shell throws, 30 - distance from tank`s core and shell
         this.angle = this._parentSprite.angle; // tank and shell sprites should be on the same direction
-        this.body.setVelocity(vector.x * SPEED.FASTEST * 3, vector.y * SPEED.FASTEST * 3); // shell`s speed
+        this.body.setVelocity(vector.x * this._shellSpeed, vector.y * this._shellSpeed);
     }
 }
