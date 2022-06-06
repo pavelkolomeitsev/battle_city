@@ -14,7 +14,6 @@ export default class Shell extends Phaser.GameObjects.Sprite {
         this._parentSprite = parentSprite;
         this._map = map;
         this.init(textureName);
-        // this.setShellSpeed(textureName);
         this._scene.events.on("update", this.update, this);
     }
 
@@ -51,20 +50,6 @@ export default class Shell extends Phaser.GameObjects.Sprite {
         return this._shellPower;
     }
 
-    private setShellSpeed(textureName: string): void {
-        // switch (textureName) {
-        //     case ENEMY.BTR.SHELL_TYPE:
-        //     case ENEMY.BMP.SHELL_TYPE:
-        //     case ENEMY.TANK.SHELL_TYPE:
-        //         this._shellSpeed = SPEED.FASTER;
-        //         break;
-        //     case "bulletRed1":
-        //     case "bulletRed2":
-        //         this._shellSpeed = SPEED.FASTEST;
-        //         break;
-        // }
-    }
-
     // check if shell is out of boarders
     public update(): void {
         if (this.active && (this.body.x < -20 ||
@@ -77,7 +62,6 @@ export default class Shell extends Phaser.GameObjects.Sprite {
         this.body.enable = status;
         this.setVisible(status);
         this.setActive(status);
-        // if (!status) this.emit("object_killed");
     }
 
     // direction has to be among 1 and -1. 1 for enemies, -1 for player

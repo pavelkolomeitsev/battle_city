@@ -26,7 +26,7 @@ export default class GroupOfShells extends Phaser.Physics.Arcade.Group {
         if (this._nextShoot > this._scene.time.now) return; // to prevent toans of fires
 
         let shell: Shell = this.getFirstDead();
-        const side: number = this._enemy ? -35 : 30;
+        const side: number = this._enemy ? -37 : 40;
         
         if (!shell) {
             const vector: Phaser.Math.Vector2 = this._scene.physics.velocityFromAngle(parentSprite.angle + 270, side); // +270 - trick to set shell just before barrel
@@ -35,14 +35,13 @@ export default class GroupOfShells extends Phaser.Physics.Arcade.Group {
             this.add(shell);
         } else {
             const vector: Phaser.Math.Vector2 = this._scene.physics.velocityFromAngle(parentSprite.angle + 270, side); // +270 - trick to set shell just before barrel
-            const position: StartPosition = { x: parentSprite.x + vector.x - 6, y: parentSprite.y + vector.y - 6 };
+            const position: StartPosition = { x: parentSprite.x + vector.x - 5, y: parentSprite.y + vector.y - 5};
             shell.body.x = position.x;
             shell.body.y = position.y;
             shell.setAlive(true);
         }
         shell.flyOut(this._direction);
 
-        // this._nextShoot = this._scene.time.now + this._pauseBetweenShoots; // instead one fire per 0.5 second
         this._nextShoot = this._scene.time.now + this._pauseBetweenShoots; // instead one fire per 0.5 second
     }
 
@@ -58,10 +57,10 @@ export default class GroupOfShells extends Phaser.Physics.Arcade.Group {
                 this._pauseBetweenShoots = 300; // enemy`s BTR
                 break;
             case "bulletRed1":
-                this._pauseBetweenShoots = 500; // player`s BMP
+                this._pauseBetweenShoots = 400; // player`s BMP
                 break;
             case "bulletRed2":
-                this._pauseBetweenShoots = 1000; // player`s tank
+                this._pauseBetweenShoots = 800; // player`s tank
                 break;
         }
     }

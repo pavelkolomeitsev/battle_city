@@ -19,14 +19,14 @@ export default class Player extends Vehicle {
         this.groupOfShells = new GroupOfShells(this._scene.physics.world, this._scene, this._map, shellTexture, false);
         this.setVehicleType(textureName);
         // handle shooting on boxes
-        this._scene.physics.add.overlap(this._map.boxes, this.groupOfShells, this.boxesShellsCollision, null, this);
+        this._scene.physics.add.overlap(this._map.explosiveObjects, this.groupOfShells, this.boxesShellsCollision, null, this);
         // handle shooting on stones
         this._scene.physics.add.overlap(this._map.stones, this.groupOfShells, this.stonesShellsCollision, null, this);
     }
 
     private setVehicleType(textureName: string): void {
         switch (textureName) {
-            case "tank_red":
+            case "player_tank":
                 this._armour = 100;
                 break;
             case "bmp_red":
@@ -126,9 +126,9 @@ export default class Player extends Vehicle {
     public destroyPlayer(shell: Shell): void {
         this._armour -= shell.damage;
         if ((this._armour < 100) && (this._armour >= 50)) {
-            // this.setTexture("objects", "tank1");
+            this.setTexture("objects", "player_tank1");
         } else if ((this._armour < 50) && (this._armour > 0)) {
-            // this.setTexture("objects", "tank2");
+            this.setTexture("objects", "player_tank2");
         } else if (this._armour <= 0) {
             this.destroy();
         }

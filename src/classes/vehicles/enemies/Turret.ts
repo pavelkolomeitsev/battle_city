@@ -25,7 +25,7 @@ export default class Turret {
         // handle shooting on player
         this._scene.physics.add.overlap(this._player, this._groupOfShells, this.shellsPlayerCollision, null, this);
         // handle shooting on boxes
-        this._scene.physics.add.overlap(this._map.boxes, this._groupOfShells, this.boxesShellsCollision, null, this);
+        this._scene.physics.add.overlap(this._map.explosiveObjects, this._groupOfShells, this.boxesShellsCollision, null, this);
         // handle shooting on stones
         this._scene.physics.add.overlap(this._map.stones, this._groupOfShells, this.stonesShellsCollision, null, this);
     }

@@ -9,14 +9,16 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     private _timer: Phaser.Time.TimerEvent = null;
     private _enemies: number[] = [];
     private _player: Player = null;
+    private _numberOfBase: number = 0;
     public counter: number = 0;
 
-    constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, map: Map, enemies: number[], player: Player) {
+    constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, map: Map, enemies: number[], player: Player, numberOfBase: number) {
         super(world, scene);
         this._scene = scene;
         this._map = map;
         this._enemies = enemies;
         this._player = player;
+        this._numberOfBase = numberOfBase;
         this._timer = this._scene.time.addEvent({ // add new enemy every 3 seconds
             delay: 3000,
             loop: true,
@@ -25,7 +27,6 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
         });
         // prevent enemy`s overlapping with each other
         this._scene.physics.add.collider(this, this, this.handleEnemyVehicleCollision, null, this);
-        this._scene.events.on("update", this.update, this); // prevent enemy`s moving out of restricted zone
     }
 
     private addEnemy(): void {
@@ -35,7 +36,7 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     }
 
     private createEnemy(): void {
-        const baseNumber: number = Math.floor(Math.random() * 2) + 1;
+        const baseNumber: number = Math.floor(Math.random() * this._numberOfBase) + 1;
         const position: StartPosition = this._map.getBasePosition(baseNumber); // there are two places on the map where enemies appear
         // get last el from array
         // transform el into texture
@@ -52,11 +53,11 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     private getEnemyVehicleTexture(index: number): string {
         switch (index) {
             case 1:
-                return "tank_blue"; // BTR
+                return "enemy_btr"; // BTR
             case 2:
-                return "tank_dark"; // BMP
+                return "enemy"; // BMP
             case 3:
-                return "tank_sand"; // tank
+                return "enemy_tank"; // tank
         }
     }
 
@@ -67,15 +68,15 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
         secondEnemy.body.stop();
     }
 
-    private update(): void {
-        if (this.children.size > 0) {
-            const array: EnemyVehicle[] = this.children.getArray() as EnemyVehicle[];
-            for (let i = 0; i < this.children.size; i++) {
-                if (!array[i].isAppear && this._map.isInCheckZone(array[i])) {
-                    array[i].body.y += 30;
-                    array[i].changeDirection();
-                }
-            }
-        }
-    }
+    // private update(): void {
+    //     if (this.children.size > 0) {
+    //         const array: EnemyVehicle[] = this.children.getArray() as EnemyVehicle[];
+    //         for (let i = 0; i < this.children.size; i++) {
+    //             if (!array[i].isAppear && this._map.isInCheckZone(array[i])) {
+    //                 array[i].body.y += 30;
+    //                 array[i].changeDirection();
+    //             }
+    //         }
+    //     }
+    // }
 }

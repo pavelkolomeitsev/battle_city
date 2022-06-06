@@ -1,16 +1,16 @@
 import BootScene from "./scenes/BootScene";
 import PreloadScene from "./scenes/PreloadScene";
-import GameScene from "./scenes/GameScene";
+import Level_1 from "./scenes/Level_1";
 
 const config = {
     type: Phaser.AUTO,
-    width: 1280, // set according to background image size / map`s size!!!
-    height: 750, // set according to background image size / map`s size!!!
+    width: window.innerWidth, // set according to background image size / map`s size!!!
+    height: window.innerHeight, // set according to background image size / map`s size!!!
     scene: [
         new BootScene(),
         new PreloadScene(),
         // new StartScene(),
-        new GameScene()
+        new Level_1()
     ],
     scale: {
         mode: Phaser.Scale.FIT, // auto scaling of all sprites

@@ -15,12 +15,13 @@ export enum TURNS {
 export enum SPEED {
     BASIC = 150,
     FASTER = 690, // enemy shell`s speed
-    FASTEST = 900 // player shell`s speed
+    FASTEST = 1000 // player shell`s speed
 };
 
 export const GROUND_FRICTION = 0.5;
-export const ROADS_FRICTION = {
-    road: 1
+export const FRICTIONS = {
+    "lake": 0.1,
+    "road": 1
 };
 
 export const TANKS = {
@@ -42,6 +43,7 @@ export type StartPosition = {
 export const BANG_ANIMATION: string = "BANG_ANIMATION";
 export const RADAR_ANIMATION: string = "RADAR_ANIMATION";
 export const SPARKLE_ANIMATION: string = "SPARKLE_ANIMATION";
+export const SHOOTING_ANIMATION: string = "SHOOTING_ANIMATION";
 
 export default class Checkpoint extends Phaser.Geom.Rectangle{
     public index: string;
@@ -61,7 +63,7 @@ export const ENEMY = {
     TANK: {
         TYPE: "TANK",
         SPEED: 60,
-        ARMOUR: 100,
+        ARMOUR: 150,
         SHELL_POWER: 45,
         SHELL_TYPE: "bulletDark3"
     },

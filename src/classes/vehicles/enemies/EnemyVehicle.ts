@@ -23,7 +23,7 @@ export default class EnemyVehicle extends Vehicle {
         const shellType: string = this.setEnemiesType(textureName);
         this._groupOfShells = new GroupOfShells(this._scene.physics.world, this._scene, this._map, shellType);
         this._timer = this._scene.time.addEvent({
-            delay: 4500,
+            delay: 4000, // appearing time of next enemy
             loop: true,
             callback: this.changeDirection,
             callbackScope: this
@@ -34,29 +34,28 @@ export default class EnemyVehicle extends Vehicle {
         // enemy shoots player and boxes
         this._scene.physics.add.overlap(this._player, this._groupOfShells, this.shellsPlayerCollision, null, this);
         // enemy shoots boxes
-        this._scene.physics.add.overlap(this._map.boxes, this._groupOfShells, this.shellsBoxesCollision, null, this);
+        this._scene.physics.add.overlap(this._map.explosiveObjects, this._groupOfShells, this.shellsBoxesCollision, null, this);
         this._scene.physics.add.overlap(this._map.stones, this._groupOfShells, this.shellsStoneCollision, null, this);
         this._scene.events.on("update", this.fire, this);
     }
 
     private setEnemiesType(textureName: string): string {
-        let shellType: string = "";
         switch (textureName) {
-            case "tank_blue": // enemy BTR
+            case "enemy_btr": // enemy BTR
                 this._type = ENEMY.BTR.TYPE;
                 this._vehicleSpeed = ENEMY.BTR.SPEED;
                 this._armour = ENEMY.BTR.ARMOUR;
-                return shellType = ENEMY.BTR.SHELL_TYPE;
-            case "tank_dark": // enemy BMP
+                return ENEMY.BTR.SHELL_TYPE;
+            case "enemy": // enemy BMP
                 this._type = ENEMY.BMP.TYPE;
                 this._vehicleSpeed = ENEMY.BMP.SPEED;
                 this._armour = ENEMY.BMP.ARMOUR;
-                return shellType = ENEMY.BMP.SHELL_TYPE;
-            case "tank_sand": // enemy tank
+                return ENEMY.BMP.SHELL_TYPE;
+            case "enemy_tank": // enemy tank
                 this._type = ENEMY.TANK.TYPE;
                 this._vehicleSpeed = ENEMY.TANK.SPEED;
                 this._armour = ENEMY.TANK.ARMOUR;
-                return shellType = ENEMY.TANK.SHELL_TYPE;
+                return ENEMY.TANK.SHELL_TYPE;
         }
     }
 
@@ -65,17 +64,19 @@ export default class EnemyVehicle extends Vehicle {
 
         switch (this._type) {
             case ENEMY.TANK.TYPE:
-                if ((this._armour <= 50) && (this._armour > 0)) {
-                    // this.setTexture("objects", "tank_sand2");
+                if ((this._armour < 150) && (this._armour >= 80)) {
+                    this.setTexture("objects", "enemy_tank1");
+                } else if ((this._armour < 80) && (this._armour > 0)) {
+                    this.setTexture("objects", "enemy_tank2");
                 } else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
                     return true;
-                }       
+                }
                 break;
             case ENEMY.BMP.TYPE:
                 if ((this._armour <= 35) && (this._armour > 0)) {
-                    // this.setTexture("objects", "tank_sand2");
+                    this.setTexture("objects", "enemy_bmp1");
                 } else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
@@ -84,7 +85,7 @@ export default class EnemyVehicle extends Vehicle {
                 break;
             case ENEMY.BTR.TYPE:
                 if ((this._armour <= 26) && (this._armour > 0)) {
-                    // this.setTexture("objects", "tank_sand2");
+                    this.setTexture("objects", "enemy_btr1");
                 } else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
@@ -132,7 +133,7 @@ export default class EnemyVehicle extends Vehicle {
     }
 
     public moveOut(): void {
-        this.body?.setVelocity(0, this.velocity * 1.3);
+        this.body?.setVelocity(0, this.velocity * 1.3); // * 1.3 - trick to run out quicker
     }
 
     public fire(): void {
@@ -140,7 +141,11 @@ export default class EnemyVehicle extends Vehicle {
             this._groupOfShells.createFire(this);
         }
         // if enemy comes close enough to player, it will shoot
-        if ((Phaser.Math.Distance.BetweenPoints(this, this._player) < 300) && this.body) {
+        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player) < 300) && this.body) {
+            this.body.stop();
+            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player.x, this._player.y);
+            this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
+        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player) < 500) && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player.x, this._player.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
