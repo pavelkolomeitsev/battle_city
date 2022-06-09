@@ -18,27 +18,27 @@
 },
 {
 	"filename": "bulletDark3",
-	"frame": {"x":44,"y":4,"w":8,"h":16},
+	"frame": {"x":42,"y":4,"w":8,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":16},
 	"sourceSize": {"w":8,"h":16}
 },
 {
-	"filename": "bulletRed1",
-	"frame": {"x":22,"y":4,"w":8,"h":14},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":14},
-	"sourceSize": {"w":8,"h":14}
-},
-{
 	"filename": "bulletRed2",
-	"frame": {"x":34,"y":4,"w":6,"h":14},
+	"frame": {"x":32,"y":4,"w":6,"h":14},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":14},
 	"sourceSize": {"w":6,"h":14}
+},
+{
+	"filename": "bulletSand1",
+	"frame": {"x":22,"y":4,"w":6,"h":13},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":13},
+	"sourceSize": {"w":6,"h":13}
 },
 {
 	"filename": "command_base_ru",
@@ -58,7 +58,7 @@
 },
 {
 	"filename": "crateWood",
-	"frame": {"x":197,"y":4,"w":28,"h":28},
+	"frame": {"x":195,"y":4,"w":28,"h":28},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":28,"h":28},
@@ -98,7 +98,7 @@
 },
 {
 	"filename": "enemy_tank",
-	"frame": {"x":140,"y":674,"w":42,"h":68},
+	"frame": {"x":208,"y":674,"w":42,"h":68},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":42,"h":68},
@@ -106,7 +106,7 @@
 },
 {
 	"filename": "enemy_tank1",
-	"frame": {"x":186,"y":674,"w":42,"h":68},
+	"frame": {"x":4,"y":746,"w":42,"h":68},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":42,"h":68},
@@ -114,7 +114,7 @@
 },
 {
 	"filename": "enemy_tank2",
-	"frame": {"x":4,"y":746,"w":42,"h":68},
+	"frame": {"x":50,"y":746,"w":42,"h":68},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":42,"h":68},
@@ -162,7 +162,7 @@
 },
 {
 	"filename": "fenceRed",
-	"frame": {"x":56,"y":4,"w":48,"h":16},
+	"frame": {"x":54,"y":4,"w":48,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":48,"h":16},
@@ -178,7 +178,7 @@
 },
 {
 	"filename": "fenceYellow",
-	"frame": {"x":108,"y":4,"w":52,"h":16},
+	"frame": {"x":106,"y":4,"w":52,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":16},
@@ -297,8 +297,32 @@
 	"sourceSize": {"w":64,"h":64}
 },
 {
+	"filename": "player_ifv",
+	"frame": {"x":208,"y":538,"w":40,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":64},
+	"sourceSize": {"w":40,"h":64}
+},
+{
+	"filename": "player_ifv1",
+	"frame": {"x":4,"y":606,"w":40,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":64},
+	"sourceSize": {"w":40,"h":64}
+},
+{
+	"filename": "player_ifv2",
+	"frame": {"x":48,"y":606,"w":40,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":64},
+	"sourceSize": {"w":40,"h":64}
+},
+{
 	"filename": "player_tank",
-	"frame": {"x":50,"y":746,"w":46,"h":68},
+	"frame": {"x":96,"y":746,"w":46,"h":68},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":46,"h":68},
@@ -306,7 +330,7 @@
 },
 {
 	"filename": "player_tank1",
-	"frame": {"x":100,"y":746,"w":46,"h":68},
+	"frame": {"x":146,"y":746,"w":46,"h":68},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":46,"h":68},
@@ -314,7 +338,7 @@
 },
 {
 	"filename": "player_tank2",
-	"frame": {"x":150,"y":746,"w":46,"h":68},
+	"frame": {"x":196,"y":746,"w":46,"h":68},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":46,"h":68},
@@ -322,7 +346,7 @@
 },
 {
 	"filename": "sparkle1",
-	"frame": {"x":164,"y":4,"w":29,"h":27},
+	"frame": {"x":162,"y":4,"w":29,"h":27},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":29,"h":27},
@@ -386,7 +410,7 @@
 },
 {
 	"filename": "treeBrown_large",
-	"frame": {"x":4,"y":606,"w":64,"h":64},
+	"frame": {"x":92,"y":606,"w":64,"h":64},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -402,7 +426,7 @@
 },
 {
 	"filename": "treeGreen_large",
-	"frame": {"x":72,"y":606,"w":64,"h":64},
+	"frame": {"x":160,"y":606,"w":64,"h":64},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -418,14 +442,6 @@
 },
 {
 	"filename": "turret",
-	"frame": {"x":140,"y":606,"w":64,"h":64},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
-	"sourceSize": {"w":64,"h":64}
-},
-{
-	"filename": "turret_1",
 	"frame": {"x":4,"y":674,"w":64,"h":64},
 	"rotated": false,
 	"trimmed": false,
@@ -433,8 +449,16 @@
 	"sourceSize": {"w":64,"h":64}
 },
 {
-	"filename": "turret_2",
+	"filename": "turret_1",
 	"frame": {"x":72,"y":674,"w":64,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
+	"sourceSize": {"w":64,"h":64}
+},
+{
+	"filename": "turret_2",
+	"frame": {"x":140,"y":674,"w":64,"h":64},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":64},
@@ -447,6 +471,6 @@
 	"format": "RGBA8888",
 	"size": {"w":255,"h":999},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:a7fecf22c9b5781457c5478e291ed323:8aa3240535b13596aef8763142928407:8d6d12ff4d5234f2a4b19e0a906dbf52$"
+	"smartupdate": "$TexturePacker:SmartUpdate:02d0d91a787935d3cd5a3d3f9b7b36a4:87b773d328ea12101f0d4add4ee78049:8d6d12ff4d5234f2a4b19e0a906dbf52$"
 }
 }

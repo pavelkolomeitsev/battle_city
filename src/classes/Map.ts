@@ -90,9 +90,9 @@ export default class Map {
     //     array = null;
     // }
 
-    public getPlayer(): Phaser.Types.Tilemaps.TiledObject {
+    public getPlayer(playerNumber: number): Phaser.Types.Tilemaps.TiledObject {
         // find a player object in tilemap
-        return this.tilemap.findObject(this._level + "player", playerObject => playerObject.name === "player");
+        return this.tilemap.findObject(this._level + "players", playerObject => playerObject.name === `player${playerNumber}`);
     }
 
     // public getTurretPosition(): StartPosition {

@@ -6,18 +6,20 @@ import GroupOfShells from "../../shells/GroupOfShells";
 import Shell from "../../shells/Shell";
 import SparkleAnimation from "../../animation/SparkleAnimation";
 import Vehicle from "../Vehicle";
+import Player2 from "../player/Player2";
 
 export default class EnemyVehicle extends Vehicle {
     private _vehicleSpeed: number = 0;
     private _type: string = "";
     private _armour: number = 0;
     private _timer: Phaser.Time.TimerEvent = null;
-    private _player: Player = null;
+    private _player1: Player = null;
+    private _player2: Player2 = null;
     private _groupOfShells: GroupOfShells;
     public isAppear: boolean = true;
     public direction: string = DIRECTION.DOWN;
 
-    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, player: Player) {
+    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, player1: Player, player2: Player2 = null) {
         super(scene, position, atlasName, textureName, map);
 
         const shellType: string = this.setEnemiesType(textureName);
@@ -29,10 +31,11 @@ export default class EnemyVehicle extends Vehicle {
             callbackScope: this
         });
 
-        this._player = player;
+        this._player1 = player1;
+        this._player2 = player2;
         this.direction = DIRECTION.DOWN;
-        // enemy shoots player and boxes
-        this._scene.physics.add.overlap(this._player, this._groupOfShells, this.shellsPlayerCollision, null, this);
+        // enemy shoots players
+        this._scene.physics.add.overlap(this._player2 ? [this._player2, this._player1] : this._player1, this._groupOfShells, this.shellsPlayerCollision, null, this);
         // enemy shoots boxes
         this._scene.physics.add.overlap(this._map.explosiveObjects, this._groupOfShells, this.shellsBoxesCollision, null, this);
         this._scene.physics.add.overlap(this._map.stones, this._groupOfShells, this.shellsStoneCollision, null, this);
@@ -141,13 +144,24 @@ export default class EnemyVehicle extends Vehicle {
             this._groupOfShells.createFire(this);
         }
         // if enemy comes close enough to player, it will shoot
-        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player) < 300) && this.body) {
+        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 300) && this.body) {
             this.body.stop();
-            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player.x, this._player.y);
+            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player1.x, this._player1.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
-        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player) < 500) && this.body) {
+        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 500) && this.body) {
             this.body.stop();
-            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player.x, this._player.y);
+            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player1.x, this._player1.y);
+            this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
+        }
+
+        if (!this._player2) return;
+        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 300) && this.body) {
+            this.body.stop();
+            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
+            this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
+        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 500) && this.body) {
+            this.body.stop();
+            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
         }
     }

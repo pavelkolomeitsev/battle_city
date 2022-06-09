@@ -4,7 +4,9 @@ export default class PreloadScene extends Phaser.Scene {
     constructor() {super({key: "preload-scene"});}
 
     protected preload(): void {
-        this.add.sprite(0, 0, "background").setOrigin(0);
+        const sprite: Phaser.GameObjects.Sprite = this.add.sprite(0, 0, "logo").setOrigin(0);
+        sprite.setX(window.innerWidth / 2 - sprite.width / 2);
+        sprite.setY(window.innerHeight / 2 - sprite.height / 2);
         new LoadingBar(this);
 
         // load images as a tileset
@@ -14,6 +16,6 @@ export default class PreloadScene extends Phaser.Scene {
     }
 
     protected create(): void {
-        this.scene.start("level-1");
+        this.scene.start("start-scene");
     }
 }

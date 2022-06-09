@@ -1,6 +1,9 @@
 import BootScene from "./scenes/BootScene";
 import PreloadScene from "./scenes/PreloadScene";
+import StartScene from "./scenes/StartScene";
 import Level_1 from "./scenes/Level_1";
+import PostStartScene from "./scenes/PostStartScene";
+import HelpScene from "./scenes/HelpScene";
 
 const config = {
     type: Phaser.AUTO,
@@ -9,7 +12,9 @@ const config = {
     scene: [
         new BootScene(),
         new PreloadScene(),
-        // new StartScene(),
+        new StartScene(),
+        new PostStartScene(),
+        new HelpScene(),
         new Level_1()
     ],
     scale: {

@@ -5,10 +5,12 @@ import Shell from "../classes/shells/Shell";
 import { BANG_ANIMATION, handleDirection, SPARKLE_ANIMATION, StartPosition } from "../utils/utils";
 import GroupOfEnemies from "../classes/vehicles/enemies/GroupOfEnemies";
 import EnemyVehicle from "../classes/vehicles/enemies/EnemyVehicle";
+import Player2 from "../classes/vehicles/player/Player2";
 
 export default class Level_1 extends Phaser.Scene {
     private _map: Map = null;
     private _player1: Player = null;
+    private _player2: Player2 = null;
     private _enemies: GroupOfEnemies = null;
     
     constructor() {super({key: "level-1"});}
@@ -18,15 +20,25 @@ export default class Level_1 extends Phaser.Scene {
         this.loadAnimation();
     }
 
-    protected create(): void {
+    protected create(data: any): void {
         this._map = new Map(this, 1);
-        // add player
-        const player = this._map.getPlayer();
-        const position: StartPosition = {x: player.x, y: player.y};
-        this._player1 = new Player(this, position, "objects", "player_tank", this._map, "bulletRed2", false);
+        // add player/s
+        if (data.data.secondPlayer) {
+            const player1 = this._map.getPlayer(1);
+            let position: StartPosition = {x: player1.x, y: player1.y};
+            this._player1 = new Player(this, position, "objects", `player_${data.data.firstPlayer.vehicle}`, this._map, data.data.firstPlayer.shellType); // "player_ifv"
 
+            const player2 = this._map.getPlayer(2);
+            position = {x: player2.x, y: player2.y};
+            this._player2 = new Player2(this, position, "objects", `player_${data.data.secondPlayer.vehicle}`, this._map, data.data.secondPlayer.shellType); // "player_ifv"
+        } else {
+            const player = this._map.getPlayer(1);
+            const position: StartPosition = {x: player.x, y: player.y};
+            this._player1 = new Player(this, position, "objects", `player_${data.data.firstPlayer.vehicle}`, this._map, data.data.firstPlayer.shellType); // "player_ifv"
+        }
+        
         // add all enemies 1 - enemy BTR, 2 - enemy BMP, 3 - enemy tank, count reverse! number of bases on each level is different!!!
-        this._enemies = new GroupOfEnemies(this.physics.world, this, this._map, [3, 3, 3, 2, 2, 2, 1, 1, 1, 1, 1], this._player1, 4);
+        this._enemies = new GroupOfEnemies(this.physics.world, this, this._map, [3, 3, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1], 4, this._player1, this._player2);
         this.handleCollisions();
         this._map.createTreesLayer(); // make player and enemies under trees
         
@@ -36,12 +48,11 @@ export default class Level_1 extends Phaser.Scene {
 
     private handleCollisions(): void {
         // player shoots all enemies
-        // this.physics.add.overlap([this._turret.platform, this._radar], this._player1.groupOfShells, this.shellsEnemiesCollision, null, this);
-        this.physics.add.overlap(this._enemies, this._player1.groupOfShells, this.shellsEnemiesCollision, null, this);
+        this.physics.add.overlap(this._enemies, this._player2 ? [this._player1.groupOfShells, this._player2.groupOfShells] : this._player1.groupOfShells, this.shellsEnemiesCollision, null, this);
 
-        // handle enemies vs simple collision (not move objects)
-        this.physics.add.collider([this._player1, ...this._map.explosiveObjects, ...this._map.stones], this._enemies, this.handleEnemiesCollision, null, this);
-        this.physics.add.collider([...this._enemies.children.getArray(), ...this._map.explosiveObjects, ...this._map.stones], this._player1, this.handlePlayerCollision, null, this);
+        // handle enemies vs simple collision (not move objects)                                          
+        this.physics.add.collider([...this._map.explosiveObjects, ...this._map.stones].concat(this._player2 ? [this._player2, this._player1] : this._player1), this._enemies, this.handleEnemiesCollision, null, this);
+        this.physics.add.collider([...this._enemies.children.getArray(), ...this._map.explosiveObjects, ...this._map.stones], this._player2 ? [this._player1, this._player2] : this._player1, this.handlePlayerCollision, null, this);
     }
 
     private shellsEnemiesCollision(enemy: EnemyVehicle, shell: Shell): void {
@@ -75,11 +86,12 @@ export default class Level_1 extends Phaser.Scene {
     // see docs -> Scene.Methods
     update(time: number, delta: number): void {
         if (this._player1.active) this._player1.move();
+        if (this._player2 && this._player2.active) this._player2.move();
         // if (this._turret.turret && this._player1.active) {
         //     const isPlayerNear: boolean = this._map.checkPlayersPosition(this._radar, this._player1);
         //     this._turret.runTurret(this._player1, isPlayerNear);
         // }
-        this.checkMapBounds([this._player1, ...this._enemies.getChildren()]);
+        this.checkMapBounds([...this._enemies.getChildren()].concat(this._player2 ? [this._player1, this._player2] : this._player1));
     }
 
     // private getVehicleConfig(): any {

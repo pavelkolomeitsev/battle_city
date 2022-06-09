@@ -2,22 +2,25 @@ import Map from "../../Map";
 import EnemyVehicle from "./EnemyVehicle";
 import { handleDirection, StartPosition } from "../../../utils/utils";
 import Player from "../player/Player";
+import Player2 from "../player/Player2";
 
 export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     private _scene: Phaser.Scene = null;
     private _map: Map = null;
     private _timer: Phaser.Time.TimerEvent = null;
     private _enemies: number[] = [];
-    private _player: Player = null;
+    private _player1: Player = null;
+    private _player2: Player2 = null;
     private _numberOfBase: number = 0;
     public counter: number = 0;
 
-    constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, map: Map, enemies: number[], player: Player, numberOfBase: number) {
+    constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, map: Map, enemies: number[], numberOfBase: number, player1: Player, player2: Player2 = null) {
         super(world, scene);
         this._scene = scene;
         this._map = map;
         this._enemies = enemies;
-        this._player = player;
+        this._player1 = player1;
+        this._player2 = player2;
         this._numberOfBase = numberOfBase;
         this._timer = this._scene.time.addEvent({ // add new enemy every 3 seconds
             delay: 3000,
@@ -43,7 +46,7 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
         // delete last el from array
         // const enemiesTexture: string = this.getEnemyVehicleTexture(this._enemies[this._enemies.length - 1]);
         const enemiesTexture: string = this.getEnemyVehicleTexture(this._enemies.pop());
-        const enemy: EnemyVehicle = new EnemyVehicle(this._scene, position, "objects", enemiesTexture, this._map, this._player);
+        const enemy: EnemyVehicle = new EnemyVehicle(this._scene, position, "objects", enemiesTexture, this._map, this._player1, this._player2);
         this.add(enemy);
 
         enemy.moveOut();

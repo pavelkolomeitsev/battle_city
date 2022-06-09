@@ -56,7 +56,7 @@ export default class GroupOfShells extends Phaser.Physics.Arcade.Group {
             case ENEMY.BTR.SHELL_TYPE:
                 this._pauseBetweenShoots = 300; // enemy`s BTR
                 break;
-            case "bulletRed1":
+            case "bulletSand1":
                 this._pauseBetweenShoots = 400; // player`s BMP
                 break;
             case "bulletRed2":

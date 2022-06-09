@@ -1,21 +1,24 @@
 import Vehicle from "../Vehicle";
 import Map from "../../Map";
-import { PLAYER_SPEED, SPEED, StartPosition, TURNS } from "../../../utils/utils";
+import { PLAYER, PLAYER_SPEED, SPEED, StartPosition, TURNS } from "../../../utils/utils";
 import GroupOfShells from "../../shells/GroupOfShells";
 import Shell from "../../shells/Shell";
 import BangAnimation from "../../animation/BangAnimation";
 import SparkleAnimation from "../../animation/SparkleAnimation";
 
 export default class Player extends Vehicle {
-    private _velocity: number;
+    protected _velocity: number;
     private _cursor: Phaser.Types.Input.Keyboard.CursorKeys = null;
-    private _armour: number = 0;
+    protected _fire: Phaser.Input.Keyboard.Key = null;
+    protected _armour: number = 0;
+    protected _vehicleType: string = "";
     public groupOfShells: GroupOfShells = null;
 
-    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, shellTexture: string, enemy: boolean) {
+    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, shellTexture: string) {
         super(scene, position, atlasName, textureName, map);
         this._velocity = 0;
         this._cursor = this._scene.input.keyboard.createCursorKeys(); // take control from keyboard, exactly up and down keys
+        this._fire = this._scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO);
         this.groupOfShells = new GroupOfShells(this._scene.physics.world, this._scene, this._map, shellTexture, false);
         this.setVehicleType(textureName);
         // handle shooting on boxes
@@ -24,25 +27,27 @@ export default class Player extends Vehicle {
         this._scene.physics.add.overlap(this._map.stones, this.groupOfShells, this.stonesShellsCollision, null, this);
     }
 
-    private setVehicleType(textureName: string): void {
+    protected setVehicleType(textureName: string): void {
         switch (textureName) {
             case "player_tank":
-                this._armour = 100;
+                this._vehicleType = "player_tank";
+                this._armour = PLAYER.TANK.ARMOUR;
                 break;
-            case "bmp_red":
-                this._armour = 77;
+            case "player_ifv":
+                this._vehicleType = "player_ifv";
+                this._armour = PLAYER.BMP.ARMOUR;
                 break;
         }
     }
 
-    private boxesShellsCollision(box: Phaser.GameObjects.Sprite, shell: Shell): void {
+    protected boxesShellsCollision(box: Phaser.GameObjects.Sprite, shell: Shell): void {
         const position: StartPosition = { x: box.x, y: box.y };
         BangAnimation.generateBang(this._scene, position);
         box.destroy();
         shell.setAlive(false);
     }
 
-    private stonesShellsCollision(stone: Phaser.GameObjects.Sprite, shell: Shell): void {
+    protected stonesShellsCollision(stone: Phaser.GameObjects.Sprite, shell: Shell): void {
         const vector: Phaser.Math.Vector2 = this._scene.physics.velocityFromAngle(shell.angle + 270, +20); // +270 - trick to set sparkle just before the stone
         const position: StartPosition = { x: shell.x + vector.x, y: shell.y + vector.y };
         SparkleAnimation.generateBang(this._scene, position);
@@ -52,8 +57,10 @@ export default class Player extends Vehicle {
     protected get direction(): number {
         let direction = PLAYER_SPEED.NONE;
 
-        if (this._cursor.up.isDown) direction = PLAYER_SPEED.FORWARD;
-        else if (this._cursor.down.isDown) direction = PLAYER_SPEED.BACKWARD;
+        // if (this._cursor.up.isDown) direction = PLAYER_SPEED.FORWARD;
+        if (this._cursor.up.isDown) direction = (this._vehicleType === "player_tank") ? PLAYER.TANK.SPEED : PLAYER.BMP.SPEED;
+        // else if (this._cursor.down.isDown) direction = PLAYER_SPEED.BACKWARD;
+        else if (this._cursor.down.isDown) direction = (this._vehicleType === "player_tank") ? -PLAYER.TANK.SPEED : -PLAYER.BMP.SPEED;
         
         return direction;
     }
@@ -94,7 +101,7 @@ export default class Player extends Vehicle {
         return this.angle + this.turn;
     }
 
-    private getVelocityFromAngle(): Phaser.Math.Vector2{ // get sprite`s speed with account of sprite`s angle
+    protected getVelocityFromAngle(): Phaser.Math.Vector2{ // get sprite`s speed with account of sprite`s angle
         const vector2 = new Phaser.Math.Vector2();
         // vector2 дает нам правильное смещение картинки/спрайта по оси х/у
         // первый параметр - текущий угол картинки (по умолчанию 90 град. то есть вправо). Машинка смотрит вверх, поэтому нужно подправить угол
@@ -114,7 +121,7 @@ export default class Player extends Vehicle {
         const velocity = this.getVelocityFromAngle();
         this.body?.setVelocity(velocity.x, velocity.y);
 
-        if (this._cursor.space.isDown && this) this.fire();
+        if (this._fire.isDown && this) this.fire();
     }
 
     public setAlive(status: boolean): void {
@@ -125,12 +132,22 @@ export default class Player extends Vehicle {
 
     public destroyPlayer(shell: Shell): void {
         this._armour -= shell.damage;
-        if ((this._armour < 100) && (this._armour >= 50)) {
-            this.setTexture("objects", "player_tank1");
-        } else if ((this._armour < 50) && (this._armour > 0)) {
-            this.setTexture("objects", "player_tank2");
-        } else if (this._armour <= 0) {
-            this.destroy();
+        if (this._vehicleType === "player_tank") {
+            if ((this._armour < 100) && (this._armour >= 50)) {
+                this.setTexture("objects", "player_tank1");
+            } else if ((this._armour < 50) && (this._armour > 0)) {
+                this.setTexture("objects", "player_tank2");
+            } else if (this._armour <= 0) {
+                this.destroy();
+            }
+        } else if (this._vehicleType === "player_ifv") {
+            if ((this._armour < 77) && (this._armour >= 40)) {
+                this.setTexture("objects", "player_ifv1");
+            } else if ((this._armour < 40) && (this._armour > 0)) {
+                this.setTexture("objects", "player_ifv2");
+            } else if (this._armour <= 0) {
+                this.destroy();
+            }
         }
     }
 }

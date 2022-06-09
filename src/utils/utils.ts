@@ -8,8 +8,8 @@ export enum PLAYER_SPEED {
 
 export enum TURNS {
     NONE = 0,
-    RIGHT = 1,
-    LEFT = -1
+    RIGHT = 1.3,
+    LEFT = -1.3
 };
 
 export enum SPEED {
@@ -24,33 +24,28 @@ export const FRICTIONS = {
     "road": 1
 };
 
-export const TANKS = {
-    RED: {
-        sprite: "tank_red",
-        position: "player"
-    },
-    BLUE: {
-        sprite: "tank_green",
-        position: "player"
-    }
-};
-
 export type StartPosition = {
     x: number,
     y: number
+};
+
+export type LevelData = {
+    firstPlayer: {
+        vehicle: string,
+        shellType: string,
+        experience: number
+    },
+    secondPlayer: {
+        vehicle: string,
+        shellType: string,
+        experience: number
+    }
 };
 
 export const BANG_ANIMATION: string = "BANG_ANIMATION";
 export const RADAR_ANIMATION: string = "RADAR_ANIMATION";
 export const SPARKLE_ANIMATION: string = "SPARKLE_ANIMATION";
 export const SHOOTING_ANIMATION: string = "SHOOTING_ANIMATION";
-
-export default class Checkpoint extends Phaser.Geom.Rectangle{
-    public index: string;
-    constructor(x: number, y: number, width: number, height: number) {
-        super(x, y, width, height);
-    }
-}
 
 export enum DIRECTION {
     RIGHT = "RIGHT",
@@ -90,16 +85,16 @@ export const ENEMY = {
 
 export const PLAYER = {
     TANK: {
-        // SPEED: 60,
+        SPEED: 100,
         ARMOUR: 100,
         SHELL_POWER: 60,
         SHELL_TYPE: "bulletRed2"
     },
     BMP: {
-        // SPEED: 120,
+        SPEED: 140,
         ARMOUR: 77,
         SHELL_POWER: 30,
-        SHELL_TYPE: "bulletRed1"
+        SHELL_TYPE: "bulletSand1"
     },
 };
 
@@ -118,4 +113,25 @@ export function handleDirection(enemy: EnemyVehicle): void {
             enemy.body.x -= 10;
             break;
     }
+}
+
+export function createText(scene: Phaser.Scene, positionX: number, positionY: number, text: string, style: Phaser.Types.GameObjects.Text.TextStyle): Phaser.GameObjects.Text {
+    return scene.add.text(positionX, positionY, text, style).setOrigin(0);
+}
+
+export function createTextButton(scene: Phaser.Scene, height: number, text: string, style: Phaser.Types.GameObjects.Text.TextStyle, textButtonWidth?: number): Phaser.GameObjects.Text {
+    const textButton: Phaser.GameObjects.Text = createText(scene, 0, 0, text, style);
+    const width: number = textButtonWidth ? textButtonWidth : textButton.width;
+    textButton.setX(window.innerWidth / 2 - width / 2);
+    textButton.setY(window.innerHeight / 2 + height);
+    textButton.setInteractive({ useHandCursor: true });
+    return textButton;
+}
+
+export function createRectangleFrame(scene: Phaser.Scene, x: number, y: number): Phaser.GameObjects.Graphics {
+    const rectFrame: Phaser.GameObjects.Graphics = scene.add.graphics();
+    rectFrame.lineStyle(8, 0xE7590D, 1);
+    rectFrame.strokeRoundedRect(x, y, 80, 100, 8);
+    rectFrame.visible = false;
+    return rectFrame;
 }
