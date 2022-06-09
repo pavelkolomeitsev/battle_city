@@ -11,14 +11,14 @@ export default class GroupOfShells extends Phaser.Physics.Arcade.Group {
     private _nextShoot: number = 0;
     private _pauseBetweenShoots: number = 0;
 
-    constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, map: Map, texture: string, enemy: boolean = true) {
+    constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, map: Map, texture: string, enemy: boolean = true, experience: number = 0) {
         super(world, scene);
         this._scene = scene;
         this._map = map;
         this._texture = texture;
         this._enemy = enemy;
         this._direction = enemy ? 1 : -1;
-        this.setPauseBetweenShoots();
+        this.setPauseBetweenShoots(experience);
     }
 
     // mechanism for sprites` reusing for better performance
@@ -45,7 +45,7 @@ export default class GroupOfShells extends Phaser.Physics.Arcade.Group {
         this._nextShoot = this._scene.time.now + this._pauseBetweenShoots; // instead one fire per 0.5 second
     }
 
-    private setPauseBetweenShoots(): void {
+    private setPauseBetweenShoots(experience: number): void {
         switch (this._texture) {
             case ENEMY.TANK.SHELL_TYPE:
                 this._pauseBetweenShoots = 1200; // enemy`s tank
@@ -57,10 +57,10 @@ export default class GroupOfShells extends Phaser.Physics.Arcade.Group {
                 this._pauseBetweenShoots = 300; // enemy`s BTR
                 break;
             case "bulletSand1":
-                this._pauseBetweenShoots = 400; // player`s BMP
+                this._pauseBetweenShoots = 400 - experience; // player`s BMP
                 break;
             case "bulletRed2":
-                this._pauseBetweenShoots = 800; // player`s tank
+                this._pauseBetweenShoots = 800 - (experience * 2); // player`s tank
                 break;
         }
     }

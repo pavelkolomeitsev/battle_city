@@ -13,13 +13,16 @@ export default class Player extends Vehicle {
     protected _armour: number = 0;
     protected _vehicleType: string = "";
     public groupOfShells: GroupOfShells = null;
+    public id: string = "P1";
+    public experience: number = 0;
 
-    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, shellTexture: string) {
+    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, shellTexture: string, experience: number) {
         super(scene, position, atlasName, textureName, map);
         this._velocity = 0;
         this._cursor = this._scene.input.keyboard.createCursorKeys(); // take control from keyboard, exactly up and down keys
         this._fire = this._scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO);
-        this.groupOfShells = new GroupOfShells(this._scene.physics.world, this._scene, this._map, shellTexture, false);
+        this.experience = experience;
+        this.groupOfShells = new GroupOfShells(this._scene.physics.world, this._scene, this._map, shellTexture, false, experience); // experience from 0 to 200
         this.setVehicleType(textureName);
         // handle shooting on boxes
         this._scene.physics.add.overlap(this._map.explosiveObjects, this.groupOfShells, this.boxesShellsCollision, null, this);
@@ -53,7 +56,7 @@ export default class Player extends Vehicle {
         SparkleAnimation.generateBang(this._scene, position);
         shell.setAlive(false);
     }
-
+    
     protected get direction(): number {
         let direction = PLAYER_SPEED.NONE;
 

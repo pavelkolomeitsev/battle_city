@@ -12,13 +12,15 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     private _player1: Player = null;
     private _player2: Player2 = null;
     private _numberOfBase: number = 0;
+    private _maxEnemies: number = 0;
     public counter: number = 0;
 
-    constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, map: Map, enemies: number[], numberOfBase: number, player1: Player, player2: Player2 = null) {
+    constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, map: Map, enemies: number[], maxEnemies: number, numberOfBase: number, player1: Player, player2: Player2 = null) {
         super(world, scene);
         this._scene = scene;
         this._map = map;
         this._enemies = enemies;
+        this._maxEnemies = maxEnemies;
         this._player1 = player1;
         this._player2 = player2;
         this._numberOfBase = numberOfBase;
@@ -33,7 +35,7 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     }
 
     private addEnemy(): void {
-        if (this.counter < 6) { // hold no more than 6 enemies on the map at one time
+        if (this.counter < this._maxEnemies) { // hold no more than max enemies on the map at one time
             this._enemies.length > 0 ? this.createEnemy() : this._timer?.remove();
         }
     }
@@ -70,16 +72,4 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
         firstEnemy.changeDirection();
         secondEnemy.body.stop();
     }
-
-    // private update(): void {
-    //     if (this.children.size > 0) {
-    //         const array: EnemyVehicle[] = this.children.getArray() as EnemyVehicle[];
-    //         for (let i = 0; i < this.children.size; i++) {
-    //             if (!array[i].isAppear && this._map.isInCheckZone(array[i])) {
-    //                 array[i].body.y += 30;
-    //                 array[i].changeDirection();
-    //             }
-    //         }
-    //     }
-    // }
 }

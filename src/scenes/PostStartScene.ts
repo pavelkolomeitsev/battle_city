@@ -2,7 +2,7 @@ import { createRectangleFrame, createText, LevelData } from "../utils/utils";
 
 export default class PostStartScene extends Phaser.Scene {
     private _data: LevelData = null;
-    private _style: Phaser.Types.GameObjects.Text.TextStyle;
+    private _style: Phaser.Types.GameObjects.Text.TextStyle = null;
     private _tank1Rect: Phaser.GameObjects.Graphics = null;
     private _ifv1Rect: Phaser.GameObjects.Graphics = null;
     private _tank2Rect: Phaser.GameObjects.Graphics = null;

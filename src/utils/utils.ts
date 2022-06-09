@@ -135,3 +135,29 @@ export function createRectangleFrame(scene: Phaser.Scene, x: number, y: number):
     rectFrame.visible = false;
     return rectFrame;
 }
+
+export function createLevelText(scene: Phaser.Scene, positionX: number, positionY: number, text: string, style: Phaser.Types.GameObjects.Text.TextStyle): Phaser.GameObjects.Text {
+    const levelText: Phaser.GameObjects.Text = createText(scene, positionX, positionY, text, style);
+    levelText.depth = 10;
+    return levelText;
+}
+
+export function getPlayersRank(experience: number): string {
+    if ((experience >= 10) && (experience < 20)) {
+        return "lieutenant";
+    } else if ((experience >= 20) && (experience < 30)) {
+        return "captain";
+    } else if ((experience >= 30) && (experience < 50)) {
+        return "major";
+    } else if ((experience >= 50) && (experience < 75)) {
+        return "lieutenant_colonel";
+    } else if ((experience >= 75) && (experience < 100)) {
+        return "colonel";
+    } else if ((experience >= 100) && (experience < 150)) {
+        return "brigadier";
+    } else if ((experience >= 150) && (experience < 200)) {
+        return "major_general";
+    } else if (experience > 200) {
+        return "lieutenant_general";
+    } else return "second_lieutenant";
+}

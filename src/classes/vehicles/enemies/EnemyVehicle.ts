@@ -65,6 +65,8 @@ export default class EnemyVehicle extends Vehicle {
     public destroyEnemy(shell: Shell): boolean {
         this._armour -= shell.damage;
 
+        const id: string = (shell.parentSprite as Player).id;
+
         switch (this._type) {
             case ENEMY.TANK.TYPE:
                 if ((this._armour < 150) && (this._armour >= 80)) {
@@ -74,6 +76,8 @@ export default class EnemyVehicle extends Vehicle {
                 } else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
+                    // + experience animation!!!
+                    this.calculateExperiencePoints(id, 1.1);
                     return true;
                 }
                 break;
@@ -83,6 +87,8 @@ export default class EnemyVehicle extends Vehicle {
                 } else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
+                    // + experience animation!!!
+                    this.calculateExperiencePoints(id, 0.7);
                     return true;
                 }       
                 break;
@@ -92,6 +98,8 @@ export default class EnemyVehicle extends Vehicle {
                 } else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
+                    // + experience animation!!!
+                    this.calculateExperiencePoints(id, 0.4);
                     return true;
                 }       
                 break;
@@ -185,5 +193,11 @@ export default class EnemyVehicle extends Vehicle {
         const position: StartPosition = { x: shell.x + vector.x, y: shell.y + vector.y };
         SparkleAnimation.generateBang(this._scene, position);
         shell.setAlive(false);
+    }
+
+    private calculateExperiencePoints(id: string, points: number): void {
+        if (this._player2) {
+            id === "P1" ? this._player1.experience += points : this._player2.experience += points;
+        } else this._player1.experience += points;
     }
 }

@@ -1,6 +1,14 @@
 {"frames": [
 
 {
+	"filename": "brigadier",
+	"frame": {"x":4,"y":999,"w":40,"h":108},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":108},
+	"sourceSize": {"w":40,"h":108}
+},
+{
 	"filename": "bulletDark1",
 	"frame": {"x":4,"y":4,"w":4,"h":10},
 	"rotated": false,
@@ -39,6 +47,22 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":6,"h":13},
 	"sourceSize": {"w":6,"h":13}
+},
+{
+	"filename": "captain",
+	"frame": {"x":48,"y":999,"w":40,"h":108},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":108},
+	"sourceSize": {"w":40,"h":108}
+},
+{
+	"filename": "colonel",
+	"frame": {"x":92,"y":999,"w":40,"h":108},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":108},
+	"sourceSize": {"w":40,"h":108}
 },
 {
 	"filename": "command_base_ru",
@@ -225,6 +249,46 @@
 	"sourceSize": {"w":62,"h":63}
 },
 {
+	"filename": "lieutenant",
+	"frame": {"x":136,"y":999,"w":40,"h":108},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":108},
+	"sourceSize": {"w":40,"h":108}
+},
+{
+	"filename": "lieutenant_colonel",
+	"frame": {"x":180,"y":999,"w":40,"h":108},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":108},
+	"sourceSize": {"w":40,"h":108}
+},
+{
+	"filename": "lieutenant_general",
+	"frame": {"x":4,"y":1111,"w":40,"h":108},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":108},
+	"sourceSize": {"w":40,"h":108}
+},
+{
+	"filename": "major",
+	"frame": {"x":48,"y":1111,"w":40,"h":108},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":108},
+	"sourceSize": {"w":40,"h":108}
+},
+{
+	"filename": "major_general",
+	"frame": {"x":92,"y":1111,"w":40,"h":108},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":108},
+	"sourceSize": {"w":40,"h":108}
+},
+{
 	"filename": "platform",
 	"frame": {"x":48,"y":402,"w":64,"h":64},
 	"rotated": false,
@@ -343,6 +407,14 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":46,"h":68},
 	"sourceSize": {"w":46,"h":68}
+},
+{
+	"filename": "second_lieutenant",
+	"frame": {"x":136,"y":1111,"w":40,"h":108},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":108},
+	"sourceSize": {"w":40,"h":108}
 },
 {
 	"filename": "sparkle1",
@@ -469,8 +541,8 @@
 	"version": "1.0",
 	"image": "objects.png",
 	"format": "RGBA8888",
-	"size": {"w":255,"h":999},
+	"size": {"w":255,"h":1223},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:02d0d91a787935d3cd5a3d3f9b7b36a4:87b773d328ea12101f0d4add4ee78049:8d6d12ff4d5234f2a4b19e0a906dbf52$"
+	"smartupdate": "$TexturePacker:SmartUpdate:c82f8dea008fbc4d20198394d2a049d9:609e7c438e474fbbd2540ed542810916:8d6d12ff4d5234f2a4b19e0a906dbf52$"
 }
 }

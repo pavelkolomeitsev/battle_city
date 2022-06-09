@@ -34,6 +34,7 @@ class Map {
         this.createLayers();
         this.createExplosiveStaticLayer();
         this.createStonesLayer();
+        this.createTreesLayer();
     }
     createLayers() {
         this.tilemap.createLayer(this._level + "grass", this._tileset);
@@ -182,7 +183,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const utils_1 = __webpack_require__(/*! ../../utils/utils */ "./src/utils/utils.ts");
 const Shell_1 = __importDefault(__webpack_require__(/*! ./Shell */ "./src/classes/shells/Shell.ts"));
 class GroupOfShells extends Phaser.Physics.Arcade.Group {
-    constructor(world, scene, map, texture, enemy = true) {
+    constructor(world, scene, map, texture, enemy = true, experience = 0) {
         super(world, scene);
         this._scene = null;
         this._map = null;
@@ -196,7 +197,7 @@ class GroupOfShells extends Phaser.Physics.Arcade.Group {
         this._texture = texture;
         this._enemy = enemy;
         this._direction = enemy ? 1 : -1;
-        this.setPauseBetweenShoots();
+        this.setPauseBetweenShoots(experience);
     }
     createFire(parentSprite) {
         if (this._nextShoot > this._scene.time.now)
@@ -219,7 +220,7 @@ class GroupOfShells extends Phaser.Physics.Arcade.Group {
         shell.flyOut(this._direction);
         this._nextShoot = this._scene.time.now + this._pauseBetweenShoots;
     }
-    setPauseBetweenShoots() {
+    setPauseBetweenShoots(experience) {
         switch (this._texture) {
             case utils_1.ENEMY.TANK.SHELL_TYPE:
                 this._pauseBetweenShoots = 1200;
@@ -231,10 +232,10 @@ class GroupOfShells extends Phaser.Physics.Arcade.Group {
                 this._pauseBetweenShoots = 300;
                 break;
             case "bulletSand1":
-                this._pauseBetweenShoots = 400;
+                this._pauseBetweenShoots = 400 - experience;
                 break;
             case "bulletRed2":
-                this._pauseBetweenShoots = 800;
+                this._pauseBetweenShoots = 800 - (experience * 2);
                 break;
         }
     }
@@ -257,12 +258,12 @@ class Shell extends Phaser.GameObjects.Sprite {
     constructor(scene, position, atlasName, textureName, parentSprite, map) {
         super(scene, position.x, position.y, atlasName, textureName);
         this._scene = null;
-        this._parentSprite = null;
         this._map = null;
         this._shellSpeed = 0;
         this._shellPower = 0;
+        this.parentSprite = null;
         this._scene = scene;
-        this._parentSprite = parentSprite;
+        this.parentSprite = parentSprite;
         this._map = map;
         this.init(textureName);
         this._scene.events.on("update", this.update, this);
@@ -311,8 +312,8 @@ class Shell extends Phaser.GameObjects.Sprite {
     }
     flyOut(direction) {
         const vector = new Phaser.Math.Vector2();
-        vector.setToPolar(this._parentSprite.rotation + (direction * Math.PI / 2));
-        this.angle = this._parentSprite.angle;
+        vector.setToPolar(this.parentSprite.rotation + (direction * Math.PI / 2));
+        this.angle = this.parentSprite.angle;
         this.body.setVelocity(vector.x * this._shellSpeed, vector.y * this._shellSpeed);
     }
 }
@@ -414,6 +415,7 @@ class EnemyVehicle extends Vehicle_1.default {
     }
     destroyEnemy(shell) {
         this._armour -= shell.damage;
+        const id = shell.parentSprite.id;
         switch (this._type) {
             case utils_1.ENEMY.TANK.TYPE:
                 if ((this._armour < 150) && (this._armour >= 80)) {
@@ -425,6 +427,7 @@ class EnemyVehicle extends Vehicle_1.default {
                 else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
+                    this.calculateExperiencePoints(id, 1.1);
                     return true;
                 }
                 break;
@@ -435,6 +438,7 @@ class EnemyVehicle extends Vehicle_1.default {
                 else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
+                    this.calculateExperiencePoints(id, 0.7);
                     return true;
                 }
                 break;
@@ -445,6 +449,7 @@ class EnemyVehicle extends Vehicle_1.default {
                 else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
+                    this.calculateExperiencePoints(id, 0.4);
                     return true;
                 }
                 break;
@@ -534,6 +539,13 @@ class EnemyVehicle extends Vehicle_1.default {
         SparkleAnimation_1.default.generateBang(this._scene, position);
         shell.setAlive(false);
     }
+    calculateExperiencePoints(id, points) {
+        if (this._player2) {
+            id === "P1" ? this._player1.experience += points : this._player2.experience += points;
+        }
+        else
+            this._player1.experience += points;
+    }
 }
 exports["default"] = EnemyVehicle;
 
@@ -554,7 +566,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const EnemyVehicle_1 = __importDefault(__webpack_require__(/*! ./EnemyVehicle */ "./src/classes/vehicles/enemies/EnemyVehicle.ts"));
 const utils_1 = __webpack_require__(/*! ../../../utils/utils */ "./src/utils/utils.ts");
 class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
-    constructor(world, scene, map, enemies, numberOfBase, player1, player2 = null) {
+    constructor(world, scene, map, enemies, maxEnemies, numberOfBase, player1, player2 = null) {
         super(world, scene);
         this._scene = null;
         this._map = null;
@@ -563,10 +575,12 @@ class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
         this._player1 = null;
         this._player2 = null;
         this._numberOfBase = 0;
+        this._maxEnemies = 0;
         this.counter = 0;
         this._scene = scene;
         this._map = map;
         this._enemies = enemies;
+        this._maxEnemies = maxEnemies;
         this._player1 = player1;
         this._player2 = player2;
         this._numberOfBase = numberOfBase;
@@ -580,7 +594,7 @@ class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     }
     addEnemy() {
         var _a;
-        if (this.counter < 6) {
+        if (this.counter < this._maxEnemies) {
             this._enemies.length > 0 ? this.createEnemy() : (_a = this._timer) === null || _a === void 0 ? void 0 : _a.remove();
         }
     }
@@ -632,17 +646,20 @@ const GroupOfShells_1 = __importDefault(__webpack_require__(/*! ../../shells/Gro
 const BangAnimation_1 = __importDefault(__webpack_require__(/*! ../../animation/BangAnimation */ "./src/classes/animation/BangAnimation.ts"));
 const SparkleAnimation_1 = __importDefault(__webpack_require__(/*! ../../animation/SparkleAnimation */ "./src/classes/animation/SparkleAnimation.ts"));
 class Player extends Vehicle_1.default {
-    constructor(scene, position, atlasName, textureName, map, shellTexture) {
+    constructor(scene, position, atlasName, textureName, map, shellTexture, experience) {
         super(scene, position, atlasName, textureName, map);
         this._cursor = null;
         this._fire = null;
         this._armour = 0;
         this._vehicleType = "";
         this.groupOfShells = null;
+        this.id = "P1";
+        this.experience = 0;
         this._velocity = 0;
         this._cursor = this._scene.input.keyboard.createCursorKeys();
         this._fire = this._scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO);
-        this.groupOfShells = new GroupOfShells_1.default(this._scene.physics.world, this._scene, this._map, shellTexture, false);
+        this.experience = experience;
+        this.groupOfShells = new GroupOfShells_1.default(this._scene.physics.world, this._scene, this._map, shellTexture, false, experience);
         this.setVehicleType(textureName);
         this._scene.physics.add.overlap(this._map.explosiveObjects, this.groupOfShells, this.boxesShellsCollision, null, this);
         this._scene.physics.add.overlap(this._map.stones, this.groupOfShells, this.stonesShellsCollision, null, this);
@@ -771,9 +788,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const utils_1 = __webpack_require__(/*! ../../../utils/utils */ "./src/utils/utils.ts");
 const Player_1 = __importDefault(__webpack_require__(/*! ./Player */ "./src/classes/vehicles/player/Player.ts"));
 class Player2 extends Player_1.default {
-    constructor(scene, position, atlasName, textureName, map, shellTexture) {
-        super(scene, position, atlasName, textureName, map, shellTexture);
+    constructor(scene, position, atlasName, textureName, map, shellTexture, experience) {
+        super(scene, position, atlasName, textureName, map, shellTexture, experience);
         this._controls = null;
+        this.id = "P2";
         this._controls = this._scene.input.keyboard.addKeys({ "up": Phaser.Input.Keyboard.KeyCodes.W, "down": Phaser.Input.Keyboard.KeyCodes.S, "left": Phaser.Input.Keyboard.KeyCodes.A, "right": Phaser.Input.Keyboard.KeyCodes.D });
         this._fire = this._scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     }
@@ -904,33 +922,58 @@ class Level_1 extends Phaser.Scene {
         super({ key: "level-1" });
         this._map = null;
         this._player1 = null;
+        this._player1Data = null;
         this._player2 = null;
+        this._player2Data = null;
         this._enemies = null;
+        this._enemiesText = null;
+        this._enemiesArray = null;
+        this._enemiesCounter = 0;
+        this._maxEnemies = 0;
+        this._style = null;
     }
     preload() {
         this.add.sprite(0, 0, "background").setOrigin(0);
         this.loadAnimation();
+        this._style = { fontFamily: "RussoOne", fontSize: "45px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
     }
     create(data) {
         this._map = new Map_1.default(this, 1);
+        this._enemiesArray = [3, 2, 3, 1, 2, 2, 3, 1, 2, 1, 1, 3, 2, 1, 1];
+        this._player1Data = data.data.firstPlayer;
+        const player = this._map.getPlayer(1);
+        let position = { x: player.x, y: player.y };
+        this._player1 = new Player_1.default(this, position, "objects", `player_${this._player1Data.vehicle}`, this._map, this._player1Data.shellType, this._player1Data.experience);
+        this._maxEnemies = 6;
+        const width = this.sys.game.canvas.width;
+        this.showFirstPlayerExperience(width);
         if (data.data.secondPlayer) {
-            const player1 = this._map.getPlayer(1);
-            let position = { x: player1.x, y: player1.y };
-            this._player1 = new Player_1.default(this, position, "objects", `player_${data.data.firstPlayer.vehicle}`, this._map, data.data.firstPlayer.shellType);
+            this._player2Data = data.data.secondPlayer;
             const player2 = this._map.getPlayer(2);
             position = { x: player2.x, y: player2.y };
-            this._player2 = new Player2_1.default(this, position, "objects", `player_${data.data.secondPlayer.vehicle}`, this._map, data.data.secondPlayer.shellType);
+            this._player2 = new Player2_1.default(this, position, "objects", `player_${this._player2Data.vehicle}`, this._map, this._player2Data.shellType, this._player2Data.experience);
+            this._enemiesArray.forEach((item, _, array) => array.push(item));
+            this._maxEnemies = 10;
+            this.showSecondPlayerExperience(width);
         }
-        else {
-            const player = this._map.getPlayer(1);
-            const position = { x: player.x, y: player.y };
-            this._player1 = new Player_1.default(this, position, "objects", `player_${data.data.firstPlayer.vehicle}`, this._map, data.data.firstPlayer.shellType);
-        }
-        this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, [3, 3, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1], 4, this._player1, this._player2);
+        this._enemiesCounter = this._enemiesArray.length;
+        this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 4, this._player1, this._player2);
+        this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesCounter}`, this._style);
         this.handleCollisions();
-        this._map.createTreesLayer();
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
         this.cameras.main.startFollow(this._player1);
+    }
+    showFirstPlayerExperience(width) {
+        (0, utils_1.createLevelText)(this, width - 80, 30, "1st", this._style);
+        const rank = (0, utils_1.getPlayersRank)(this._player1Data.experience);
+        const sprite = this.add.sprite(width - 40, 140, "objects", rank);
+        sprite.depth = 10;
+    }
+    showSecondPlayerExperience(width) {
+        (0, utils_1.createLevelText)(this, window.innerWidth - 90, 200, "2nd", this._style);
+        const rank = (0, utils_1.getPlayersRank)(this._player2Data.experience);
+        const sprite = this.add.sprite(window.innerWidth - 40, 310, "objects", rank);
+        sprite.depth = 10;
     }
     handleCollisions() {
         this.physics.add.overlap(this._enemies, this._player2 ? [this._player1.groupOfShells, this._player2.groupOfShells] : this._player1.groupOfShells, this.shellsEnemiesCollision, null, this);
@@ -942,6 +985,24 @@ class Level_1 extends Phaser.Scene {
         BangAnimation_1.default.generateBang(this, position);
         if (enemy.destroyEnemy(shell)) {
             --this._enemies.counter;
+            --this._enemiesCounter;
+            this._enemiesText.setText(`Enemies: ${this._enemiesCounter}`);
+        }
+        if (this._enemies.counter <= 0 && (this._player1 || this._player2)) {
+            console.log("player`s experience", this._player1.experience);
+            const levelData = {
+                firstPlayer: {
+                    vehicle: this._player1Data.vehicle,
+                    shellType: this._player1Data.shellType,
+                    experience: this._player1.experience
+                },
+                secondPlayer: null
+            };
+            if (this._player2) {
+                levelData.secondPlayer.vehicle = this._player2Data.vehicle;
+                levelData.secondPlayer.shellType = this._player2Data.shellType;
+                levelData.secondPlayer.experience = this._player2.experience;
+            }
         }
         shell.setAlive(false);
     }
@@ -1024,6 +1085,7 @@ class PostStartScene extends Phaser.Scene {
     constructor() {
         super({ key: "post-start-scene" });
         this._data = null;
+        this._style = null;
         this._tank1Rect = null;
         this._ifv1Rect = null;
         this._tank2Rect = null;
@@ -1260,7 +1322,7 @@ exports.LoadingBar = LoadingBar;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createRectangleFrame = exports.createTextButton = exports.createText = exports.handleDirection = exports.PLAYER = exports.ENEMY = exports.DIRECTION = exports.SHOOTING_ANIMATION = exports.SPARKLE_ANIMATION = exports.RADAR_ANIMATION = exports.BANG_ANIMATION = exports.FRICTIONS = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.PLAYER_SPEED = void 0;
+exports.getPlayersRank = exports.createLevelText = exports.createRectangleFrame = exports.createTextButton = exports.createText = exports.handleDirection = exports.PLAYER = exports.ENEMY = exports.DIRECTION = exports.SHOOTING_ANIMATION = exports.SPARKLE_ANIMATION = exports.RADAR_ANIMATION = exports.BANG_ANIMATION = exports.FRICTIONS = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.PLAYER_SPEED = void 0;
 var PLAYER_SPEED;
 (function (PLAYER_SPEED) {
     PLAYER_SPEED[PLAYER_SPEED["NONE"] = 0] = "NONE";
@@ -1379,6 +1441,41 @@ function createRectangleFrame(scene, x, y) {
     return rectFrame;
 }
 exports.createRectangleFrame = createRectangleFrame;
+function createLevelText(scene, positionX, positionY, text, style) {
+    const levelText = createText(scene, positionX, positionY, text, style);
+    levelText.depth = 10;
+    return levelText;
+}
+exports.createLevelText = createLevelText;
+function getPlayersRank(experience) {
+    if ((experience >= 10) && (experience < 20)) {
+        return "lieutenant";
+    }
+    else if ((experience >= 20) && (experience < 30)) {
+        return "captain";
+    }
+    else if ((experience >= 30) && (experience < 50)) {
+        return "major";
+    }
+    else if ((experience >= 50) && (experience < 75)) {
+        return "lieutenant_colonel";
+    }
+    else if ((experience >= 75) && (experience < 100)) {
+        return "colonel";
+    }
+    else if ((experience >= 100) && (experience < 150)) {
+        return "brigadier";
+    }
+    else if ((experience >= 150) && (experience < 200)) {
+        return "major_general";
+    }
+    else if (experience > 200) {
+        return "lieutenant_general";
+    }
+    else
+        return "second_lieutenant";
+}
+exports.getPlayersRank = getPlayersRank;
 
 
 /***/ })

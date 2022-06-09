@@ -30,6 +30,7 @@ export default class Map {
         this.createLayers();
         this.createExplosiveStaticLayer();
         this.createStonesLayer();
+        this.createTreesLayer();
     }
     
     private createLayers(): void {
@@ -65,7 +66,7 @@ export default class Map {
         });
     }
 
-    public createTreesLayer(): void {
+    private createTreesLayer(): void {
         this.tilemap.findObject(this._level + "trees", gameObject => {
             const castedObject: Phaser.GameObjects.Sprite = gameObject as Phaser.GameObjects.Sprite;
             // gameObject.name should be the same in "objects.json" and tilemap.json files

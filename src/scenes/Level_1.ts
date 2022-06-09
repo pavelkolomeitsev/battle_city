@@ -2,7 +2,7 @@ import BangAnimation from "../classes/animation/BangAnimation";
 import Map from "../classes/Map";
 import Player from "../classes/vehicles/player/Player";
 import Shell from "../classes/shells/Shell";
-import { BANG_ANIMATION, handleDirection, SPARKLE_ANIMATION, StartPosition } from "../utils/utils";
+import { BANG_ANIMATION, createLevelText, createText, getPlayersRank, handleDirection, LevelData, SPARKLE_ANIMATION, StartPosition } from "../utils/utils";
 import GroupOfEnemies from "../classes/vehicles/enemies/GroupOfEnemies";
 import EnemyVehicle from "../classes/vehicles/enemies/EnemyVehicle";
 import Player2 from "../classes/vehicles/player/Player2";
@@ -10,40 +10,68 @@ import Player2 from "../classes/vehicles/player/Player2";
 export default class Level_1 extends Phaser.Scene {
     private _map: Map = null;
     private _player1: Player = null;
+    private _player1Data: any = null;
     private _player2: Player2 = null;
+    private _player2Data: any = null;
     private _enemies: GroupOfEnemies = null;
+    private _enemiesText: Phaser.GameObjects.Text = null;
+    private _enemiesArray: number[] = null;
+    private _enemiesCounter: number = 0;
+    private _maxEnemies: number = 0;
+    private _style: Phaser.Types.GameObjects.Text.TextStyle = null;
     
     constructor() {super({key: "level-1"});}
 
     protected preload(): void {
         this.add.sprite(0, 0, "background").setOrigin(0);
         this.loadAnimation();
+        this._style = { fontFamily: "RussoOne", fontSize: "45px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
     }
 
     protected create(data: any): void {
         this._map = new Map(this, 1);
+        // add all enemies 1 - enemy BTR, 2 - enemy BMP, 3 - enemy tank, count reverse! number of bases on each level is different!!!
+        this._enemiesArray = [3, 2, 3, 1, 2, 2, 3, 1, 2, 1, 1, 3, 2, 1, 1];
         // add player/s
+        this._player1Data = data.data.firstPlayer;
+        const player = this._map.getPlayer(1);
+        let position: StartPosition = {x: player.x, y: player.y};
+        this._player1 = new Player(this, position, "objects", `player_${this._player1Data.vehicle}`, this._map, this._player1Data.shellType, this._player1Data.experience); // experience from 0 to 200
+        this._maxEnemies = 6;
+        const width: number = this.sys.game.canvas.width;
+        this.showFirstPlayerExperience(width);
         if (data.data.secondPlayer) {
-            const player1 = this._map.getPlayer(1);
-            let position: StartPosition = {x: player1.x, y: player1.y};
-            this._player1 = new Player(this, position, "objects", `player_${data.data.firstPlayer.vehicle}`, this._map, data.data.firstPlayer.shellType); // "player_ifv"
-
+            this._player2Data = data.data.secondPlayer;
             const player2 = this._map.getPlayer(2);
             position = {x: player2.x, y: player2.y};
-            this._player2 = new Player2(this, position, "objects", `player_${data.data.secondPlayer.vehicle}`, this._map, data.data.secondPlayer.shellType); // "player_ifv"
-        } else {
-            const player = this._map.getPlayer(1);
-            const position: StartPosition = {x: player.x, y: player.y};
-            this._player1 = new Player(this, position, "objects", `player_${data.data.firstPlayer.vehicle}`, this._map, data.data.firstPlayer.shellType); // "player_ifv"
+            this._player2 = new Player2(this, position, "objects", `player_${this._player2Data.vehicle}`, this._map, this._player2Data.shellType, this._player2Data.experience);
+            this._enemiesArray.forEach((item: number, _, array) => array.push(item)); // if there are two players -> twice enemies
+            this._maxEnemies = 10;
+            // create exp level 2 player
+            this.showSecondPlayerExperience(width);
         }
-        
-        // add all enemies 1 - enemy BTR, 2 - enemy BMP, 3 - enemy tank, count reverse! number of bases on each level is different!!!
-        this._enemies = new GroupOfEnemies(this.physics.world, this, this._map, [3, 3, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1], 4, this._player1, this._player2);
+        this._enemiesCounter = this._enemiesArray.length;
+        this._enemies = new GroupOfEnemies(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 4, this._player1, this._player2);
+        this._enemiesText = createLevelText(this, 15, 30, `Enemies: ${this._enemiesCounter}`, this._style);
         this.handleCollisions();
-        this._map.createTreesLayer(); // make player and enemies under trees
-        
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels); // set map`s bounds as camera`s bounds
         this.cameras.main.startFollow(this._player1); // set camera to center on the player`s tank
+    }
+
+    private showFirstPlayerExperience(width: number): void {
+        // createLevelText(this, window.innerWidth - 80, 30, "1st", this._style);
+        createLevelText(this, width - 80, 30, "1st", this._style);
+        const rank: string = getPlayersRank(this._player1Data.experience);
+        // const sprite: Phaser.GameObjects.Sprite = this.add.sprite(window.innerWidth - 40, 140, "objects", rank);
+        const sprite: Phaser.GameObjects.Sprite = this.add.sprite(width - 40, 140, "objects", rank);
+        sprite.depth = 10;
+    }
+
+    private showSecondPlayerExperience(width: number): void {
+        createLevelText(this, window.innerWidth - 90, 200, "2nd", this._style);
+        const rank: string = getPlayersRank(this._player2Data.experience);
+        const sprite: Phaser.GameObjects.Sprite = this.add.sprite(window.innerWidth - 40, 310, "objects", rank);
+        sprite.depth = 10;
     }
 
     private handleCollisions(): void {
@@ -60,7 +88,28 @@ export default class Level_1 extends Phaser.Scene {
         BangAnimation.generateBang(this, position);
         if (enemy.destroyEnemy(shell)) {
             --this._enemies.counter;
+            --this._enemiesCounter;
+            this._enemiesText.setText(`Enemies: ${this._enemiesCounter}`);
         }
+        if (this._enemies.counter <= 0 && (this._player1 || this._player2)) {
+            // create LevelData and pass it to the next scene
+            const levelData: LevelData = {
+                firstPlayer: {
+                    vehicle: this._player1Data.vehicle,
+                    shellType: this._player1Data.shellType,
+                    experience: this._player1.experience // calculate player`s experience!!!
+                },
+                secondPlayer: null
+            };
+            if (this._player2) {
+                levelData.secondPlayer.vehicle = this._player2Data.vehicle;
+                levelData.secondPlayer.shellType = this._player2Data.shellType;
+                levelData.secondPlayer.experience = this._player2.experience; // calculate player`s experience!!!
+            }
+            
+            // level is finished
+        }
+
         // if (enemy instanceof Radar) {
         //     this._radar.destroy();
         // } else if (enemy.frame.name === "platform") {

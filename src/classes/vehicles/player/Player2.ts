@@ -4,8 +4,9 @@ import Player from "./Player";
 
 export default class Player2 extends Player {
     private _controls = null;
-    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, shellTexture: string) {
-        super(scene, position, atlasName, textureName, map, shellTexture);
+    public id: string = "P2";
+    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, shellTexture: string, experience: number) {
+        super(scene, position, atlasName, textureName, map, shellTexture, experience);
         this._controls = this._scene.input.keyboard.addKeys({"up": Phaser.Input.Keyboard.KeyCodes.W, "down": Phaser.Input.Keyboard.KeyCodes.S, "left": Phaser.Input.Keyboard.KeyCodes.A, "right": Phaser.Input.Keyboard.KeyCodes.D});
         this._fire = this._scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     }

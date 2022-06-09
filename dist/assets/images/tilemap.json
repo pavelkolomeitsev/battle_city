@@ -481,7 +481,7 @@
                          "visible":true,
                          "width":28,
                          "x":835.333,
-                         "y":348.667
+                         "y":373.667
                         }, 
                         {
                          "gid":59,
@@ -504,8 +504,8 @@
                          "type":"",
                          "visible":true,
                          "width":28,
-                         "x":1190,
-                         "y":414
+                         "x":1138,
+                         "y":419
                         }, 
                         {
                          "gid":59,
@@ -600,8 +600,8 @@
                          "type":"",
                          "visible":true,
                          "width":28,
-                         "x":882,
-                         "y":434
+                         "x":1053,
+                         "y":321
                         }, 
                         {
                          "gid":59,
@@ -683,8 +683,8 @@
                          "type":"",
                          "visible":true,
                          "width":117,
-                         "x":936.667,
-                         "y":436.333
+                         "x":904.000666666667,
+                         "y":200.666333333333
                         }, 
                         {
                          "gid":94,
@@ -719,8 +719,8 @@
                          "type":"",
                          "visible":true,
                          "width":124,
-                         "x":930,
-                         "y":762
+                         "x":1060,
+                         "y":702
                         }, 
                         {
                          "gid":93,
@@ -731,8 +731,8 @@
                          "type":"",
                          "visible":true,
                          "width":54,
-                         "x":784.333,
-                         "y":788.333
+                         "x":749.333,
+                         "y":827.333
                         }, 
                         {
                          "gid":95,
@@ -743,8 +743,8 @@
                          "type":"",
                          "visible":true,
                          "width":40,
-                         "x":1152.33,
-                         "y":822.667
+                         "x":908.33,
+                         "y":723.667
                         }, 
                         {
                          "gid":93,
@@ -2016,7 +2016,7 @@
                          "type":"",
                          "visible":true,
                          "width":0,
-                         "x":996,
+                         "x":1105,
                          "y":36
                         }],
                  "opacity":1,
@@ -2039,8 +2039,8 @@
                          "type":"",
                          "visible":true,
                          "width":0,
-                         "x":895.334,
-                         "y":894
+                         "x":1123.33,
+                         "y":895
                         }, 
                         {
                          "height":0,
@@ -2051,8 +2051,8 @@
                          "type":"",
                          "visible":true,
                          "width":0,
-                         "x":1088,
-                         "y":896
+                         "x":931,
+                         "y":895
                         }],
                  "opacity":1,
                  "type":"objectgroup",
@@ -2086,39 +2086,9 @@
          "margin":0,
          "name":"objects",
          "spacing":0,
-         "tilecount":55,
+         "tilecount":44,
          "tileheight":101,
          "tiles":[
-                {
-                 "id":51,
-                 "image":"objects\/bulletDark1.png",
-                 "imageheight":10,
-                 "imagewidth":4
-                }, 
-                {
-                 "id":52,
-                 "image":"objects\/bulletDark2.png",
-                 "imageheight":13,
-                 "imagewidth":6
-                }, 
-                {
-                 "id":53,
-                 "image":"objects\/bulletDark3.png",
-                 "imageheight":16,
-                 "imagewidth":8
-                }, 
-                {
-                 "id":54,
-                 "image":"objects\/bulletRed1.png",
-                 "imageheight":14,
-                 "imagewidth":8
-                }, 
-                {
-                 "id":55,
-                 "image":"objects\/bulletRed2.png",
-                 "imageheight":14,
-                 "imagewidth":6
-                }, 
                 {
                  "id":56,
                  "image":"objects\/command_base_ru.png",
@@ -2180,36 +2150,6 @@
                  "imagewidth":42
                 }, 
                 {
-                 "id":66,
-                 "image":"objects\/explosion1.png",
-                 "imageheight":60,
-                 "imagewidth":60
-                }, 
-                {
-                 "id":67,
-                 "image":"objects\/explosion2.png",
-                 "imageheight":56,
-                 "imagewidth":57
-                }, 
-                {
-                 "id":68,
-                 "image":"objects\/explosion3.png",
-                 "imageheight":63,
-                 "imagewidth":64
-                }, 
-                {
-                 "id":69,
-                 "image":"objects\/explosion4.png",
-                 "imageheight":45,
-                 "imagewidth":46
-                }, 
-                {
-                 "id":70,
-                 "image":"objects\/explosion5.png",
-                 "imageheight":52,
-                 "imagewidth":53
-                }, 
-                {
                  "id":71,
                  "image":"objects\/fenceRed.png",
                  "imageheight":16,
@@ -2268,8 +2208,7 @@
                  "image":"objects\/platform1.png",
                  "imageheight":64,
                  "imagewidth":64
-                },
-            
+                }, 
                 {
                  "id":81,
                  "image":"objects\/platform2.png",
@@ -2329,13 +2268,8 @@
                  "image":"objects\/player_tank2.png",
                  "imageheight":68,
                  "imagewidth":46
-                }, 
-                {
-                 "id":91,
-                 "image":"objects\/sparkle1.png",
-                 "imageheight":27,
-                 "imagewidth":29
-                }, 
+                },
+            
                 {
                  "id":92,
                  "image":"objects\/stone_big.png",
