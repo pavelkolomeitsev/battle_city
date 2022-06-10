@@ -2,7 +2,7 @@ import BangAnimation from "../classes/animation/BangAnimation";
 import Map from "../classes/Map";
 import Player from "../classes/vehicles/player/Player";
 import Shell from "../classes/shells/Shell";
-import { BANG_ANIMATION, createLevelText, createText, getPlayersRank, handleDirection, LevelData, SPARKLE_ANIMATION, StartPosition } from "../utils/utils";
+import { createLevelText, getPlayersRank, handleDirection, LevelData, StartPosition } from "../utils/utils";
 import GroupOfEnemies from "../classes/vehicles/enemies/GroupOfEnemies";
 import EnemyVehicle from "../classes/vehicles/enemies/EnemyVehicle";
 import Player2 from "../classes/vehicles/player/Player2";
@@ -24,14 +24,13 @@ export default class Level_1 extends Phaser.Scene {
 
     protected preload(): void {
         this.add.sprite(0, 0, "background").setOrigin(0);
-        this.loadAnimation();
-        this._style = { fontFamily: "RussoOne", fontSize: "45px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
+        this._style = { fontFamily: "RussoOne", fontSize: "40px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
     }
 
     protected create(data: any): void {
         this._map = new Map(this, 1);
         // add all enemies 1 - enemy BTR, 2 - enemy BMP, 3 - enemy tank, count reverse! number of bases on each level is different!!!
-        this._enemiesArray = [3, 2, 3, 1, 2, 2, 3, 1, 2, 1, 1, 3, 2, 1, 1];
+        this._enemiesArray = [3, 1, 2, 2, 3, 1, 2, 1, 1, 3, 2, 1];
         // add player/s
         this._player1Data = data.data.firstPlayer;
         const player = this._map.getPlayer(1);
@@ -62,15 +61,14 @@ export default class Level_1 extends Phaser.Scene {
         // createLevelText(this, window.innerWidth - 80, 30, "1st", this._style);
         createLevelText(this, width - 80, 30, "1st", this._style);
         const rank: string = getPlayersRank(this._player1Data.experience);
-        // const sprite: Phaser.GameObjects.Sprite = this.add.sprite(window.innerWidth - 40, 140, "objects", rank);
-        const sprite: Phaser.GameObjects.Sprite = this.add.sprite(width - 40, 140, "objects", rank);
+        const sprite: Phaser.GameObjects.Sprite = this.add.sprite(width - 40, 130, "objects", rank);
         sprite.depth = 10;
     }
 
     private showSecondPlayerExperience(width: number): void {
         createLevelText(this, window.innerWidth - 90, 200, "2nd", this._style);
         const rank: string = getPlayersRank(this._player2Data.experience);
-        const sprite: Phaser.GameObjects.Sprite = this.add.sprite(window.innerWidth - 40, 310, "objects", rank);
+        const sprite: Phaser.GameObjects.Sprite = this.add.sprite(window.innerWidth - 40, 300, "objects", rank);
         sprite.depth = 10;
     }
 
@@ -143,16 +141,6 @@ export default class Level_1 extends Phaser.Scene {
         this.checkMapBounds([...this._enemies.getChildren()].concat(this._player2 ? [this._player1, this._player2] : this._player1));
     }
 
-    // private getVehicleConfig(): any {
-    //     // config for the first player
-    //     let config: any = { player1: TANKS.RED, player2: TANKS.BLUE };
-    //     // if (this._client && !this._client._isFirst) {
-    //     //     // config for the second player
-    //     //     config = { player1: CARS.BLUE, player2: CARS.RED };
-    //     // }
-    //     return config;
-    // }
-
     private checkMapBounds(vehicles: Phaser.GameObjects.GameObject[]): void {
         if (vehicles && vehicles.length > 0) {
             for (let i = 0; i < vehicles.length; i++) {
@@ -172,47 +160,5 @@ export default class Level_1 extends Phaser.Scene {
                 }
             }
         }
-    }
-
-    private loadAnimation(): void {
-        // to garantee safe and correct loading of animation
-        const bangFrames: Phaser.Types.Animations.AnimationFrame[] = this.anims.generateFrameNames("objects", {
-            prefix: "explosion",
-            start: 1,
-            end: 5
-        });
-        this.anims.create({
-            key: BANG_ANIMATION,
-            frames: bangFrames,
-            frameRate: 5,
-            duration: 800, // miliseconds
-            repeat: 0, // to play animation only once
-        });
-
-        // const frames: Phaser.Types.Animations.AnimationFrame[] = this.anims.generateFrameNames("objects", {
-        //     prefix: "platform",
-        //     start: 1,
-        //     end: 8
-        // });
-        // this.anims.create({
-        //     key: RADAR_ANIMATION,
-        //     frames: frames,
-        //     frameRate: 7,
-        //     duration: 1000, // miliseconds
-        //     repeat: -1, // to play animation infinitely
-        // });
-
-        const sparkleFrame: Phaser.Types.Animations.AnimationFrame[] = this.anims.generateFrameNames("objects", {
-            prefix: "sparkle",
-            start: 1,
-            end: 1
-        });
-        this.anims.create({
-            key: SPARKLE_ANIMATION,
-            frames: sparkleFrame,
-            frameRate: 7,
-            duration: 350, // miliseconds
-            repeat: 0, // to play animation only once
-        });
     }
 }

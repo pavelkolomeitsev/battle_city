@@ -169,6 +169,36 @@ exports["default"] = SparkleAnimation;
 
 /***/ }),
 
+/***/ "./src/classes/animation/XpointsAnimation.ts":
+/*!***************************************************!*\
+  !*** ./src/classes/animation/XpointsAnimation.ts ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+class XpointsAnimation extends Phaser.GameObjects.Sprite {
+    constructor(scene, position, textureType, spriteNumber) {
+        super(scene, position.x, position.y, textureType);
+        this._scene = null;
+        this._scene = scene;
+        this._scene.add.existing(this);
+        this.xpointsAnimation(spriteNumber);
+    }
+    xpointsAnimation(spriteNumber) {
+        this.play(`XPOINTS_${spriteNumber}_ANIMATION`);
+        this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => this.destroy(), this);
+    }
+    static generateAnimation(scene, position, spriteNumber) {
+        const texture = `${spriteNumber}xp`;
+        new XpointsAnimation(scene, position, texture, spriteNumber);
+    }
+}
+exports["default"] = XpointsAnimation;
+
+
+/***/ }),
+
 /***/ "./src/classes/shells/GroupOfShells.ts":
 /*!*********************************************!*\
   !*** ./src/classes/shells/GroupOfShells.ts ***!
@@ -367,6 +397,7 @@ const BangAnimation_1 = __importDefault(__webpack_require__(/*! ../../animation/
 const GroupOfShells_1 = __importDefault(__webpack_require__(/*! ../../shells/GroupOfShells */ "./src/classes/shells/GroupOfShells.ts"));
 const SparkleAnimation_1 = __importDefault(__webpack_require__(/*! ../../animation/SparkleAnimation */ "./src/classes/animation/SparkleAnimation.ts"));
 const Vehicle_1 = __importDefault(__webpack_require__(/*! ../Vehicle */ "./src/classes/vehicles/Vehicle.ts"));
+const XpointsAnimation_1 = __importDefault(__webpack_require__(/*! ../../animation/XpointsAnimation */ "./src/classes/animation/XpointsAnimation.ts"));
 class EnemyVehicle extends Vehicle_1.default {
     constructor(scene, position, atlasName, textureName, map, player1, player2 = null) {
         super(scene, position, atlasName, textureName, map);
@@ -427,6 +458,8 @@ class EnemyVehicle extends Vehicle_1.default {
                 else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
+                    const position = { x: shell.x, y: shell.y };
+                    XpointsAnimation_1.default.generateAnimation(this._scene, position, 3);
                     this.calculateExperiencePoints(id, 1.1);
                     return true;
                 }
@@ -438,6 +471,8 @@ class EnemyVehicle extends Vehicle_1.default {
                 else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
+                    const position = { x: shell.x, y: shell.y };
+                    XpointsAnimation_1.default.generateAnimation(this._scene, position, 2);
                     this.calculateExperiencePoints(id, 0.7);
                     return true;
                 }
@@ -449,6 +484,8 @@ class EnemyVehicle extends Vehicle_1.default {
                 else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
+                    const position = { x: shell.x, y: shell.y };
+                    XpointsAnimation_1.default.generateAnimation(this._scene, position, 1);
                     this.calculateExperiencePoints(id, 0.4);
                     return true;
                 }
@@ -934,12 +971,11 @@ class Level_1 extends Phaser.Scene {
     }
     preload() {
         this.add.sprite(0, 0, "background").setOrigin(0);
-        this.loadAnimation();
-        this._style = { fontFamily: "RussoOne", fontSize: "45px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
+        this._style = { fontFamily: "RussoOne", fontSize: "40px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
     }
     create(data) {
         this._map = new Map_1.default(this, 1);
-        this._enemiesArray = [3, 2, 3, 1, 2, 2, 3, 1, 2, 1, 1, 3, 2, 1, 1];
+        this._enemiesArray = [3, 1, 2, 2, 3, 1, 2, 1, 1, 3, 2, 1];
         this._player1Data = data.data.firstPlayer;
         const player = this._map.getPlayer(1);
         let position = { x: player.x, y: player.y };
@@ -966,13 +1002,13 @@ class Level_1 extends Phaser.Scene {
     showFirstPlayerExperience(width) {
         (0, utils_1.createLevelText)(this, width - 80, 30, "1st", this._style);
         const rank = (0, utils_1.getPlayersRank)(this._player1Data.experience);
-        const sprite = this.add.sprite(width - 40, 140, "objects", rank);
+        const sprite = this.add.sprite(width - 40, 130, "objects", rank);
         sprite.depth = 10;
     }
     showSecondPlayerExperience(width) {
         (0, utils_1.createLevelText)(this, window.innerWidth - 90, 200, "2nd", this._style);
         const rank = (0, utils_1.getPlayersRank)(this._player2Data.experience);
-        const sprite = this.add.sprite(window.innerWidth - 40, 310, "objects", rank);
+        const sprite = this.add.sprite(window.innerWidth - 40, 300, "objects", rank);
         sprite.depth = 10;
     }
     handleCollisions() {
@@ -989,7 +1025,6 @@ class Level_1 extends Phaser.Scene {
             this._enemiesText.setText(`Enemies: ${this._enemiesCounter}`);
         }
         if (this._enemies.counter <= 0 && (this._player1 || this._player2)) {
-            console.log("player`s experience", this._player1.experience);
             const levelData = {
                 firstPlayer: {
                     vehicle: this._player1Data.vehicle,
@@ -1039,32 +1074,6 @@ class Level_1 extends Phaser.Scene {
                 }
             }
         }
-    }
-    loadAnimation() {
-        const bangFrames = this.anims.generateFrameNames("objects", {
-            prefix: "explosion",
-            start: 1,
-            end: 5
-        });
-        this.anims.create({
-            key: utils_1.BANG_ANIMATION,
-            frames: bangFrames,
-            frameRate: 5,
-            duration: 800,
-            repeat: 0,
-        });
-        const sparkleFrame = this.anims.generateFrameNames("objects", {
-            prefix: "sparkle",
-            start: 1,
-            end: 1
-        });
-        this.anims.create({
-            key: utils_1.SPARKLE_ANIMATION,
-            frames: sparkleFrame,
-            frameRate: 7,
-            duration: 350,
-            repeat: 0,
-        });
     }
 }
 exports["default"] = Level_1;
@@ -1204,6 +1213,7 @@ exports["default"] = PostStartScene;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const LoadingBar_1 = __webpack_require__(/*! ../utils/LoadingBar */ "./src/utils/LoadingBar.ts");
+const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
 class PreloadScene extends Phaser.Scene {
     constructor() { super({ key: "preload-scene" }); }
     preload() {
@@ -1217,6 +1227,81 @@ class PreloadScene extends Phaser.Scene {
     }
     create() {
         this.scene.start("start-scene");
+        this.loadAnimation();
+    }
+    loadAnimation() {
+        const bangFrames = this.anims.generateFrameNames("objects", {
+            prefix: "explosion",
+            start: 1,
+            end: 5
+        });
+        this.anims.create({
+            key: utils_1.BANG_ANIMATION,
+            frames: bangFrames,
+            frameRate: 5,
+            duration: 800,
+            repeat: 0,
+        });
+        const frames = this.anims.generateFrameNames("objects", {
+            prefix: "platform",
+            start: 1,
+            end: 8
+        });
+        this.anims.create({
+            key: utils_1.RADAR_ANIMATION,
+            frames: frames,
+            frameRate: 7,
+            duration: 1000,
+            repeat: -1,
+        });
+        const sparkleFrame = this.anims.generateFrameNames("objects", {
+            prefix: "sparkle",
+            start: 1,
+            end: 1
+        });
+        this.anims.create({
+            key: utils_1.SPARKLE_ANIMATION,
+            frames: sparkleFrame,
+            frameRate: 7,
+            duration: 350,
+            repeat: 0,
+        });
+        const xpoints1Frame = this.anims.generateFrameNames("objects", {
+            suffix: "xp",
+            start: 1,
+            end: 1
+        });
+        this.anims.create({
+            key: utils_1.XPOINTS_1_ANIMATION,
+            frames: xpoints1Frame,
+            frameRate: 1,
+            duration: 2000,
+            repeat: 0,
+        });
+        const xpoints2Frame = this.anims.generateFrameNames("objects", {
+            suffix: "xp",
+            start: 2,
+            end: 2
+        });
+        this.anims.create({
+            key: utils_1.XPOINTS_2_ANIMATION,
+            frames: xpoints2Frame,
+            frameRate: 1,
+            duration: 2000,
+            repeat: 0,
+        });
+        const xpoints3Frame = this.anims.generateFrameNames("objects", {
+            suffix: "xp",
+            start: 3,
+            end: 3
+        });
+        this.anims.create({
+            key: utils_1.XPOINTS_3_ANIMATION,
+            frames: xpoints3Frame,
+            frameRate: 1,
+            duration: 2000,
+            repeat: 0,
+        });
     }
 }
 exports["default"] = PreloadScene;
@@ -1322,7 +1407,7 @@ exports.LoadingBar = LoadingBar;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getPlayersRank = exports.createLevelText = exports.createRectangleFrame = exports.createTextButton = exports.createText = exports.handleDirection = exports.PLAYER = exports.ENEMY = exports.DIRECTION = exports.SHOOTING_ANIMATION = exports.SPARKLE_ANIMATION = exports.RADAR_ANIMATION = exports.BANG_ANIMATION = exports.FRICTIONS = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.PLAYER_SPEED = void 0;
+exports.getPlayersRank = exports.createLevelText = exports.createRectangleFrame = exports.createTextButton = exports.createText = exports.handleDirection = exports.PLAYER = exports.ENEMY = exports.DIRECTION = exports.XPOINTS_3_ANIMATION = exports.XPOINTS_2_ANIMATION = exports.XPOINTS_1_ANIMATION = exports.SHOOTING_ANIMATION = exports.SPARKLE_ANIMATION = exports.RADAR_ANIMATION = exports.BANG_ANIMATION = exports.FRICTIONS = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.PLAYER_SPEED = void 0;
 var PLAYER_SPEED;
 (function (PLAYER_SPEED) {
     PLAYER_SPEED[PLAYER_SPEED["NONE"] = 0] = "NONE";
@@ -1353,6 +1438,9 @@ exports.BANG_ANIMATION = "BANG_ANIMATION";
 exports.RADAR_ANIMATION = "RADAR_ANIMATION";
 exports.SPARKLE_ANIMATION = "SPARKLE_ANIMATION";
 exports.SHOOTING_ANIMATION = "SHOOTING_ANIMATION";
+exports.XPOINTS_1_ANIMATION = "XPOINTS_1_ANIMATION";
+exports.XPOINTS_2_ANIMATION = "XPOINTS_2_ANIMATION";
+exports.XPOINTS_3_ANIMATION = "XPOINTS_3_ANIMATION";
 var DIRECTION;
 (function (DIRECTION) {
     DIRECTION["RIGHT"] = "RIGHT";

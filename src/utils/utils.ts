@@ -46,6 +46,9 @@ export const BANG_ANIMATION: string = "BANG_ANIMATION";
 export const RADAR_ANIMATION: string = "RADAR_ANIMATION";
 export const SPARKLE_ANIMATION: string = "SPARKLE_ANIMATION";
 export const SHOOTING_ANIMATION: string = "SHOOTING_ANIMATION";
+export const XPOINTS_1_ANIMATION: string = "XPOINTS_1_ANIMATION";
+export const XPOINTS_2_ANIMATION: string = "XPOINTS_2_ANIMATION";
+export const XPOINTS_3_ANIMATION: string = "XPOINTS_3_ANIMATION";
 
 export enum DIRECTION {
     RIGHT = "RIGHT",

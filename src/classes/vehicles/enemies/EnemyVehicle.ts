@@ -7,6 +7,7 @@ import Shell from "../../shells/Shell";
 import SparkleAnimation from "../../animation/SparkleAnimation";
 import Vehicle from "../Vehicle";
 import Player2 from "../player/Player2";
+import XpointsAnimation from "../../animation/XpointsAnimation";
 
 export default class EnemyVehicle extends Vehicle {
     private _vehicleSpeed: number = 0;
@@ -76,7 +77,8 @@ export default class EnemyVehicle extends Vehicle {
                 } else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
-                    // + experience animation!!!
+                    const position: StartPosition = { x: shell.x, y: shell.y };
+                    XpointsAnimation.generateAnimation(this._scene, position, 3);
                     this.calculateExperiencePoints(id, 1.1);
                     return true;
                 }
@@ -87,7 +89,8 @@ export default class EnemyVehicle extends Vehicle {
                 } else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
-                    // + experience animation!!!
+                    const position: StartPosition = { x: shell.x, y: shell.y };
+                    XpointsAnimation.generateAnimation(this._scene, position, 2);
                     this.calculateExperiencePoints(id, 0.7);
                     return true;
                 }       
@@ -98,7 +101,8 @@ export default class EnemyVehicle extends Vehicle {
                 } else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
                     this.destroy();
-                    // + experience animation!!!
+                    const position: StartPosition = { x: shell.x, y: shell.y };
+                    XpointsAnimation.generateAnimation(this._scene, position, 1);
                     this.calculateExperiencePoints(id, 0.4);
                     return true;
                 }       
