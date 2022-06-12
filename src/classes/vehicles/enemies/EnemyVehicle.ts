@@ -65,9 +65,7 @@ export default class EnemyVehicle extends Vehicle {
 
     public destroyEnemy(shell: Shell): boolean {
         this._armour -= shell.damage;
-
         const id: string = (shell.parentSprite as Player).id;
-
         switch (this._type) {
             case ENEMY.TANK.TYPE:
                 if ((this._armour < 150) && (this._armour >= 80)) {
@@ -79,7 +77,7 @@ export default class EnemyVehicle extends Vehicle {
                     this.destroy();
                     const position: StartPosition = { x: shell.x, y: shell.y };
                     XpointsAnimation.generateAnimation(this._scene, position, 3);
-                    this.calculateExperiencePoints(id, 1.1);
+                    this.calculateExperiencePoints(id, 1.1, ENEMY.TANK.TYPE);
                     return true;
                 }
                 break;
@@ -91,7 +89,7 @@ export default class EnemyVehicle extends Vehicle {
                     this.destroy();
                     const position: StartPosition = { x: shell.x, y: shell.y };
                     XpointsAnimation.generateAnimation(this._scene, position, 2);
-                    this.calculateExperiencePoints(id, 0.7);
+                    this.calculateExperiencePoints(id, 0.7, ENEMY.BMP.TYPE);
                     return true;
                 }       
                 break;
@@ -103,7 +101,7 @@ export default class EnemyVehicle extends Vehicle {
                     this.destroy();
                     const position: StartPosition = { x: shell.x, y: shell.y };
                     XpointsAnimation.generateAnimation(this._scene, position, 1);
-                    this.calculateExperiencePoints(id, 0.4);
+                    this.calculateExperiencePoints(id, 0.4, ENEMY.BTR.TYPE);
                     return true;
                 }       
                 break;
@@ -155,6 +153,7 @@ export default class EnemyVehicle extends Vehicle {
         if (this._groupOfShells) {
             this._groupOfShells.createFire(this);
         }
+        if (!this._player1) return;
         // if enemy comes close enough to player, it will shoot
         if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 300) && this.body) {
             this.body.stop();
@@ -199,9 +198,27 @@ export default class EnemyVehicle extends Vehicle {
         shell.setAlive(false);
     }
 
-    private calculateExperiencePoints(id: string, points: number): void {
-        if (this._player2) {
-            id === "P1" ? this._player1.experience += points : this._player2.experience += points;
-        } else this._player1.experience += points;
+    private calculateExperiencePoints(id: string, points: number, enemyType: string): void {
+        if (this._player1 && id === "P1") {
+            this._player1.experience += points;
+            this.calculateDestroyedEnemies(this._player1, enemyType);
+        } else if (this._player2 && id === "P2") {
+            this._player2.experience += points;
+            this.calculateDestroyedEnemies(this._player2, enemyType);
+        }
+    }
+
+    private calculateDestroyedEnemies(player: Player, enemyType: string): void {
+        switch (enemyType) {
+            case ENEMY.TANK.TYPE:
+                player.tanksPerLevel++;
+                break;
+            case ENEMY.BMP.TYPE:
+                player.bmpPerLevel++;
+                break;
+            case ENEMY.BTR.TYPE:
+                player.btrPerLevel++;
+                break;
+        }
     }
 }

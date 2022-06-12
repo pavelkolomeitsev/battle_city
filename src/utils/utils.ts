@@ -32,15 +32,22 @@ export type StartPosition = {
 export type LevelData = {
     nextLevelNumber: string,
     nextLevelName: string,
+    multiplayerGame: boolean,
     firstPlayer: {
         vehicle: string,
         shellType: string,
-        experience: number
+        experience: number,
+        tanksPerLevel: number,
+        bmpPerLevel: number,
+        btrPerLevel: number
     },
     secondPlayer: {
         vehicle: string,
         shellType: string,
-        experience: number
+        experience: number,
+        tanksPerLevel: number,
+        bmpPerLevel: number,
+        btrPerLevel: number
     }
 };
 

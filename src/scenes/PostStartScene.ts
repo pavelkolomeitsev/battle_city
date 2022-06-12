@@ -22,15 +22,22 @@ export default class PostStartScene extends Phaser.Scene {
         this._data = {
             nextLevelNumber: "level-1",
             nextLevelName: "Training Camp",
+            multiplayerGame: false,
             firstPlayer: {
                 vehicle: "tank",
                 shellType: "bulletRed2",
-                experience: 0
+                experience: 0,
+                tanksPerLevel: 0,
+                bmpPerLevel: 0,
+                btrPerLevel: 0
             },
             secondPlayer: {
                 vehicle: "tank",
                 shellType: "bulletRed2",
-                experience: 0
+                experience: 0,
+                tanksPerLevel: 0,
+                bmpPerLevel: 0,
+                btrPerLevel: 0
             }
         };
         this._style = { fontFamily: "RussoOne", fontSize: "55px", color: "#FFFFFF" };
@@ -55,7 +62,7 @@ export default class PostStartScene extends Phaser.Scene {
         tank.setInteractive({ useHandCursor: true });
         tank.once("pointerdown", () => {
             this._buttonClick.play();
-            this.scene.start("prelevel-scene", { data: this._data })
+            this.scene.start("prelevel-scene", { data: this._data });
         });
         const ifv: Phaser.GameObjects.Text = createText(this, window.innerWidth / 2 + 40, window.innerHeight / 2 + 50, "IFV", style);
         ifv.setInteractive({ useHandCursor: true });
@@ -68,6 +75,7 @@ export default class PostStartScene extends Phaser.Scene {
     }
 
     private twoPlayerMenu(): void {
+        this._data.multiplayerGame = true;
         createText(this, window.innerWidth / 2 - 300, 50, "Choose your vehicles", this._style);
         createText(this, window.innerWidth / 2 - 250, window.innerHeight / 2 - 170, "1st player", this._style);
         const tank1: Phaser.GameObjects.Sprite = this.add.sprite(window.innerWidth / 2 + 130, window.innerHeight / 2 - 150, "objects", "player_tank");
@@ -123,7 +131,7 @@ export default class PostStartScene extends Phaser.Scene {
         startButtonText.setInteractive({ useHandCursor: true });
         startButtonText.once("pointerdown", () => {
             this._buttonClick.play();
-            this.scene.start("prelevel-scene", { data: this._data })
+            this.scene.start("prelevel-scene", { data: this._data });
         });
     }
 }

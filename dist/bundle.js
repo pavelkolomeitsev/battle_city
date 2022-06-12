@@ -469,7 +469,7 @@ class EnemyVehicle extends Vehicle_1.default {
                     this.destroy();
                     const position = { x: shell.x, y: shell.y };
                     XpointsAnimation_1.default.generateAnimation(this._scene, position, 3);
-                    this.calculateExperiencePoints(id, 1.1);
+                    this.calculateExperiencePoints(id, 1.1, utils_1.ENEMY.TANK.TYPE);
                     return true;
                 }
                 break;
@@ -482,7 +482,7 @@ class EnemyVehicle extends Vehicle_1.default {
                     this.destroy();
                     const position = { x: shell.x, y: shell.y };
                     XpointsAnimation_1.default.generateAnimation(this._scene, position, 2);
-                    this.calculateExperiencePoints(id, 0.7);
+                    this.calculateExperiencePoints(id, 0.7, utils_1.ENEMY.BMP.TYPE);
                     return true;
                 }
                 break;
@@ -495,7 +495,7 @@ class EnemyVehicle extends Vehicle_1.default {
                     this.destroy();
                     const position = { x: shell.x, y: shell.y };
                     XpointsAnimation_1.default.generateAnimation(this._scene, position, 1);
-                    this.calculateExperiencePoints(id, 0.4);
+                    this.calculateExperiencePoints(id, 0.4, utils_1.ENEMY.BTR.TYPE);
                     return true;
                 }
                 break;
@@ -544,6 +544,8 @@ class EnemyVehicle extends Vehicle_1.default {
         if (this._groupOfShells) {
             this._groupOfShells.createFire(this);
         }
+        if (!this._player1)
+            return;
         if ((this._type !== utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 300) && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player1.x, this._player1.y);
@@ -585,12 +587,28 @@ class EnemyVehicle extends Vehicle_1.default {
         SparkleAnimation_1.default.generateBang(this._scene, position);
         shell.setAlive(false);
     }
-    calculateExperiencePoints(id, points) {
-        if (this._player2) {
-            id === "P1" ? this._player1.experience += points : this._player2.experience += points;
-        }
-        else
+    calculateExperiencePoints(id, points, enemyType) {
+        if (this._player1 && id === "P1") {
             this._player1.experience += points;
+            this.calculateDestroyedEnemies(this._player1, enemyType);
+        }
+        else if (this._player2 && id === "P2") {
+            this._player2.experience += points;
+            this.calculateDestroyedEnemies(this._player2, enemyType);
+        }
+    }
+    calculateDestroyedEnemies(player, enemyType) {
+        switch (enemyType) {
+            case utils_1.ENEMY.TANK.TYPE:
+                player.tanksPerLevel++;
+                break;
+            case utils_1.ENEMY.BMP.TYPE:
+                player.bmpPerLevel++;
+                break;
+            case utils_1.ENEMY.BTR.TYPE:
+                player.btrPerLevel++;
+                break;
+        }
     }
 }
 exports["default"] = EnemyVehicle;
@@ -702,6 +720,9 @@ class Player extends Vehicle_1.default {
         this.groupOfShells = null;
         this.id = "P1";
         this.experience = 0;
+        this.tanksPerLevel = 0;
+        this.bmpPerLevel = 0;
+        this.btrPerLevel = 0;
         this._velocity = 0;
         this._cursor = this._scene.input.keyboard.createCursorKeys();
         this._fire = this._scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.NUMPAD_ZERO);
@@ -802,6 +823,7 @@ class Player extends Vehicle_1.default {
                 this.setTexture("objects", "player_tank2");
             }
             else if (this._armour <= 0) {
+                this._scene.events.emit("first_player_dead");
                 this.destroy();
             }
         }
@@ -813,6 +835,7 @@ class Player extends Vehicle_1.default {
                 this.setTexture("objects", "player_ifv2");
             }
             else if (this._armour <= 0) {
+                this._scene.events.emit("first_player_dead");
                 this.destroy();
             }
         }
@@ -860,6 +883,33 @@ class Player2 extends Player_1.default {
             turn = utils_1.TURNS.LEFT;
         return turn;
     }
+    destroyPlayer(shell) {
+        this._armour -= shell.damage;
+        if (this._vehicleType === "player_tank") {
+            if ((this._armour < 100) && (this._armour >= 50)) {
+                this.setTexture("objects", "player_tank1");
+            }
+            else if ((this._armour < 50) && (this._armour > 0)) {
+                this.setTexture("objects", "player_tank2");
+            }
+            else if (this._armour <= 0) {
+                this._scene.events.emit("second_player_dead");
+                this.destroy();
+            }
+        }
+        else if (this._vehicleType === "player_ifv") {
+            if ((this._armour < 77) && (this._armour >= 40)) {
+                this.setTexture("objects", "player_ifv1");
+            }
+            else if ((this._armour < 40) && (this._armour > 0)) {
+                this.setTexture("objects", "player_ifv2");
+            }
+            else if (this._armour <= 0) {
+                this._scene.events.emit("second_player_dead");
+                this.destroy();
+            }
+        }
+    }
 }
 exports["default"] = Player2;
 
@@ -884,6 +934,8 @@ const Level_1_1 = __importDefault(__webpack_require__(/*! ./scenes/Level_1 */ ".
 const PostStartScene_1 = __importDefault(__webpack_require__(/*! ./scenes/PostStartScene */ "./src/scenes/PostStartScene.ts"));
 const HelpScene_1 = __importDefault(__webpack_require__(/*! ./scenes/HelpScene */ "./src/scenes/HelpScene.ts"));
 const PrelevelScene_1 = __importDefault(__webpack_require__(/*! ./scenes/PrelevelScene */ "./src/scenes/PrelevelScene.ts"));
+const PostlevelScene_1 = __importDefault(__webpack_require__(/*! ./scenes/PostlevelScene */ "./src/scenes/PostlevelScene.ts"));
+const GameOverScene_1 = __importDefault(__webpack_require__(/*! ./scenes/GameOverScene */ "./src/scenes/GameOverScene.ts"));
 const config = {
     type: Phaser.AUTO,
     width: window.innerWidth,
@@ -892,10 +944,12 @@ const config = {
         new BootScene_1.default(),
         new PreloadScene_1.default(),
         new StartScene_1.default(),
-        new PostStartScene_1.default(),
         new HelpScene_1.default(),
+        new PostStartScene_1.default(),
         new PrelevelScene_1.default(),
-        new Level_1_1.default()
+        new PostlevelScene_1.default(),
+        new Level_1_1.default(),
+        new GameOverScene_1.default()
     ],
     scale: {
         mode: Phaser.Scale.FIT,
@@ -929,6 +983,25 @@ class BootScene extends Phaser.Scene {
     }
 }
 exports["default"] = BootScene;
+
+
+/***/ }),
+
+/***/ "./src/scenes/GameOverScene.ts":
+/*!*************************************!*\
+  !*** ./src/scenes/GameOverScene.ts ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+class GameOverScene extends Phaser.Scene {
+    constructor() { super({ key: "gameover-scene" }); }
+    create() {
+        console.log("Game over scene");
+    }
+}
+exports["default"] = GameOverScene;
 
 
 /***/ }),
@@ -972,10 +1045,9 @@ class Level_1 extends Phaser.Scene {
     constructor() {
         super({ key: "level-1" });
         this._map = null;
+        this._levelData = null;
         this._player1 = null;
-        this._player1Data = null;
         this._player2 = null;
-        this._player2Data = null;
         this._enemies = null;
         this._enemiesText = null;
         this._enemiesArray = null;
@@ -989,21 +1061,20 @@ class Level_1 extends Phaser.Scene {
         this._style = { fontFamily: "RussoOne", fontSize: "40px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
         this._fightingMelody = this.sound.add("fightMelody", { volume: 0.1, loop: true });
     }
-    create(data) {
+    create({ data }) {
         this._map = new Map_1.default(this, 1);
+        this._levelData = data;
         this._enemiesArray = [3, 1, 2, 2, 3, 1, 2, 1, 1, 3, 2, 1];
-        this._player1Data = data.data.firstPlayer;
         const player = this._map.getPlayer(1);
         let position = { x: player.x, y: player.y };
-        this._player1 = new Player_1.default(this, position, "objects", `player_${this._player1Data.vehicle}`, this._map, this._player1Data.shellType, this._player1Data.experience);
+        this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
         this._maxEnemies = 6;
         const width = this.sys.game.canvas.width;
         this.showFirstPlayerExperience(width);
-        if (data.data.secondPlayer) {
-            this._player2Data = data.data.secondPlayer;
+        if (this._levelData.secondPlayer) {
             const player2 = this._map.getPlayer(2);
             position = { x: player2.x, y: player2.y };
-            this._player2 = new Player2_1.default(this, position, "objects", `player_${this._player2Data.vehicle}`, this._map, this._player2Data.shellType, this._player2Data.experience);
+            this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
             this._enemiesArray.forEach((item, _, array) => array.push(item));
             this._maxEnemies = 10;
             this.showSecondPlayerExperience(width);
@@ -1014,17 +1085,19 @@ class Level_1 extends Phaser.Scene {
         this.handleCollisions();
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
         this.cameras.main.startFollow(this._player1);
+        this.events.once("first_player_dead", this.firstPlayerDead, this);
+        this.events.once("second_player_dead", this.secondPlayerDead, this);
         this._fightingMelody.play();
     }
     showFirstPlayerExperience(width) {
         (0, utils_1.createLevelText)(this, width - 80, 30, "1st", this._style);
-        const rank = (0, utils_1.getPlayersRank)(this._player1Data.experience);
+        const rank = (0, utils_1.getPlayersRank)(this._levelData.firstPlayer.experience);
         const sprite = this.add.sprite(width - 40, 130, "objects", rank);
         sprite.depth = 10;
     }
     showSecondPlayerExperience(width) {
-        (0, utils_1.createLevelText)(this, window.innerWidth - 90, 200, "2nd", this._style);
-        const rank = (0, utils_1.getPlayersRank)(this._player2Data.experience);
+        (0, utils_1.createLevelText)(this, width - 90, 200, "2nd", this._style);
+        const rank = (0, utils_1.getPlayersRank)(this._levelData.secondPlayer.experience);
         const sprite = this.add.sprite(window.innerWidth - 40, 300, "objects", rank);
         sprite.depth = 10;
     }
@@ -1041,22 +1114,23 @@ class Level_1 extends Phaser.Scene {
             --this._enemiesCounter;
             this._enemiesText.setText(`Enemies: ${this._enemiesCounter}`);
         }
-        if (this._enemies.counter <= 0 && (this._player1 || this._player2)) {
-            const levelData = {
-                nextLevelNumber: "level-2",
-                nextLevelName: "First Blood",
-                firstPlayer: {
-                    vehicle: this._player1Data.vehicle,
-                    shellType: this._player1Data.shellType,
-                    experience: this._player1.experience
-                },
-                secondPlayer: null
-            };
-            if (this._player2) {
-                levelData.secondPlayer.vehicle = this._player2Data.vehicle;
-                levelData.secondPlayer.shellType = this._player2Data.shellType;
-                levelData.secondPlayer.experience = this._player2.experience;
+        if (this._enemiesCounter <= 0) {
+            this._levelData.nextLevelNumber = "level-2";
+            this._levelData.nextLevelName = "First Blood";
+            if (this._player1 && this._levelData.firstPlayer) {
+                this._levelData.firstPlayer.experience = this._player1.experience;
+                this._levelData.firstPlayer.tanksPerLevel = this._player1.tanksPerLevel;
+                this._levelData.firstPlayer.bmpPerLevel = this._player1.bmpPerLevel;
+                this._levelData.firstPlayer.btrPerLevel = this._player1.btrPerLevel;
             }
+            if (this._player2 && this._levelData.secondPlayer) {
+                this._levelData.secondPlayer.experience = this._player2.experience;
+                this._levelData.secondPlayer.tanksPerLevel = this._player2.tanksPerLevel;
+                this._levelData.secondPlayer.bmpPerLevel = this._player2.bmpPerLevel;
+                this._levelData.secondPlayer.btrPerLevel = this._player2.btrPerLevel;
+            }
+            this._fightingMelody.stop();
+            this.scene.start("postlevel-scene", { data: this._levelData });
         }
         shell.setAlive(false);
     }
@@ -1066,6 +1140,19 @@ class Level_1 extends Phaser.Scene {
     }
     handlePlayerCollision(gameObject, player) {
         player.body.stop();
+    }
+    firstPlayerDead() {
+        if (!this._levelData.multiplayerGame)
+            this.scene.start("gameover-scene");
+        else if (this._levelData.multiplayerGame && this._levelData.secondPlayer)
+            this._levelData.firstPlayer = null;
+        else if (this._levelData.multiplayerGame && !this._levelData.secondPlayer)
+            this.scene.start("gameover-scene");
+    }
+    secondPlayerDead() {
+        this._levelData.secondPlayer = null;
+        if (!this._levelData.firstPlayer)
+            this.scene.start("gameover-scene");
     }
     update(time, delta) {
         if (this._player1.active)
@@ -1129,15 +1216,22 @@ class PostStartScene extends Phaser.Scene {
         this._data = {
             nextLevelNumber: "level-1",
             nextLevelName: "Training Camp",
+            multiplayerGame: false,
             firstPlayer: {
                 vehicle: "tank",
                 shellType: "bulletRed2",
-                experience: 0
+                experience: 0,
+                tanksPerLevel: 0,
+                bmpPerLevel: 0,
+                btrPerLevel: 0
             },
             secondPlayer: {
                 vehicle: "tank",
                 shellType: "bulletRed2",
-                experience: 0
+                experience: 0,
+                tanksPerLevel: 0,
+                bmpPerLevel: 0,
+                btrPerLevel: 0
             }
         };
         this._style = { fontFamily: "RussoOne", fontSize: "55px", color: "#FFFFFF" };
@@ -1171,6 +1265,7 @@ class PostStartScene extends Phaser.Scene {
         });
     }
     twoPlayerMenu() {
+        this._data.multiplayerGame = true;
         (0, utils_1.createText)(this, window.innerWidth / 2 - 300, 50, "Choose your vehicles", this._style);
         (0, utils_1.createText)(this, window.innerWidth / 2 - 250, window.innerHeight / 2 - 170, "1st player", this._style);
         const tank1 = this.add.sprite(window.innerWidth / 2 + 130, window.innerHeight / 2 - 150, "objects", "player_tank");
@@ -1234,6 +1329,189 @@ exports["default"] = PostStartScene;
 
 /***/ }),
 
+/***/ "./src/scenes/PostlevelScene.ts":
+/*!**************************************!*\
+  !*** ./src/scenes/PostlevelScene.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+class PostlevelScene extends Phaser.Scene {
+    constructor() {
+        super({ key: "postlevel-scene" });
+        this._data = null;
+        this._startTimer = null;
+        this._endTimer = null;
+        this._1PlayerBtrTween = null;
+        this._1PlayerBtrText = null;
+        this._1PlayerBmpTween = null;
+        this._1PlayerBmpText = null;
+        this._1PlayerTankTween = null;
+        this._1PlayerTankText = null;
+        this._1PlayerTotalTween = null;
+        this._1PlayerTotalText = null;
+        this._1PlayerTotal = 0;
+        this._2PlayerBtrTween = null;
+        this._2PlayerBtrText = null;
+        this._2PlayerBmpTween = null;
+        this._2PlayerBmpText = null;
+        this._2PlayerTankTween = null;
+        this._2PlayerTankText = null;
+        this._2PlayerTotalTween = null;
+        this._2PlayerTotalText = null;
+        this._2PlayerTotal = 0;
+        this._header = null;
+        this._mainStyle = null;
+        this._secondaryStyle = null;
+        this._melody = null;
+        this._width = null;
+    }
+    preload() {
+        this._header = { fontFamily: "RussoOne", fontSize: "70px", color: "#00FF00" };
+        this._mainStyle = { fontFamily: "RussoOne", fontSize: "65px", color: "#00FF00" };
+        this._secondaryStyle = { fontFamily: "RussoOne", fontSize: "50px", color: "#00FF00" };
+        this._melody = this.sound.add("mainMelody", { volume: 0.4, loop: true });
+        this._width = this.sys.game.canvas.width;
+    }
+    create({ data }) {
+        this._data = data;
+        this._startTimer = this.time.addEvent({
+            delay: 800,
+            loop: false,
+            callback: this.startCountPoints,
+            callbackScope: this
+        });
+        const levelNumberText = (0, utils_1.createText)(this, 0, 150, "Level complete!", this._header);
+        levelNumberText.setX(this.sys.game.canvas.width / 2 - levelNumberText.width / 2);
+        if (this._data.firstPlayer)
+            this.firstPlayerResults();
+        if (this._data.secondPlayer)
+            this.secondPlayerResults();
+        this._melody.play();
+    }
+    startCountPoints() {
+        if (this._data.firstPlayer)
+            this._1PlayerBtrTween.resume();
+        if (this._data.secondPlayer)
+            this._2PlayerBtrTween.resume();
+        this._startTimer.remove();
+    }
+    firstPlayerResults() {
+        this._1PlayerTotal = this._data.firstPlayer.btrPerLevel * 1 + this._data.firstPlayer.bmpPerLevel * 2 + this._data.firstPlayer.tanksPerLevel * 3;
+        const header = (0, utils_1.createText)(this, 250, 250, "1st player", this._mainStyle);
+        this._1PlayerBtrText = (0, utils_1.createText)(this, 250, 330, `BTRs: ${this._data.firstPlayer.btrPerLevel} × 1xp = 0xp`, this._secondaryStyle);
+        this._1PlayerBmpText = (0, utils_1.createText)(this, 250, 410, `BMPs: ${this._data.firstPlayer.bmpPerLevel} × 2xp = 0xp`, this._secondaryStyle);
+        this._1PlayerTankText = (0, utils_1.createText)(this, 250, 490, `Tanks: ${this._data.firstPlayer.tanksPerLevel} × 3xp = 0xp`, this._secondaryStyle);
+        const dash = (0, utils_1.createText)(this, 250, 510, "_____________________", this._secondaryStyle);
+        this._1PlayerTotalText = (0, utils_1.createText)(this, 250, 580, `Total: 0xp`, this._secondaryStyle);
+        header.setX(this._1PlayerTankText.width / 3);
+        this._1PlayerBtrText.setX(this._1PlayerTankText.width / 3);
+        this._1PlayerBmpText.setX(this._1PlayerTankText.width / 3);
+        this._1PlayerTankText.setX(this._1PlayerTankText.width / 3);
+        dash.setX(this._1PlayerTankText.width / 3);
+        this._1PlayerTotalText.setX(this._1PlayerTankText.width / 3);
+        this._1PlayerBtrTween = this.tweens.addCounter({
+            from: 0,
+            to: this._data.firstPlayer.btrPerLevel * 1,
+            duration: 1000,
+            paused: true,
+            onComplete: () => this._1PlayerBmpTween.resume()
+        });
+        this._1PlayerBmpTween = this.tweens.addCounter({
+            from: 0,
+            to: this._data.firstPlayer.bmpPerLevel * 2,
+            duration: 1000,
+            paused: true,
+            onComplete: () => this._1PlayerTankTween.resume()
+        });
+        this._1PlayerTankTween = this.tweens.addCounter({
+            from: 0,
+            to: this._data.firstPlayer.tanksPerLevel * 3,
+            duration: 1000,
+            paused: true,
+            onComplete: () => this._1PlayerTotalTween.resume()
+        });
+        this._1PlayerTotalTween = this.tweens.addCounter({
+            from: 0,
+            to: this._1PlayerTotal,
+            duration: 1500,
+            paused: true,
+            onComplete: () => this.pauseBeforeCloseScene()
+        });
+    }
+    secondPlayerResults() {
+        this._2PlayerTotal = this._data.secondPlayer.btrPerLevel * 1 + this._data.secondPlayer.bmpPerLevel * 2 + this._data.secondPlayer.tanksPerLevel * 3;
+        const header = (0, utils_1.createText)(this, this._width - 750, 250, "2nd player", this._mainStyle);
+        this._2PlayerBtrText = (0, utils_1.createText)(this, this._width - 750, 330, `BTRs: ${this._data.secondPlayer.btrPerLevel} × 1xp = 0xp`, this._secondaryStyle);
+        this._2PlayerBmpText = (0, utils_1.createText)(this, this._width - 750, 410, `BMPs: ${this._data.secondPlayer.bmpPerLevel} × 2xp = 0xp`, this._secondaryStyle);
+        this._2PlayerTankText = (0, utils_1.createText)(this, this._width - 750, 490, `Tanks: ${this._data.secondPlayer.tanksPerLevel} × 3xp = 0xp`, this._secondaryStyle);
+        const dash = (0, utils_1.createText)(this, this._width - 750, 510, "_____________________", this._secondaryStyle);
+        this._2PlayerTotalText = (0, utils_1.createText)(this, this._width - 750, 580, `Total: 0xp`, this._secondaryStyle);
+        header.setX(this._width - this._2PlayerTankText.width - this._2PlayerTankText.width / 3);
+        this._2PlayerBtrText.setX(this._width - this._2PlayerTankText.width - this._2PlayerTankText.width / 3);
+        this._2PlayerBmpText.setX(this._width - this._2PlayerTankText.width - this._2PlayerTankText.width / 3);
+        this._2PlayerTankText.setX(this._width - this._2PlayerTankText.width - this._2PlayerTankText.width / 3);
+        dash.setX(this._width - this._2PlayerTankText.width - this._2PlayerTankText.width / 3);
+        this._2PlayerTotalText.setX(this._width - this._2PlayerTankText.width - this._2PlayerTankText.width / 3);
+        this._2PlayerBtrTween = this.tweens.addCounter({
+            from: 0,
+            to: this._data.secondPlayer.btrPerLevel * 1,
+            duration: 1000,
+            paused: true,
+            onComplete: () => this._2PlayerBmpTween.resume()
+        });
+        this._2PlayerBmpTween = this.tweens.addCounter({
+            from: 0,
+            to: this._data.secondPlayer.bmpPerLevel * 2,
+            duration: 1000,
+            paused: true,
+            onComplete: () => this._2PlayerTankTween.resume()
+        });
+        this._2PlayerTankTween = this.tweens.addCounter({
+            from: 0,
+            to: this._data.secondPlayer.tanksPerLevel * 3,
+            duration: 1000,
+            paused: true,
+            onComplete: () => this._2PlayerTotalTween.resume()
+        });
+        this._2PlayerTotalTween = this.tweens.addCounter({
+            from: 0,
+            to: this._2PlayerTotal,
+            duration: 1500,
+            paused: true,
+            onComplete: this._data.firstPlayer ? () => { } : () => this.pauseBeforeCloseScene()
+        });
+    }
+    pauseBeforeCloseScene() {
+        this._endTimer = this.time.delayedCall(2000, this.startNextLevel, null, this);
+    }
+    startNextLevel() {
+        this._endTimer.remove();
+        this._melody.stop();
+        this.scene.start("prelevel-scene", { data: this._data });
+    }
+    update() {
+        if (this._data.firstPlayer) {
+            this._1PlayerBtrText.setText(`BTRs: ${this._data.firstPlayer.btrPerLevel} × 1xp = ${this._1PlayerBtrTween.getValue().toFixed(0)}xp`);
+            this._1PlayerBmpText.setText(`BMPs: ${this._data.firstPlayer.bmpPerLevel} × 2xp = ${this._1PlayerBmpTween.getValue().toFixed(0)}xp`);
+            this._1PlayerTankText.setText(`Tanks: ${this._data.firstPlayer.tanksPerLevel} × 3xp = ${this._1PlayerTankTween.getValue().toFixed(0)}xp`);
+            this._1PlayerTotalText.setText(`Total: ${this._1PlayerTotalTween.getValue().toFixed(0)}xp`);
+        }
+        if (this._data.secondPlayer) {
+            this._2PlayerBtrText.setText(`BTRs: ${this._data.secondPlayer.btrPerLevel} × 1xp = ${this._2PlayerBtrTween.getValue().toFixed(0)}xp`);
+            this._2PlayerBmpText.setText(`BMPs: ${this._data.secondPlayer.bmpPerLevel} × 2xp = ${this._2PlayerBmpTween.getValue().toFixed(0)}xp`);
+            this._2PlayerTankText.setText(`Tanks: ${this._data.secondPlayer.tanksPerLevel} × 3xp = ${this._2PlayerTankTween.getValue().toFixed(0)}xp`);
+            this._2PlayerTotalText.setText(`Total: ${this._2PlayerTotalTween.getValue().toFixed(0)}xp`);
+        }
+    }
+}
+exports["default"] = PostlevelScene;
+
+
+/***/ }),
+
 /***/ "./src/scenes/PrelevelScene.ts":
 /*!*************************************!*\
   !*** ./src/scenes/PrelevelScene.ts ***!
@@ -1258,13 +1536,13 @@ class PrelevelScene extends Phaser.Scene {
         this._levelNameStyle = { fontFamily: "RussoOne", fontSize: "80px", color: "#E62B0D" };
         this._melody = this.sound.add('prelevelMelody');
     }
-    create(data) {
-        this._data = data.data;
-        let levelNumber = data.data.nextLevelNumber;
+    create({ data }) {
+        this._data = data;
+        let levelNumber = this._data.nextLevelNumber;
         levelNumber = levelNumber.replace("-", " ");
         const levelNumberText = (0, utils_1.createText)(this, 0, 300, levelNumber, this._levelNumberStyle);
         levelNumberText.setX(this.sys.game.canvas.width / 2 - levelNumberText.width / 2);
-        let levelName = data.data.nextLevelName;
+        let levelName = this._data.nextLevelName;
         const levelNameText = (0, utils_1.createText)(this, 0, 400, levelName, this._levelNameStyle);
         levelNameText.setX(this.sys.game.canvas.width / 2 - levelNameText.width / 2);
         this._timer1 = this.time.addEvent({
@@ -1285,8 +1563,9 @@ class PrelevelScene extends Phaser.Scene {
         this._timer1.remove();
     }
     startNextLevel() {
-        this.scene.start(this._data.nextLevelNumber, { data: this._data });
         this._timer2.remove();
+        this._melody.stop();
+        this.scene.start(this._data.nextLevelNumber, { data: this._data });
     }
 }
 exports["default"] = PrelevelScene;
@@ -1426,7 +1705,7 @@ class StartScene extends Phaser.Scene {
         const sprite = this.add.sprite(0, 0, "logo").setOrigin(0);
         sprite.setX(window.innerWidth / 2 - sprite.width / 2);
         sprite.setY(window.innerHeight / 2 - sprite.height / 2 - 200);
-        this._mainMelody = this.sound.add("mainMelody", { volume: 0.5, loop: true });
+        this._mainMelody = this.sound.add("mainMelody", { volume: 0.4, loop: true });
         this._buttonClick = this.sound.add("click");
     }
     create() {

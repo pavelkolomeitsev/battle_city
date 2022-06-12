@@ -1,4 +1,4 @@
-import { createText, createTextButton } from "../utils/utils";
+import { createTextButton } from "../utils/utils";
 
 export default class StartScene extends Phaser.Scene {
     private _style: Phaser.Types.GameObjects.Text.TextStyle;
@@ -17,7 +17,7 @@ export default class StartScene extends Phaser.Scene {
         const sprite: Phaser.GameObjects.Sprite = this.add.sprite(0, 0, "logo").setOrigin(0);
         sprite.setX(window.innerWidth / 2 - sprite.width / 2);
         sprite.setY(window.innerHeight / 2 - sprite.height / 2 - 200);
-        this._mainMelody = this.sound.add("mainMelody", {volume: 0.5, loop: true});
+        this._mainMelody = this.sound.add("mainMelody", {volume: 0.4, loop: true});
         this._buttonClick = this.sound.add("click");
     }
 

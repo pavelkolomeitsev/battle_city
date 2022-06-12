@@ -5,6 +5,8 @@ import Level_1 from "./scenes/Level_1";
 import PostStartScene from "./scenes/PostStartScene";
 import HelpScene from "./scenes/HelpScene";
 import PrelevelScene from "./scenes/PrelevelScene";
+import PostlevelScene from "./scenes/PostlevelScene";
+import GameOverScene from "./scenes/GameOverScene";
 
 const config = {
     type: Phaser.AUTO,
@@ -14,10 +16,12 @@ const config = {
         new BootScene(),
         new PreloadScene(),
         new StartScene(),
-        new PostStartScene(),
         new HelpScene(),
+        new PostStartScene(),
         new PrelevelScene(),
-        new Level_1()
+        new PostlevelScene(),
+        new Level_1(),
+        new GameOverScene()
     ],
     scale: {
         mode: Phaser.Scale.FIT, // auto scaling of all sprites
@@ -26,11 +30,6 @@ const config = {
     physics: {
         default: "arcade",
         arcade: { debug: false} // if true -> shows objects` frames
-        // default: "matter",
-        // matter: {
-        //     debug: false,
-        //     gravity: { x: 0, y: 0 }
-        // }
     }
 };
 

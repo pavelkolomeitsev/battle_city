@@ -16,6 +16,9 @@ export default class Player extends Vehicle {
     public groupOfShells: GroupOfShells = null;
     public id: string = "P1";
     public experience: number = 0;
+    public tanksPerLevel: number = 0;
+    public bmpPerLevel: number = 0;
+    public btrPerLevel: number = 0;
 
     constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, shellTexture: string, experience: number) {
         super(scene, position, atlasName, textureName, map);
@@ -144,6 +147,7 @@ export default class Player extends Vehicle {
             } else if ((this._armour < 50) && (this._armour > 0)) {
                 this.setTexture("objects", "player_tank2");
             } else if (this._armour <= 0) {
+                this._scene.events.emit("first_player_dead");
                 this.destroy();
             }
         } else if (this._vehicleType === "player_ifv") {
@@ -152,6 +156,7 @@ export default class Player extends Vehicle {
             } else if ((this._armour < 40) && (this._armour > 0)) {
                 this.setTexture("objects", "player_ifv2");
             } else if (this._armour <= 0) {
+                this._scene.events.emit("first_player_dead");
                 this.destroy();
             }
         }

@@ -1,5 +1,6 @@
 import { PLAYER, PLAYER_SPEED, StartPosition, TURNS } from "../../../utils/utils";
 import Map from "../../Map";
+import Shell from "../../shells/Shell";
 import Player from "./Player";
 
 export default class Player2 extends Player {
@@ -27,5 +28,28 @@ export default class Player2 extends Player {
         else if (this._controls.left.isDown) turn = TURNS.LEFT;
         
         return turn;
+    }
+
+    public destroyPlayer(shell: Shell): void {
+        this._armour -= shell.damage;
+        if (this._vehicleType === "player_tank") {
+            if ((this._armour < 100) && (this._armour >= 50)) {
+                this.setTexture("objects", "player_tank1");
+            } else if ((this._armour < 50) && (this._armour > 0)) {
+                this.setTexture("objects", "player_tank2");
+            } else if (this._armour <= 0) {
+                this._scene.events.emit("second_player_dead");
+                this.destroy();
+            }
+        } else if (this._vehicleType === "player_ifv") {
+            if ((this._armour < 77) && (this._armour >= 40)) {
+                this.setTexture("objects", "player_ifv1");
+            } else if ((this._armour < 40) && (this._armour > 0)) {
+                this.setTexture("objects", "player_ifv2");
+            } else if (this._armour <= 0) {
+                this._scene.events.emit("second_player_dead");
+                this.destroy();
+            }
+        }
     }
 }

@@ -16,13 +16,13 @@ export default class PrelevelScene extends Phaser.Scene {
         this._melody = this.sound.add('prelevelMelody');
     }
 
-    protected create(data: any): void {
-        this._data = data.data;
-        let levelNumber: string = data.data.nextLevelNumber;
+    protected create({data}): void {
+        this._data = data;
+        let levelNumber: string = this._data.nextLevelNumber;
         levelNumber = levelNumber.replace("-", " ");
         const levelNumberText: Phaser.GameObjects.Text = createText(this, 0, 300, levelNumber, this._levelNumberStyle);
         levelNumberText.setX(this.sys.game.canvas.width / 2 - levelNumberText.width / 2);
-        let levelName: string = data.data.nextLevelName;
+        let levelName: string = this._data.nextLevelName;
         const levelNameText: Phaser.GameObjects.Text = createText(this, 0, 400, levelName, this._levelNameStyle);
         levelNameText.setX(this.sys.game.canvas.width / 2 - levelNameText.width / 2);
         this._timer1 = this.time.addEvent({ // play melody in 0.4 sec
@@ -45,7 +45,8 @@ export default class PrelevelScene extends Phaser.Scene {
     }
 
     private startNextLevel(): void {
-        this.scene.start(this._data.nextLevelNumber, { data: this._data });
         this._timer2.remove();
+        this._melody.stop();
+        this.scene.start(this._data.nextLevelNumber, { data: this._data });
     }
 }
