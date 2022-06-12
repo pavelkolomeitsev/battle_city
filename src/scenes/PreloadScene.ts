@@ -14,6 +14,14 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.spritesheet("tileset", "assets/images/tilemap.png", { frameWidth: 64, frameHeight: 64, margin: 0, spacing: 0 });
         this.load.tilemapTiledJSON("tilemap", "assets/images/tilemap.json");
         this.load.atlas("objects", "assets/images/objects.png", "assets/images/objects.json");
+
+        this.load.audio("prelevelMelody", "assets/sounds/prelevelMelody.mp3");
+        this.load.audio("mainMelody", "assets/sounds/mainMelody.mp3");
+        this.load.audio("fightMelody", "assets/sounds/fightMelody.mp3");
+        this.load.audio("playerIfvShooting", "assets/sounds/playerIfvShooting.mp3");
+        this.load.audio("playerTankShooting", "assets/sounds/playerTankShooting.mp3");
+        this.load.audio("simpleExplosion", "assets/sounds/simpleExplosion.mp3");
+        this.load.audio("click", "assets/sounds/click.mp3");
     }
 
     protected create(): void {

@@ -30,6 +30,8 @@ export type StartPosition = {
 };
 
 export type LevelData = {
+    nextLevelNumber: string,
+    nextLevelName: string,
     firstPlayer: {
         vehicle: string,
         shellType: string,

@@ -12,6 +12,7 @@ export default class Player extends Vehicle {
     protected _fire: Phaser.Input.Keyboard.Key = null;
     protected _armour: number = 0;
     protected _vehicleType: string = "";
+    public shootingSound: Phaser.Sound.BaseSound = null;
     public groupOfShells: GroupOfShells = null;
     public id: string = "P1";
     public experience: number = 0;
@@ -35,10 +36,12 @@ export default class Player extends Vehicle {
             case "player_tank":
                 this._vehicleType = "player_tank";
                 this._armour = PLAYER.TANK.ARMOUR;
+                this.shootingSound = this._scene.sound.add('playerTankShooting', {volume: 0.5});
                 break;
             case "player_ifv":
                 this._vehicleType = "player_ifv";
                 this._armour = PLAYER.BMP.ARMOUR;
+                this.shootingSound = this._scene.sound.add('playerIfvShooting', {volume: 0.3});
                 break;
         }
     }

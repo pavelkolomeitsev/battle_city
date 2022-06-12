@@ -122,12 +122,15 @@ class BangAnimation extends Phaser.GameObjects.Sprite {
     constructor(scene, position, textureType) {
         super(scene, position.x, position.y, textureType);
         this._scene = null;
+        this._bangSound = null;
         this._scene = scene;
         this._scene.add.existing(this);
+        this._bangSound = this._scene.sound.add('simpleExplosion', { volume: 0.9 });
         this.bangAnimation();
     }
     bangAnimation() {
         this.play(utils_1.BANG_ANIMATION);
+        this._bangSound.play();
         this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => this.destroy(), this);
     }
     static generateBang(scene, position) {
@@ -279,11 +282,15 @@ exports["default"] = GroupOfShells;
 /*!*************************************!*\
   !*** ./src/classes/shells/Shell.ts ***!
   \*************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const utils_1 = __webpack_require__(/*! ../../utils/utils */ "./src/utils/utils.ts");
+const Player_1 = __importDefault(__webpack_require__(/*! ../vehicles/player/Player */ "./src/classes/vehicles/player/Player.ts"));
 class Shell extends Phaser.GameObjects.Sprite {
     constructor(scene, position, atlasName, textureName, parentSprite, map) {
         super(scene, position.x, position.y, atlasName, textureName);
@@ -345,6 +352,8 @@ class Shell extends Phaser.GameObjects.Sprite {
         vector.setToPolar(this.parentSprite.rotation + (direction * Math.PI / 2));
         this.angle = this.parentSprite.angle;
         this.body.setVelocity(vector.x * this._shellSpeed, vector.y * this._shellSpeed);
+        if (this.parentSprite instanceof Player_1.default)
+            this.parentSprite.shootingSound.play();
     }
 }
 exports["default"] = Shell;
@@ -689,6 +698,7 @@ class Player extends Vehicle_1.default {
         this._fire = null;
         this._armour = 0;
         this._vehicleType = "";
+        this.shootingSound = null;
         this.groupOfShells = null;
         this.id = "P1";
         this.experience = 0;
@@ -706,10 +716,12 @@ class Player extends Vehicle_1.default {
             case "player_tank":
                 this._vehicleType = "player_tank";
                 this._armour = utils_1.PLAYER.TANK.ARMOUR;
+                this.shootingSound = this._scene.sound.add('playerTankShooting', { volume: 0.5 });
                 break;
             case "player_ifv":
                 this._vehicleType = "player_ifv";
                 this._armour = utils_1.PLAYER.BMP.ARMOUR;
+                this.shootingSound = this._scene.sound.add('playerIfvShooting', { volume: 0.3 });
                 break;
         }
     }
@@ -871,6 +883,7 @@ const StartScene_1 = __importDefault(__webpack_require__(/*! ./scenes/StartScene
 const Level_1_1 = __importDefault(__webpack_require__(/*! ./scenes/Level_1 */ "./src/scenes/Level_1.ts"));
 const PostStartScene_1 = __importDefault(__webpack_require__(/*! ./scenes/PostStartScene */ "./src/scenes/PostStartScene.ts"));
 const HelpScene_1 = __importDefault(__webpack_require__(/*! ./scenes/HelpScene */ "./src/scenes/HelpScene.ts"));
+const PrelevelScene_1 = __importDefault(__webpack_require__(/*! ./scenes/PrelevelScene */ "./src/scenes/PrelevelScene.ts"));
 const config = {
     type: Phaser.AUTO,
     width: window.innerWidth,
@@ -881,6 +894,7 @@ const config = {
         new StartScene_1.default(),
         new PostStartScene_1.default(),
         new HelpScene_1.default(),
+        new PrelevelScene_1.default(),
         new Level_1_1.default()
     ],
     scale: {
@@ -968,10 +982,12 @@ class Level_1 extends Phaser.Scene {
         this._enemiesCounter = 0;
         this._maxEnemies = 0;
         this._style = null;
+        this._fightingMelody = null;
     }
     preload() {
         this.add.sprite(0, 0, "background").setOrigin(0);
         this._style = { fontFamily: "RussoOne", fontSize: "40px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
+        this._fightingMelody = this.sound.add("fightMelody", { volume: 0.1, loop: true });
     }
     create(data) {
         this._map = new Map_1.default(this, 1);
@@ -998,6 +1014,7 @@ class Level_1 extends Phaser.Scene {
         this.handleCollisions();
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
         this.cameras.main.startFollow(this._player1);
+        this._fightingMelody.play();
     }
     showFirstPlayerExperience(width) {
         (0, utils_1.createLevelText)(this, width - 80, 30, "1st", this._style);
@@ -1026,6 +1043,8 @@ class Level_1 extends Phaser.Scene {
         }
         if (this._enemies.counter <= 0 && (this._player1 || this._player2)) {
             const levelData = {
+                nextLevelNumber: "level-2",
+                nextLevelName: "First Blood",
                 firstPlayer: {
                     vehicle: this._player1Data.vehicle,
                     shellType: this._player1Data.shellType,
@@ -1099,13 +1118,17 @@ class PostStartScene extends Phaser.Scene {
         this._ifv1Rect = null;
         this._tank2Rect = null;
         this._ifv2Rect = null;
+        this._buttonClick = null;
     }
+    preload() { this._buttonClick = this.sound.add("click"); }
     create(data) {
         this.init();
         data.onePlayer ? this.onePlayerMenu() : this.twoPlayerMenu();
     }
     init() {
         this._data = {
+            nextLevelNumber: "level-1",
+            nextLevelName: "Training Camp",
             firstPlayer: {
                 vehicle: "tank",
                 shellType: "bulletRed2",
@@ -1135,14 +1158,16 @@ class PostStartScene extends Phaser.Scene {
         const tank = (0, utils_1.createText)(this, window.innerWidth / 2 - 125, window.innerHeight / 2 + 50, "tank", style);
         tank.setInteractive({ useHandCursor: true });
         tank.once("pointerdown", () => {
-            this.scene.start("level-1", { data: this._data });
+            this._buttonClick.play();
+            this.scene.start("prelevel-scene", { data: this._data });
         });
         const ifv = (0, utils_1.createText)(this, window.innerWidth / 2 + 40, window.innerHeight / 2 + 50, "IFV", style);
         ifv.setInteractive({ useHandCursor: true });
         ifv.once("pointerdown", () => {
+            this._buttonClick.play();
             this._data.firstPlayer.vehicle = "ifv";
             this._data.firstPlayer.shellType = "bulletSand1";
-            this.scene.start("level-1", { data: this._data });
+            this.scene.start("prelevel-scene", { data: this._data });
         });
     }
     twoPlayerMenu() {
@@ -1151,6 +1176,7 @@ class PostStartScene extends Phaser.Scene {
         const tank1 = this.add.sprite(window.innerWidth / 2 + 130, window.innerHeight / 2 - 150, "objects", "player_tank");
         tank1.setInteractive({ useHandCursor: true });
         tank1.on("pointerdown", () => {
+            this._buttonClick.play();
             if (!this._tank1Rect.visible) {
                 this._data.firstPlayer.vehicle = "tank";
                 this._data.firstPlayer.shellType = "bulletRed2";
@@ -1161,6 +1187,7 @@ class PostStartScene extends Phaser.Scene {
         const ifv1 = this.add.sprite(window.innerWidth / 2 + 230, window.innerHeight / 2 - 150, "objects", "player_ifv");
         ifv1.setInteractive({ useHandCursor: true });
         ifv1.on("pointerdown", () => {
+            this._buttonClick.play();
             if (!this._ifv1Rect.visible) {
                 this._data.firstPlayer.vehicle = "ifv";
                 this._data.firstPlayer.shellType = "bulletSand1";
@@ -1172,6 +1199,7 @@ class PostStartScene extends Phaser.Scene {
         const tank2 = this.add.sprite(window.innerWidth / 2 + 130, window.innerHeight / 2, "objects", "player_tank");
         tank2.setInteractive({ useHandCursor: true });
         tank2.on("pointerdown", () => {
+            this._buttonClick.play();
             if (!this._tank2Rect.visible) {
                 this._data.secondPlayer.vehicle = "tank";
                 this._data.secondPlayer.shellType = "bulletRed2";
@@ -1182,6 +1210,7 @@ class PostStartScene extends Phaser.Scene {
         const ifv2 = this.add.sprite(window.innerWidth / 2 + 230, window.innerHeight / 2, "objects", "player_ifv");
         ifv2.setInteractive({ useHandCursor: true });
         ifv2.on("pointerdown", () => {
+            this._buttonClick.play();
             if (!this._ifv2Rect.visible) {
                 this._data.secondPlayer.vehicle = "ifv";
                 this._data.secondPlayer.shellType = "bulletSand1";
@@ -1195,11 +1224,72 @@ class PostStartScene extends Phaser.Scene {
         const startButtonText = (0, utils_1.createText)(this, window.innerWidth / 2 - 69, window.innerHeight - 155, "Start", this._style);
         startButtonText.setInteractive({ useHandCursor: true });
         startButtonText.once("pointerdown", () => {
-            this.scene.start("level-1", { data: this._data });
+            this._buttonClick.play();
+            this.scene.start("prelevel-scene", { data: this._data });
         });
     }
 }
 exports["default"] = PostStartScene;
+
+
+/***/ }),
+
+/***/ "./src/scenes/PrelevelScene.ts":
+/*!*************************************!*\
+  !*** ./src/scenes/PrelevelScene.ts ***!
+  \*************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+class PrelevelScene extends Phaser.Scene {
+    constructor() {
+        super({ key: "prelevel-scene" });
+        this._data = null;
+        this._timer1 = null;
+        this._timer2 = null;
+        this._levelNumberStyle = null;
+        this._levelNameStyle = null;
+        this._melody = null;
+    }
+    preload() {
+        this._levelNumberStyle = { fontFamily: "RussoOne", fontSize: "60px", color: "#E62B0D" };
+        this._levelNameStyle = { fontFamily: "RussoOne", fontSize: "80px", color: "#E62B0D" };
+        this._melody = this.sound.add('prelevelMelody');
+    }
+    create(data) {
+        this._data = data.data;
+        let levelNumber = data.data.nextLevelNumber;
+        levelNumber = levelNumber.replace("-", " ");
+        const levelNumberText = (0, utils_1.createText)(this, 0, 300, levelNumber, this._levelNumberStyle);
+        levelNumberText.setX(this.sys.game.canvas.width / 2 - levelNumberText.width / 2);
+        let levelName = data.data.nextLevelName;
+        const levelNameText = (0, utils_1.createText)(this, 0, 400, levelName, this._levelNameStyle);
+        levelNameText.setX(this.sys.game.canvas.width / 2 - levelNameText.width / 2);
+        this._timer1 = this.time.addEvent({
+            delay: 400,
+            loop: false,
+            callback: this.playMelody,
+            callbackScope: this
+        });
+        this._timer2 = this.time.addEvent({
+            delay: 4200,
+            loop: false,
+            callback: this.startNextLevel,
+            callbackScope: this
+        });
+    }
+    playMelody() {
+        this._melody.play();
+        this._timer1.remove();
+    }
+    startNextLevel() {
+        this.scene.start(this._data.nextLevelNumber, { data: this._data });
+        this._timer2.remove();
+    }
+}
+exports["default"] = PrelevelScene;
 
 
 /***/ }),
@@ -1224,6 +1314,13 @@ class PreloadScene extends Phaser.Scene {
         this.load.spritesheet("tileset", "assets/images/tilemap.png", { frameWidth: 64, frameHeight: 64, margin: 0, spacing: 0 });
         this.load.tilemapTiledJSON("tilemap", "assets/images/tilemap.json");
         this.load.atlas("objects", "assets/images/objects.png", "assets/images/objects.json");
+        this.load.audio("prelevelMelody", "assets/sounds/prelevelMelody.mp3");
+        this.load.audio("mainMelody", "assets/sounds/mainMelody.mp3");
+        this.load.audio("fightMelody", "assets/sounds/fightMelody.mp3");
+        this.load.audio("playerIfvShooting", "assets/sounds/playerIfvShooting.mp3");
+        this.load.audio("playerTankShooting", "assets/sounds/playerTankShooting.mp3");
+        this.load.audio("simpleExplosion", "assets/sounds/simpleExplosion.mp3");
+        this.load.audio("click", "assets/sounds/click.mp3");
     }
     create() {
         this.scene.start("start-scene");
@@ -1321,26 +1418,37 @@ const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts"
 class StartScene extends Phaser.Scene {
     constructor() {
         super({ key: "start-scene" });
+        this._mainMelody = null;
+        this._buttonClick = null;
         this._style = { fontFamily: "RussoOne", fontSize: "55px", color: "#FFFFFF" };
     }
     preload() {
         const sprite = this.add.sprite(0, 0, "logo").setOrigin(0);
         sprite.setX(window.innerWidth / 2 - sprite.width / 2);
         sprite.setY(window.innerHeight / 2 - sprite.height / 2 - 200);
+        this._mainMelody = this.sound.add("mainMelody", { volume: 0.5, loop: true });
+        this._buttonClick = this.sound.add("click");
     }
     create() {
         this._onePlayerTextButton = (0, utils_1.createTextButton)(this, 50, "1 player", this._style);
         this._onePlayerTextButton.once("pointerdown", () => {
+            this._mainMelody.stop();
+            this._buttonClick.play();
             this.scene.start("post-start-scene", { onePlayer: true });
         });
         this._twoPlayersTextButton = (0, utils_1.createTextButton)(this, 130, "2 players", this._style, this._onePlayerTextButton.width);
         this._twoPlayersTextButton.once("pointerdown", () => {
+            this._mainMelody.stop();
+            this._buttonClick.play();
             this.scene.start("post-start-scene", { onePlayer: false });
         });
         this._help = (0, utils_1.createTextButton)(this, 210, "Help", this._style, this._onePlayerTextButton.width);
         this._help.on("pointerdown", () => {
+            this._mainMelody.stop();
+            this._buttonClick.play();
             this.scene.start("help-scene");
         });
+        this._mainMelody.play();
     }
 }
 exports["default"] = StartScene;

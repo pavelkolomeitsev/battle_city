@@ -1,5 +1,7 @@
 import { StartPosition, SPEED, ENEMY, PLAYER } from "../../utils/utils";
 import Map from "../Map";
+import Player from "../vehicles/player/Player";
+import Player2 from "../vehicles/player/Player2";
 
 export default class Shell extends Phaser.GameObjects.Sprite {
     private _scene: Phaser.Scene = null;
@@ -70,5 +72,6 @@ export default class Shell extends Phaser.GameObjects.Sprite {
         vector.setToPolar(this.parentSprite.rotation + (direction * Math.PI / 2)); // (this._tank.vehicle.rotation - Math.PI) - correct side from where shell throws, 30 - distance from tank`s core and shell
         this.angle = this.parentSprite.angle; // tank and shell sprites should be on the same direction
         this.body.setVelocity(vector.x * this._shellSpeed, vector.y * this._shellSpeed);
+        if (this.parentSprite instanceof Player) (this.parentSprite as Player).shootingSound.play();
     }
 }

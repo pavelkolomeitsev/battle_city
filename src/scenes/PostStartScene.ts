@@ -7,8 +7,11 @@ export default class PostStartScene extends Phaser.Scene {
     private _ifv1Rect: Phaser.GameObjects.Graphics = null;
     private _tank2Rect: Phaser.GameObjects.Graphics = null;
     private _ifv2Rect: Phaser.GameObjects.Graphics = null;
+    private _buttonClick: Phaser.Sound.BaseSound = null;
     
-    constructor() {super({ key: "post-start-scene" });}
+    constructor() { super({ key: "post-start-scene" }); }
+    
+    protected preload(): void {this._buttonClick = this.sound.add("click");}
 
     protected create(data: any): void {
         this.init();
@@ -17,6 +20,8 @@ export default class PostStartScene extends Phaser.Scene {
     
     private init(): void {
         this._data = {
+            nextLevelNumber: "level-1",
+            nextLevelName: "Training Camp",
             firstPlayer: {
                 vehicle: "tank",
                 shellType: "bulletRed2",
@@ -49,14 +54,16 @@ export default class PostStartScene extends Phaser.Scene {
         const tank: Phaser.GameObjects.Text = createText(this, window.innerWidth / 2 - 125, window.innerHeight / 2 + 50, "tank", style);
         tank.setInteractive({ useHandCursor: true });
         tank.once("pointerdown", () => {
-            this.scene.start("level-1", {data: this._data});
+            this._buttonClick.play();
+            this.scene.start("prelevel-scene", { data: this._data })
         });
         const ifv: Phaser.GameObjects.Text = createText(this, window.innerWidth / 2 + 40, window.innerHeight / 2 + 50, "IFV", style);
         ifv.setInteractive({ useHandCursor: true });
         ifv.once("pointerdown", () => {
+            this._buttonClick.play();
             this._data.firstPlayer.vehicle = "ifv";
-            this._data.firstPlayer.shellType = "bulletSand1"; // need to change!!!
-            this.scene.start("level-1", {data: this._data});
+            this._data.firstPlayer.shellType = "bulletSand1";
+            this.scene.start("prelevel-scene", {data: this._data});
         });
     }
 
@@ -66,6 +73,7 @@ export default class PostStartScene extends Phaser.Scene {
         const tank1: Phaser.GameObjects.Sprite = this.add.sprite(window.innerWidth / 2 + 130, window.innerHeight / 2 - 150, "objects", "player_tank");
         tank1.setInteractive({ useHandCursor: true });
         tank1.on("pointerdown", () => {
+            this._buttonClick.play();
             if (!this._tank1Rect.visible) {
                 this._data.firstPlayer.vehicle = "tank";
                 this._data.firstPlayer.shellType = "bulletRed2";
@@ -76,9 +84,10 @@ export default class PostStartScene extends Phaser.Scene {
         const ifv1: Phaser.GameObjects.Sprite = this.add.sprite(window.innerWidth / 2 + 230, window.innerHeight / 2 - 150, "objects", "player_ifv");
         ifv1.setInteractive({ useHandCursor: true });
         ifv1.on("pointerdown", () => {
+            this._buttonClick.play();
             if (!this._ifv1Rect.visible) {
                 this._data.firstPlayer.vehicle = "ifv";
-                this._data.firstPlayer.shellType = "bulletSand1"; // need to change!!!
+                this._data.firstPlayer.shellType = "bulletSand1";
                 this._ifv1Rect.visible = true;
                 this._tank1Rect.visible = false;
             }
@@ -87,6 +96,7 @@ export default class PostStartScene extends Phaser.Scene {
         const tank2: Phaser.GameObjects.Sprite = this.add.sprite(window.innerWidth / 2 + 130, window.innerHeight / 2, "objects", "player_tank");
         tank2.setInteractive({ useHandCursor: true });
         tank2.on("pointerdown", () => {
+            this._buttonClick.play();
             if (!this._tank2Rect.visible) {
                 this._data.secondPlayer.vehicle = "tank";
                 this._data.secondPlayer.shellType = "bulletRed2";
@@ -97,9 +107,10 @@ export default class PostStartScene extends Phaser.Scene {
         const ifv2: Phaser.GameObjects.Sprite = this.add.sprite(window.innerWidth / 2 + 230, window.innerHeight / 2, "objects", "player_ifv");
         ifv2.setInteractive({ useHandCursor: true });
         ifv2.on("pointerdown", () => {
+            this._buttonClick.play();
             if (!this._ifv2Rect.visible) {
                 this._data.secondPlayer.vehicle = "ifv";
-                this._data.secondPlayer.shellType = "bulletSand1"; // need to change!!!
+                this._data.secondPlayer.shellType = "bulletSand1";
                 this._ifv2Rect.visible = true;
                 this._tank2Rect.visible = false;
             }
@@ -111,7 +122,8 @@ export default class PostStartScene extends Phaser.Scene {
         const startButtonText: Phaser.GameObjects.Text = createText(this, window.innerWidth / 2 - 69, window.innerHeight - 155, "Start", this._style);
         startButtonText.setInteractive({ useHandCursor: true });
         startButtonText.once("pointerdown", () => {
-            this.scene.start("level-1", { data: this._data });
+            this._buttonClick.play();
+            this.scene.start("prelevel-scene", { data: this._data })
         });
     }
 }

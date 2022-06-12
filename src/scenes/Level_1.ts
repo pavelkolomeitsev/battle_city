@@ -19,12 +19,14 @@ export default class Level_1 extends Phaser.Scene {
     private _enemiesCounter: number = 0;
     private _maxEnemies: number = 0;
     private _style: Phaser.Types.GameObjects.Text.TextStyle = null;
+    private _fightingMelody: Phaser.Sound.BaseSound = null;
     
     constructor() {super({key: "level-1"});}
 
     protected preload(): void {
         this.add.sprite(0, 0, "background").setOrigin(0);
         this._style = { fontFamily: "RussoOne", fontSize: "40px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
+        this._fightingMelody = this.sound.add("fightMelody", {volume: 0.1, loop: true});
     }
 
     protected create(data: any): void {
@@ -55,6 +57,8 @@ export default class Level_1 extends Phaser.Scene {
         this.handleCollisions();
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels); // set map`s bounds as camera`s bounds
         this.cameras.main.startFollow(this._player1); // set camera to center on the player`s tank
+
+        this._fightingMelody.play();
     }
 
     private showFirstPlayerExperience(width: number): void {
@@ -92,6 +96,8 @@ export default class Level_1 extends Phaser.Scene {
         if (this._enemies.counter <= 0 && (this._player1 || this._player2)) {
             // create LevelData and pass it to the next scene
             const levelData: LevelData = {
+                nextLevelNumber: "level-2",
+                nextLevelName: "First Blood",
                 firstPlayer: {
                     vehicle: this._player1Data.vehicle,
                     shellType: this._player1Data.shellType,
