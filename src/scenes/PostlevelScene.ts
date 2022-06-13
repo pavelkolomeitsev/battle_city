@@ -26,6 +26,7 @@ export default class PostlevelScene extends Phaser.Scene {
     private _mainStyle: Phaser.Types.GameObjects.Text.TextStyle = null;
     private _secondaryStyle: Phaser.Types.GameObjects.Text.TextStyle = null;
     private _melody: Phaser.Sound.BaseSound = null;
+    private _coinSound: Phaser.Sound.BaseSound = null;
     private _width: number = null;
 
     constructor() { super({ key: "postlevel-scene" });}
@@ -35,6 +36,7 @@ export default class PostlevelScene extends Phaser.Scene {
         this._mainStyle = { fontFamily: "RussoOne", fontSize: "65px", color: "#00FF00" };
         this._secondaryStyle = { fontFamily: "RussoOne", fontSize: "50px", color: "#00FF00" };
         this._melody = this.sound.add("mainMelody", { volume: 0.4, loop: true });
+        this._coinSound = this.sound.add("coinSound", { volume: 1, loop: true });
         this._width = this.sys.game.canvas.width;
     }
 
@@ -61,6 +63,7 @@ export default class PostlevelScene extends Phaser.Scene {
         if (this._data.firstPlayer) this._1PlayerBtrTween.resume();
         if (this._data.secondPlayer) this._2PlayerBtrTween.resume();
         this._startTimer.remove();
+        this._coinSound.play();
     }
 
     private firstPlayerResults(): void {
@@ -154,6 +157,7 @@ export default class PostlevelScene extends Phaser.Scene {
     }
 
     private pauseBeforeCloseScene(): void {
+        this._coinSound.stop();
         this._endTimer = this.time.delayedCall(2000, this.startNextLevel, null, this)
     }
 

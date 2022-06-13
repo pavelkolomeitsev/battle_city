@@ -416,7 +416,7 @@ class EnemyVehicle extends Vehicle_1.default {
         this._timer = null;
         this._player1 = null;
         this._player2 = null;
-        this.isAppear = true;
+        this._bases = [];
         this.direction = utils_1.DIRECTION.DOWN;
         const shellType = this.setEnemiesType(textureName);
         this._groupOfShells = new GroupOfShells_1.default(this._scene.physics.world, this._scene, this._map, shellType);
@@ -426,6 +426,7 @@ class EnemyVehicle extends Vehicle_1.default {
             callback: this.changeDirection,
             callbackScope: this
         });
+        this.initBases(map);
         this._player1 = player1;
         this._player2 = player2;
         this.direction = utils_1.DIRECTION.DOWN;
@@ -453,6 +454,11 @@ class EnemyVehicle extends Vehicle_1.default {
                 return utils_1.ENEMY.TANK.SHELL_TYPE;
         }
     }
+    initBases(map) {
+        for (let i = 1; i < 4; i++) {
+            this._bases.push(map.getBasePosition(i));
+        }
+    }
     destroyEnemy(shell) {
         this._armour -= shell.damage;
         const id = shell.parentSprite.id;
@@ -466,6 +472,7 @@ class EnemyVehicle extends Vehicle_1.default {
                 }
                 else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
+                    this._timer.remove();
                     this.destroy();
                     const position = { x: shell.x, y: shell.y };
                     XpointsAnimation_1.default.generateAnimation(this._scene, position, 3);
@@ -479,6 +486,7 @@ class EnemyVehicle extends Vehicle_1.default {
                 }
                 else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
+                    this._timer.remove();
                     this.destroy();
                     const position = { x: shell.x, y: shell.y };
                     XpointsAnimation_1.default.generateAnimation(this._scene, position, 2);
@@ -492,6 +500,7 @@ class EnemyVehicle extends Vehicle_1.default {
                 }
                 else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
+                    this._timer.remove();
                     this.destroy();
                     const position = { x: shell.x, y: shell.y };
                     XpointsAnimation_1.default.generateAnimation(this._scene, position, 1);
@@ -510,8 +519,6 @@ class EnemyVehicle extends Vehicle_1.default {
     }
     changeDirection() {
         var _a;
-        if (this.isAppear)
-            this.isAppear = false;
         const [x, y, angle] = this.getVehiclesDirection();
         (_a = this.body) === null || _a === void 0 ? void 0 : _a.setVelocity(x, y);
         this.angle = angle;
@@ -538,32 +545,39 @@ class EnemyVehicle extends Vehicle_1.default {
     }
     moveOut() {
         var _a;
-        (_a = this.body) === null || _a === void 0 ? void 0 : _a.setVelocity(0, this.velocity * 1.3);
+        (_a = this.body) === null || _a === void 0 ? void 0 : _a.setVelocity(0, this.velocity * 1.5);
     }
     fire() {
         if (this._groupOfShells) {
             this._groupOfShells.createFire(this);
         }
+        this._bases.forEach((base) => {
+            var _a;
+            if ((Phaser.Math.Distance.BetweenPoints(this, base) < 80) && this.body) {
+                (_a = this.body) === null || _a === void 0 ? void 0 : _a.setVelocity(0, this.velocity * 1.5);
+                this.angle = 0;
+            }
+        });
         if (!this._player1)
             return;
-        if ((this._type !== utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 300) && this.body) {
+        if ((this._type !== utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 300) && this._player1.body && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player1.x, this._player1.y);
             this.rotation = angle - Math.PI / 2;
         }
-        else if ((this._type === utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 500) && this.body) {
+        else if ((this._type === utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 500) && this._player1.body && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player1.x, this._player1.y);
             this.rotation = angle - Math.PI / 2;
         }
         if (!this._player2)
             return;
-        if ((this._type !== utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 300) && this.body) {
+        if ((this._type !== utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 300) && this._player2.body && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
             this.rotation = angle - Math.PI / 2;
         }
-        else if ((this._type === utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 500) && this.body) {
+        else if ((this._type === utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 500) && this._player2.body && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
             this.rotation = angle - Math.PI / 2;
@@ -1050,6 +1064,8 @@ class Level_1 extends Phaser.Scene {
         this._player2 = null;
         this._enemies = null;
         this._enemiesText = null;
+        this._finishText = null;
+        this._finishTween = null;
         this._enemiesArray = null;
         this._enemiesCounter = 0;
         this._maxEnemies = 0;
@@ -1085,9 +1101,8 @@ class Level_1 extends Phaser.Scene {
         this.handleCollisions();
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
         this.cameras.main.startFollow(this._player1);
-        this.events.once("first_player_dead", this.firstPlayerDead, this);
-        this.events.once("second_player_dead", this.secondPlayerDead, this);
         this._fightingMelody.play();
+        this.createFinishText();
     }
     showFirstPlayerExperience(width) {
         (0, utils_1.createLevelText)(this, width - 80, 30, "1st", this._style);
@@ -1105,6 +1120,23 @@ class Level_1 extends Phaser.Scene {
         this.physics.add.overlap(this._enemies, this._player2 ? [this._player1.groupOfShells, this._player2.groupOfShells] : this._player1.groupOfShells, this.shellsEnemiesCollision, null, this);
         this.physics.add.collider([...this._map.explosiveObjects, ...this._map.stones].concat(this._player2 ? [this._player2, this._player1] : this._player1), this._enemies, this.handleEnemiesCollision, null, this);
         this.physics.add.collider([...this._enemies.children.getArray(), ...this._map.explosiveObjects, ...this._map.stones], this._player2 ? [this._player1, this._player2] : this._player1, this.handlePlayerCollision, null, this);
+        this.events.once("first_player_dead", this.firstPlayerDead, this);
+        this.events.once("second_player_dead", this.secondPlayerDead, this);
+    }
+    createFinishText() {
+        this._finishText = (0, utils_1.createText)(this, this.sys.game.canvas.width, this.sys.game.canvas.height + 150, "GAME OVER", { fontFamily: "RussoOne", fontSize: "90px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 });
+        this._finishText.setX(this.sys.game.canvas.width / 2 - this._finishText.width / 2);
+        this._finishText.depth = 10;
+        this._finishTween = this.tweens.add({
+            targets: this._finishText,
+            y: this.sys.game.canvas.height / 2 - 70,
+            duration: 3000,
+            paused: true,
+            onComplete: () => {
+                this._fightingMelody.stop();
+                this.scene.start("start-scene");
+            }
+        });
     }
     shellsEnemiesCollision(enemy, shell) {
         const position = { x: enemy.x, y: enemy.y };
@@ -1143,16 +1175,16 @@ class Level_1 extends Phaser.Scene {
     }
     firstPlayerDead() {
         if (!this._levelData.multiplayerGame)
-            this.scene.start("gameover-scene");
+            this._finishTween.resume();
         else if (this._levelData.multiplayerGame && this._levelData.secondPlayer)
             this._levelData.firstPlayer = null;
         else if (this._levelData.multiplayerGame && !this._levelData.secondPlayer)
-            this.scene.start("gameover-scene");
+            this._finishTween.resume();
     }
     secondPlayerDead() {
         this._levelData.secondPlayer = null;
         if (!this._levelData.firstPlayer)
-            this.scene.start("gameover-scene");
+            this._finishTween.resume();
     }
     update(time, delta) {
         if (this._player1.active)
@@ -1366,6 +1398,7 @@ class PostlevelScene extends Phaser.Scene {
         this._mainStyle = null;
         this._secondaryStyle = null;
         this._melody = null;
+        this._coinSound = null;
         this._width = null;
     }
     preload() {
@@ -1373,6 +1406,7 @@ class PostlevelScene extends Phaser.Scene {
         this._mainStyle = { fontFamily: "RussoOne", fontSize: "65px", color: "#00FF00" };
         this._secondaryStyle = { fontFamily: "RussoOne", fontSize: "50px", color: "#00FF00" };
         this._melody = this.sound.add("mainMelody", { volume: 0.4, loop: true });
+        this._coinSound = this.sound.add("coinSound", { volume: 1, loop: true });
         this._width = this.sys.game.canvas.width;
     }
     create({ data }) {
@@ -1397,6 +1431,7 @@ class PostlevelScene extends Phaser.Scene {
         if (this._data.secondPlayer)
             this._2PlayerBtrTween.resume();
         this._startTimer.remove();
+        this._coinSound.play();
     }
     firstPlayerResults() {
         this._1PlayerTotal = this._data.firstPlayer.btrPerLevel * 1 + this._data.firstPlayer.bmpPerLevel * 2 + this._data.firstPlayer.tanksPerLevel * 3;
@@ -1485,6 +1520,7 @@ class PostlevelScene extends Phaser.Scene {
         });
     }
     pauseBeforeCloseScene() {
+        this._coinSound.stop();
         this._endTimer = this.time.delayedCall(2000, this.startNextLevel, null, this);
     }
     startNextLevel() {
@@ -1600,6 +1636,7 @@ class PreloadScene extends Phaser.Scene {
         this.load.audio("playerTankShooting", "assets/sounds/playerTankShooting.mp3");
         this.load.audio("simpleExplosion", "assets/sounds/simpleExplosion.mp3");
         this.load.audio("click", "assets/sounds/click.mp3");
+        this.load.audio("coinSound", "assets/sounds/coinSound.mp3");
     }
     create() {
         this.scene.start("start-scene");

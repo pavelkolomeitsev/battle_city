@@ -17,7 +17,7 @@ export default class EnemyVehicle extends Vehicle {
     private _player1: Player = null;
     private _player2: Player2 = null;
     private _groupOfShells: GroupOfShells;
-    public isAppear: boolean = true;
+    private _bases: StartPosition[] = [];
     public direction: string = DIRECTION.DOWN;
 
     constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, player1: Player, player2: Player2 = null) {
@@ -31,7 +31,7 @@ export default class EnemyVehicle extends Vehicle {
             callback: this.changeDirection,
             callbackScope: this
         });
-
+        this.initBases(map);
         this._player1 = player1;
         this._player2 = player2;
         this.direction = DIRECTION.DOWN;
@@ -63,6 +63,12 @@ export default class EnemyVehicle extends Vehicle {
         }
     }
 
+    private initBases(map: Map): void {
+        for (let i = 1; i < 4; i++) { // there are always 3 enemies bases
+            this._bases.push(map.getBasePosition(i));
+        }
+    }
+
     public destroyEnemy(shell: Shell): boolean {
         this._armour -= shell.damage;
         const id: string = (shell.parentSprite as Player).id;
@@ -74,6 +80,7 @@ export default class EnemyVehicle extends Vehicle {
                     this.setTexture("objects", "enemy_tank2");
                 } else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
+                    this._timer.remove();
                     this.destroy();
                     const position: StartPosition = { x: shell.x, y: shell.y };
                     XpointsAnimation.generateAnimation(this._scene, position, 3);
@@ -86,6 +93,7 @@ export default class EnemyVehicle extends Vehicle {
                     this.setTexture("objects", "enemy_bmp1");
                 } else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
+                    this._timer.remove();
                     this.destroy();
                     const position: StartPosition = { x: shell.x, y: shell.y };
                     XpointsAnimation.generateAnimation(this._scene, position, 2);
@@ -98,6 +106,7 @@ export default class EnemyVehicle extends Vehicle {
                     this.setTexture("objects", "enemy_btr1");
                 } else if (this._armour <= 0) {
                     this._scene.events.off("update", this.fire, this);
+                    this._timer.remove();
                     this.destroy();
                     const position: StartPosition = { x: shell.x, y: shell.y };
                     XpointsAnimation.generateAnimation(this._scene, position, 1);
@@ -118,7 +127,6 @@ export default class EnemyVehicle extends Vehicle {
     }
 
     public changeDirection(): void {
-        if (this.isAppear) this.isAppear = false; // first time to allow enemy tank to move out
         const [x, y, angle] = this.getVehiclesDirection();
         this.body?.setVelocity(x, y); // set direction
         this.angle = angle; // set correct sprite`s angle
@@ -146,31 +154,37 @@ export default class EnemyVehicle extends Vehicle {
     }
 
     public moveOut(): void {
-        this.body?.setVelocity(0, this.velocity * 1.3); // * 1.3 - trick to run out quicker
+        this.body?.setVelocity(0, this.velocity * 1.5); // * 1.3 - trick to run out quicker
     }
 
     public fire(): void {
         if (this._groupOfShells) {
-            this._groupOfShells.createFire(this);
+            this._groupOfShells.createFire(this); // start shooting
         }
+        this._bases.forEach((base: StartPosition) => { // send enemy down if it comes close to the base
+            if ((Phaser.Math.Distance.BetweenPoints(this, base) < 80) && this.body) {
+                this.body?.setVelocity(0, this.velocity * 1.5);
+                this.angle = 0;
+            }
+        });
         if (!this._player1) return;
         // if enemy comes close enough to player, it will shoot
-        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 300) && this.body) {
+        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 300) && this._player1.body && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player1.x, this._player1.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
-        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 500) && this.body) {
+        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 500) && this._player1.body && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player1.x, this._player1.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
         }
 
         if (!this._player2) return;
-        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 300) && this.body) {
+        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 300) && this._player2.body && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
-        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 500) && this.body) {
+        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 500) && this._player2.body && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player

@@ -22,6 +22,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.audio("playerTankShooting", "assets/sounds/playerTankShooting.mp3");
         this.load.audio("simpleExplosion", "assets/sounds/simpleExplosion.mp3");
         this.load.audio("click", "assets/sounds/click.mp3");
+        this.load.audio("coinSound", "assets/sounds/coinSound.mp3");
     }
 
     protected create(): void {

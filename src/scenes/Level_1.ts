@@ -2,7 +2,7 @@ import BangAnimation from "../classes/animation/BangAnimation";
 import Map from "../classes/Map";
 import Player from "../classes/vehicles/player/Player";
 import Shell from "../classes/shells/Shell";
-import { createLevelText, getPlayersRank, handleDirection, LevelData, StartPosition } from "../utils/utils";
+import { createLevelText, createText, getPlayersRank, handleDirection, LevelData, StartPosition } from "../utils/utils";
 import GroupOfEnemies from "../classes/vehicles/enemies/GroupOfEnemies";
 import EnemyVehicle from "../classes/vehicles/enemies/EnemyVehicle";
 import Player2 from "../classes/vehicles/player/Player2";
@@ -14,6 +14,8 @@ export default class Level_1 extends Phaser.Scene {
     private _player2: Player2 = null;
     private _enemies: GroupOfEnemies = null;
     private _enemiesText: Phaser.GameObjects.Text = null;
+    private _finishText: Phaser.GameObjects.Text = null;
+    private _finishTween: Phaser.Tweens.Tween = null;
     private _enemiesArray: number[] = null;
     private _enemiesCounter: number = 0;
     private _maxEnemies: number = 0;
@@ -55,10 +57,8 @@ export default class Level_1 extends Phaser.Scene {
         this.handleCollisions();
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels); // set map`s bounds as camera`s bounds
         this.cameras.main.startFollow(this._player1); // set camera to center on the player`s tank
-
-        this.events.once("first_player_dead", this.firstPlayerDead, this);
-        this.events.once("second_player_dead", this.secondPlayerDead, this);
         this._fightingMelody.play();
+        this.createFinishText();
     }
 
     private showFirstPlayerExperience(width: number): void {
@@ -81,6 +81,24 @@ export default class Level_1 extends Phaser.Scene {
         // handle enemies vs simple collision (not move objects)                                          
         this.physics.add.collider([...this._map.explosiveObjects, ...this._map.stones].concat(this._player2 ? [this._player2, this._player1] : this._player1), this._enemies, this.handleEnemiesCollision, null, this);
         this.physics.add.collider([...this._enemies.children.getArray(), ...this._map.explosiveObjects, ...this._map.stones], this._player2 ? [this._player1, this._player2] : this._player1, this.handlePlayerCollision, null, this);
+        this.events.once("first_player_dead", this.firstPlayerDead, this);
+        this.events.once("second_player_dead", this.secondPlayerDead, this);
+    }
+
+    private createFinishText(): void {
+        this._finishText = createText(this, this.sys.game.canvas.width, this.sys.game.canvas.height + 150, "GAME OVER", { fontFamily: "RussoOne", fontSize: "90px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 });
+        this._finishText.setX(this.sys.game.canvas.width / 2 - this._finishText.width / 2);
+        this._finishText.depth = 10;
+        this._finishTween = this.tweens.add({
+            targets: this._finishText,
+            y: this.sys.game.canvas.height / 2 - 70,
+            duration: 3000,
+            paused: true,
+            onComplete: () => {
+                this._fightingMelody.stop();
+                this.scene.start("start-scene");
+            }
+        });
     }
 
     private shellsEnemiesCollision(enemy: EnemyVehicle, shell: Shell): void {
@@ -135,16 +153,16 @@ export default class Level_1 extends Phaser.Scene {
 
     private firstPlayerDead(): void {
         // if singleplayer game
-        if (!this._levelData.multiplayerGame) this.scene.start("gameover-scene");
+        if (!this._levelData.multiplayerGame) this._finishTween.resume();
         // if multiplayer game and second player is alive
         else if (this._levelData.multiplayerGame && this._levelData.secondPlayer) this._levelData.firstPlayer = null;
         // if multiplayer game and second player is dead
-        else if (this._levelData.multiplayerGame && !this._levelData.secondPlayer) this.scene.start("gameover-scene");
+        else if (this._levelData.multiplayerGame && !this._levelData.secondPlayer) this._finishTween.resume();
     }
 
     private secondPlayerDead(): void {
         this._levelData.secondPlayer = null;
-        if (!this._levelData.firstPlayer) this.scene.start("gameover-scene");
+        if (!this._levelData.firstPlayer) this._finishTween.resume();
     }
 
     // see docs -> Scene.Methods
