@@ -7,6 +7,7 @@ import HelpScene from "./scenes/HelpScene";
 import PrelevelScene from "./scenes/PrelevelScene";
 import PostlevelScene from "./scenes/PostlevelScene";
 import GameOverScene from "./scenes/GameOverScene";
+import Level_2 from "./scenes/Level_2";
 
 const config = {
     type: Phaser.AUTO,
@@ -21,6 +22,7 @@ const config = {
         new PrelevelScene(),
         new PostlevelScene(),
         new Level_1(),
+        new Level_2(),
         new GameOverScene()
     ],
     scale: {

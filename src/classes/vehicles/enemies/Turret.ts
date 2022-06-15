@@ -5,29 +5,36 @@ import Player from "../player/Player";
 import Shell from "../../shells/Shell";
 import BangAnimation from "../../animation/BangAnimation";
 import SparkleAnimation from "../../animation/SparkleAnimation";
+import Player2 from "../player/Player2";
 
 export default class Turret {
+    private static idCounter: number = 0;
+
     private _scene: Phaser.Scene = null;
     private _map: Map = null;
     private _armour: number = 0;
-    private _player: Player = null;
+    private _player1: Player = null;
+    private _player2: Player2 = null;
     private _groupOfShells: GroupOfShells = null;
     public platform: Phaser.GameObjects.Sprite = null;
     public turret: Phaser.GameObjects.Sprite = null;
     public isFiring: boolean = true;
+    public id: number = 0;
 
-    constructor(scene: Phaser.Scene, position: StartPosition, map: Map, player: Player) {
+    constructor(scene: Phaser.Scene, position: StartPosition, map: Map, player1: Player, player2: Player2 = null) {
         this._scene = scene;
         this._map = map;
         this._armour = ENEMY.TURRET.ARMOUR;
-        this._player = player;
+        this._player1 = player1;
+        this._player2 = player2;
         this.init(position, this._map, ENEMY.TURRET.SHELL_TYPE);
         // handle shooting on player
-        this._scene.physics.add.overlap(this._player, this._groupOfShells, this.shellsPlayerCollision, null, this);
+        this._scene.physics.add.overlap(this._player2 ? [this._player1, this._player2] : this._player1, this._groupOfShells, this.shellsPlayerCollision, null, this);
         // handle shooting on boxes
         this._scene.physics.add.overlap(this._map.explosiveObjects, this._groupOfShells, this.boxesShellsCollision, null, this);
         // handle shooting on stones
         this._scene.physics.add.overlap(this._map.stones, this._groupOfShells, this.stonesShellsCollision, null, this);
+        this.id = ++Turret.idCounter;
     }
 
     private init(position: StartPosition, map: Map, shellTexture: string): void {
@@ -88,7 +95,7 @@ export default class Turret {
         if (this._groupOfShells && this.isFiring) this._groupOfShells.createFire(this.turret);
     }
 
-    public destroyTurret(shell: Shell): void {
+    public destroyTurret(shell: Shell): boolean {
         this._armour -= shell.damage;
         if ((this._armour <= 130) && (this._armour > 60)) {
             this.turret.setTexture("objects", "turret_2");
@@ -101,6 +108,8 @@ export default class Turret {
             this.platform = null;
             this._scene = null;
             this._groupOfShells = null;
+            return true;
         }
+        return false;
     }
 }

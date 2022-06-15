@@ -26,7 +26,7 @@ export default class EnemyVehicle extends Vehicle {
         const shellType: string = this.setEnemiesType(textureName);
         this._groupOfShells = new GroupOfShells(this._scene.physics.world, this._scene, this._map, shellType);
         this._timer = this._scene.time.addEvent({
-            delay: 4000, // appearing time of next enemy
+            delay: 4000,
             loop: true,
             callback: this.changeDirection,
             callbackScope: this
@@ -64,7 +64,7 @@ export default class EnemyVehicle extends Vehicle {
     }
 
     private initBases(map: Map): void {
-        for (let i = 1; i < 4; i++) { // there are always 3 enemies bases
+        for (let i = 1; i < 4; i++) { // there are always 3 enemy`s bases
             this._bases.push(map.getBasePosition(i));
         }
     }
@@ -169,22 +169,22 @@ export default class EnemyVehicle extends Vehicle {
         });
         if (!this._player1) return;
         // if enemy comes close enough to player, it will shoot
-        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 300) && this._player1.body && this.body) {
+        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 350) && this._player1.body && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player1.x, this._player1.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
-        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 500) && this._player1.body && this.body) {
+        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 550) && this._player1.body && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player1.x, this._player1.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
         }
 
         if (!this._player2) return;
-        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 300) && this._player2.body && this.body) {
+        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 350) && this._player2.body && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
-        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 500) && this._player2.body && this.body) {
+        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 550) && this._player2.body && this.body) {
             this.body.stop();
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player

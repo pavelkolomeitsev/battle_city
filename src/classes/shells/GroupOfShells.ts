@@ -23,7 +23,7 @@ export default class GroupOfShells extends Phaser.Physics.Arcade.Group {
 
     // mechanism for sprites` reusing for better performance
     public createFire(parentSprite: Phaser.GameObjects.Sprite): void {
-        if (this._nextShoot > this._scene.time.now) return; // to prevent toans of fires
+        if (this._nextShoot > this._scene.time.now || !parentSprite.active) return; // to prevent toans of fires
 
         let shell: Shell = this.getFirstDead();
         const side: number = this._enemy ? -37 : 40;

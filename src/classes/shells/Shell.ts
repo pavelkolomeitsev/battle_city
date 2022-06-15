@@ -1,7 +1,6 @@
 import { StartPosition, SPEED, ENEMY, PLAYER } from "../../utils/utils";
 import Map from "../Map";
 import Player from "../vehicles/player/Player";
-import Player2 from "../vehicles/player/Player2";
 
 export default class Shell extends Phaser.GameObjects.Sprite {
     private _scene: Phaser.Scene = null;

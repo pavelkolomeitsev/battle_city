@@ -113,16 +113,40 @@ export const PLAYER = {
 export function handleDirection(enemy: EnemyVehicle): void {
     switch (enemy.direction) {
         case DIRECTION.DOWN:
-            enemy.body.y -= 10;
+            enemy.body.y -= 5;
             break;
         case DIRECTION.LEFT:
-            enemy.body.x += 10;
+            enemy.body.x += 5;
             break;
         case DIRECTION.UP:
-            enemy.body.y += 10;
+            enemy.body.y += 5;
             break;
         case DIRECTION.RIGHT:
-            enemy.body.x -= 10;
+            enemy.body.x -= 5;
+            break;
+    }
+}
+
+export function goToOpositeDirection(enemy: EnemyVehicle): void {
+    switch (enemy.direction) {
+        case DIRECTION.DOWN:
+            // go up
+            enemy.body?.setVelocity(0, -enemy.velocity); // set direction
+            enemy.angle = 180; // set correct sprite`s angle
+            break;
+        case DIRECTION.LEFT:
+            // go right
+            enemy.body?.setVelocity(enemy.velocity, 0); // set direction
+            enemy.angle = -90; // set correct sprite`s angle
+            break;
+        case DIRECTION.UP:
+            // go down
+            enemy.body?.setVelocity(0, enemy.velocity); // set direction
+            enemy.angle = 0; // set correct sprite`s angle
+            break;
+        case DIRECTION.RIGHT:
+            enemy.body?.setVelocity(-enemy.velocity, 0); // set direction
+            enemy.angle = 90; // set correct sprite`s angle
             break;
     }
 }
