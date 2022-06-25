@@ -29,7 +29,9 @@ export default class PostStartScene extends Phaser.Scene {
                 experience: 0,
                 tanksPerLevel: 0,
                 bmpPerLevel: 0,
-                btrPerLevel: 0
+                btrPerLevel: 0,
+                turretsPerLevel: 0,
+                radarPerLevel:0
             },
             secondPlayer: {
                 vehicle: "tank",
@@ -37,7 +39,9 @@ export default class PostStartScene extends Phaser.Scene {
                 experience: 0,
                 tanksPerLevel: 0,
                 bmpPerLevel: 0,
-                btrPerLevel: 0
+                btrPerLevel: 0,
+                turretsPerLevel: 0,
+                radarPerLevel: 0
             }
         };
         this._style = { fontFamily: "RussoOne", fontSize: "55px", color: "#FFFFFF" };

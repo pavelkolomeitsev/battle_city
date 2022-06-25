@@ -10,6 +10,10 @@ export default class PostlevelScene extends Phaser.Scene {
     private _1PlayerBmpText: Phaser.GameObjects.Text = null;
     private _1PlayerTankTween: Phaser.Tweens.Tween = null;
     private _1PlayerTankText: Phaser.GameObjects.Text = null;
+    private _1PlayerTurretsTween: Phaser.Tweens.Tween = null;
+    private _1PlayerTurretsText: Phaser.GameObjects.Text = null;
+    private _1PlayerRadarTween: Phaser.Tweens.Tween = null;
+    private _1PlayerRadarText: Phaser.GameObjects.Text = null;
     private _1PlayerTotalTween: Phaser.Tweens.Tween = null;
     private _1PlayerTotalText: Phaser.GameObjects.Text = null;
     private _1PlayerTotal: number = 0;
@@ -19,6 +23,10 @@ export default class PostlevelScene extends Phaser.Scene {
     private _2PlayerBmpText: Phaser.GameObjects.Text = null;
     private _2PlayerTankTween: Phaser.Tweens.Tween = null;
     private _2PlayerTankText: Phaser.GameObjects.Text = null;
+    private _2PlayerTurretsTween: Phaser.Tweens.Tween = null;
+    private _2PlayerTurretsText: Phaser.GameObjects.Text = null;
+    private _2PlayerRadarTween: Phaser.Tweens.Tween = null;
+    private _2PlayerRadarText: Phaser.GameObjects.Text = null;
     private _2PlayerTotalTween: Phaser.Tweens.Tween = null;
     private _2PlayerTotalText: Phaser.GameObjects.Text = null;
     private _2PlayerTotal: number = 0;
@@ -67,17 +75,21 @@ export default class PostlevelScene extends Phaser.Scene {
     }
 
     private firstPlayerResults(): void {
-        this._1PlayerTotal = this._data.firstPlayer.btrPerLevel * 1 + this._data.firstPlayer.bmpPerLevel * 2 + this._data.firstPlayer.tanksPerLevel * 3;
+        this._1PlayerTotal = this._data.firstPlayer.btrPerLevel * 1 + this._data.firstPlayer.bmpPerLevel * 2 + this._data.firstPlayer.tanksPerLevel * 3 + this._data.firstPlayer.turretsPerLevel * 3 + this._data.firstPlayer.radarPerLevel * 1;
         const header: Phaser.GameObjects.Text = createText(this, 250, 250, "1st player", this._mainStyle);
         this._1PlayerBtrText = createText(this, 250, 330, `BTRs: ${this._data.firstPlayer.btrPerLevel} × 1xp = 0xp`, this._secondaryStyle);
         this._1PlayerBmpText = createText(this, 250, 410, `BMPs: ${this._data.firstPlayer.bmpPerLevel} × 2xp = 0xp`, this._secondaryStyle);
         this._1PlayerTankText = createText(this, 250, 490, `Tanks: ${this._data.firstPlayer.tanksPerLevel} × 3xp = 0xp`, this._secondaryStyle);
-        const dash: Phaser.GameObjects.Text = createText(this, 250, 510, "_____________________", this._secondaryStyle);
-        this._1PlayerTotalText = createText(this, 250, 580, `Total: 0xp`, this._secondaryStyle);
+        this._1PlayerTurretsText = createText(this, 250, 570, `Turrets: ${this._data.firstPlayer.turretsPerLevel} × 3xp = 0xp`, this._secondaryStyle);
+        this._1PlayerRadarText = createText(this, 250, 650, `Radars: ${this._data.firstPlayer.radarPerLevel} × 1xp = 0xp`, this._secondaryStyle);
+        const dash: Phaser.GameObjects.Text = createText(this, 250, 670, "_____________________", this._secondaryStyle);
+        this._1PlayerTotalText = createText(this, 250, 740, `Total: 0xp`, this._secondaryStyle);
         header.setX(this._1PlayerTankText.width / 3);
         this._1PlayerBtrText.setX(this._1PlayerTankText.width / 3);
         this._1PlayerBmpText.setX(this._1PlayerTankText.width / 3);
         this._1PlayerTankText.setX(this._1PlayerTankText.width / 3);
+        this._1PlayerTurretsText.setX(this._1PlayerTankText.width / 3);
+        this._1PlayerRadarText.setX(this._1PlayerTankText.width / 3);
         dash.setX(this._1PlayerTankText.width / 3);
         this._1PlayerTotalText.setX(this._1PlayerTankText.width / 3);
 
@@ -100,6 +112,20 @@ export default class PostlevelScene extends Phaser.Scene {
             to: this._data.firstPlayer.tanksPerLevel * 3,
             duration: 1000,
             paused: true,
+            onComplete: () => this._1PlayerTurretsTween.resume()
+        });
+        this._1PlayerTurretsTween = this.tweens.addCounter({
+            from: 0,
+            to: this._data.firstPlayer.turretsPerLevel * 3,
+            duration: 1000,
+            paused: true,
+            onComplete: () => this._1PlayerRadarTween.resume()
+        });
+        this._1PlayerRadarTween = this.tweens.addCounter({
+            from: 0,
+            to: this._data.firstPlayer.radarPerLevel * 1,
+            duration: 1000,
+            paused: true,
             onComplete: () => this._1PlayerTotalTween.resume()
         });
         this._1PlayerTotalTween = this.tweens.addCounter({
@@ -112,19 +138,23 @@ export default class PostlevelScene extends Phaser.Scene {
     }
 
     private secondPlayerResults(): void {
-        this._2PlayerTotal = this._data.secondPlayer.btrPerLevel * 1 + this._data.secondPlayer.bmpPerLevel * 2 + this._data.secondPlayer.tanksPerLevel * 3;
+        this._2PlayerTotal = this._data.secondPlayer.btrPerLevel * 1 + this._data.secondPlayer.bmpPerLevel * 2 + this._data.secondPlayer.tanksPerLevel * 3 + this._data.secondPlayer.turretsPerLevel * 3 + this._data.secondPlayer.radarPerLevel * 1;
         const header: Phaser.GameObjects.Text = createText(this, this._width - 750, 250, "2nd player", this._mainStyle);
         this._2PlayerBtrText = createText(this, this._width - 750, 330, `BTRs: ${this._data.secondPlayer.btrPerLevel} × 1xp = 0xp`, this._secondaryStyle);
         this._2PlayerBmpText = createText(this, this._width - 750, 410, `BMPs: ${this._data.secondPlayer.bmpPerLevel} × 2xp = 0xp`, this._secondaryStyle);
         this._2PlayerTankText = createText(this, this._width - 750, 490, `Tanks: ${this._data.secondPlayer.tanksPerLevel} × 3xp = 0xp`, this._secondaryStyle);
-        const dash: Phaser.GameObjects.Text = createText(this, this._width - 750, 510, "_____________________", this._secondaryStyle);
-        this._2PlayerTotalText = createText(this, this._width - 750, 580, `Total: 0xp`, this._secondaryStyle);
-        header.setX(this._width - this._2PlayerTankText.width - this._2PlayerTankText.width / 3);
-        this._2PlayerBtrText.setX(this._width - this._2PlayerTankText.width - this._2PlayerTankText.width / 3);
-        this._2PlayerBmpText.setX(this._width - this._2PlayerTankText.width - this._2PlayerTankText.width / 3);
-        this._2PlayerTankText.setX(this._width - this._2PlayerTankText.width - this._2PlayerTankText.width / 3);
-        dash.setX(this._width - this._2PlayerTankText.width - this._2PlayerTankText.width / 3);
-        this._2PlayerTotalText.setX(this._width - this._2PlayerTankText.width - this._2PlayerTankText.width / 3);
+        this._2PlayerTurretsText = createText(this, this._width - 750, 570, `Turrets: ${this._data.secondPlayer.turretsPerLevel} × 3xp = 0xp`, this._secondaryStyle);
+        this._2PlayerRadarText = createText(this, this._width - 750, 650, `Radars: ${this._data.secondPlayer.radarPerLevel} × 1xp = 0xp`, this._secondaryStyle);
+        const dash: Phaser.GameObjects.Text = createText(this, this._width - 750, 670, "_____________________", this._secondaryStyle);
+        this._2PlayerTotalText = createText(this, this._width - 750, 740, `Total: 0xp`, this._secondaryStyle);
+        header.setX(this._width - this._2PlayerTurretsText.width - this._2PlayerTurretsText.width / 3);
+        this._2PlayerBtrText.setX(this._width - this._2PlayerTurretsText.width - this._2PlayerTurretsText.width / 3);
+        this._2PlayerBmpText.setX(this._width - this._2PlayerTurretsText.width - this._2PlayerTurretsText.width / 3);
+        this._2PlayerTankText.setX(this._width - this._2PlayerTurretsText.width - this._2PlayerTurretsText.width / 3);
+        this._2PlayerTurretsText.setX(this._width - this._2PlayerTurretsText.width - this._2PlayerTurretsText.width / 3);
+        this._2PlayerRadarText.setX(this._width - this._2PlayerTurretsText.width - this._2PlayerTurretsText.width / 3);
+        dash.setX(this._width - this._2PlayerTurretsText.width - this._2PlayerTurretsText.width / 3);
+        this._2PlayerTotalText.setX(this._width - this._2PlayerTurretsText.width - this._2PlayerTurretsText.width / 3);
 
         this._2PlayerBtrTween = this.tweens.addCounter({
             from: 0,
@@ -143,6 +173,20 @@ export default class PostlevelScene extends Phaser.Scene {
         this._2PlayerTankTween = this.tweens.addCounter({
             from: 0,
             to: this._data.secondPlayer.tanksPerLevel * 3,
+            duration: 1000,
+            paused: true,
+            onComplete: () => this._2PlayerTurretsTween.resume()
+        });
+        this._2PlayerTurretsTween = this.tweens.addCounter({
+            from: 0,
+            to: this._data.secondPlayer.turretsPerLevel * 3,
+            duration: 1000,
+            paused: true,
+            onComplete: () => this._2PlayerRadarTween.resume()
+        });
+        this._2PlayerRadarTween = this.tweens.addCounter({
+            from: 0,
+            to: this._data.secondPlayer.radarPerLevel * 1,
             duration: 1000,
             paused: true,
             onComplete: () => this._2PlayerTotalTween.resume()
@@ -172,6 +216,8 @@ export default class PostlevelScene extends Phaser.Scene {
             this._1PlayerBtrText.setText(`BTRs: ${this._data.firstPlayer.btrPerLevel} × 1xp = ${this._1PlayerBtrTween.getValue().toFixed(0)}xp`);
             this._1PlayerBmpText.setText(`BMPs: ${this._data.firstPlayer.bmpPerLevel} × 2xp = ${this._1PlayerBmpTween.getValue().toFixed(0)}xp`);
             this._1PlayerTankText.setText(`Tanks: ${this._data.firstPlayer.tanksPerLevel} × 3xp = ${this._1PlayerTankTween.getValue().toFixed(0)}xp`);
+            this._1PlayerTurretsText.setText(`Turrets: ${this._data.firstPlayer.turretsPerLevel} × 3xp = ${this._1PlayerTurretsTween.getValue().toFixed(0)}xp`);
+            this._1PlayerRadarText.setText(`Radars: ${this._data.firstPlayer.radarPerLevel} × 1xp = ${this._1PlayerRadarTween.getValue().toFixed(0)}xp`);
             this._1PlayerTotalText.setText(`Total: ${this._1PlayerTotalTween.getValue().toFixed(0)}xp`);
         }
 
@@ -179,6 +225,8 @@ export default class PostlevelScene extends Phaser.Scene {
             this._2PlayerBtrText.setText(`BTRs: ${this._data.secondPlayer.btrPerLevel} × 1xp = ${this._2PlayerBtrTween.getValue().toFixed(0)}xp`);
             this._2PlayerBmpText.setText(`BMPs: ${this._data.secondPlayer.bmpPerLevel} × 2xp = ${this._2PlayerBmpTween.getValue().toFixed(0)}xp`);
             this._2PlayerTankText.setText(`Tanks: ${this._data.secondPlayer.tanksPerLevel} × 3xp = ${this._2PlayerTankTween.getValue().toFixed(0)}xp`);
+            this._2PlayerTurretsText.setText(`Turrets: ${this._data.secondPlayer.turretsPerLevel} × 3xp = ${this._2PlayerTurretsTween.getValue().toFixed(0)}xp`);
+            this._2PlayerRadarText.setText(`Radars: ${this._data.secondPlayer.radarPerLevel} × 1xp = ${this._2PlayerRadarTween.getValue().toFixed(0)}xp`);
             this._2PlayerTotalText.setText(`Total: ${this._2PlayerTotalTween.getValue().toFixed(0)}xp`);
         }
     }

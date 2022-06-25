@@ -5,13 +5,23 @@ import GroupOfShells from "../../shells/GroupOfShells";
 import Shell from "../../shells/Shell";
 import BangAnimation from "../../animation/BangAnimation";
 import SparkleAnimation from "../../animation/SparkleAnimation";
+import Player2 from "./Player2";
+import Headquarter from "../../Headquarter";
+import Radar from "../enemies/Radar";
+import EnemyVehicle from "../enemies/EnemyVehicle";
+import GroupOfEnemies from "../enemies/GroupOfEnemies";
 
 export default class Player extends Vehicle {
-    protected _velocity: number;
     private _cursor: Phaser.Types.Input.Keyboard.CursorKeys = null;
+    private _player2: Player2 = null;
+    protected _velocity: number;
     protected _fire: Phaser.Input.Keyboard.Key = null;
     protected _armour: number = 0;
     protected _vehicleType: string = "";
+    protected _enemyVehicles: GroupOfEnemies = null;
+    protected _radar: Radar = null;
+    protected _headquarterUa: Headquarter = null;
+    protected _headquarterRu: Headquarter = null;
     public shootingSound: Phaser.Sound.BaseSound = null;
     public groupOfShells: GroupOfShells = null;
     public id: string = "P1";
@@ -19,6 +29,8 @@ export default class Player extends Vehicle {
     public tanksPerLevel: number = 0;
     public bmpPerLevel: number = 0;
     public btrPerLevel: number = 0;
+    public turretsPerLevel: number = 0;
+    public radarPerLevel: number = 0;
 
     constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, shellTexture: string, experience: number) {
         super(scene, position, atlasName, textureName, map);
@@ -28,10 +40,6 @@ export default class Player extends Vehicle {
         this.experience = experience;
         this.groupOfShells = new GroupOfShells(this._scene.physics.world, this._scene, this._map, shellTexture, false, experience); // experience from 0 to 200
         this.setVehicleType(textureName);
-        // handle shooting on boxes
-        this._scene.physics.add.overlap(this._map.explosiveObjects, this.groupOfShells, this.boxesShellsCollision, null, this);
-        // handle shooting on stones
-        this._scene.physics.add.overlap(this._map.stones, this.groupOfShells, this.stonesShellsCollision, null, this);
     }
 
     protected setVehicleType(textureName: string): void {
@@ -49,6 +57,42 @@ export default class Player extends Vehicle {
         }
     }
 
+    public set enemyVehicles(enemyVehicles: GroupOfEnemies) {
+        this._enemyVehicles = enemyVehicles;
+    }
+
+    public set player2(player2: Player2) {
+        this._player2 = player2;
+    }
+    
+    public set radar(radar: Radar) {
+        this._radar = radar;
+    }
+
+    public set headquarterUa(headquarterUa: Headquarter) {
+        this._headquarterUa = headquarterUa;
+    }
+
+    public set headquarterRu(headquarterRu: Headquarter) {
+        this._headquarterRu = headquarterRu;
+    }
+
+    public handleCollisions(): void {
+        // handle shooting on boxes
+        this._scene.physics.add.overlap(this._map.explosiveObjects, this.groupOfShells, this.boxesShellsCollision, null, this);
+        // handle shooting on stones
+        this._scene.physics.add.overlap(this._map.stones, this.groupOfShells, this.stonesShellsCollision, null, this);
+        const stopableArray: Phaser.GameObjects.Sprite[] = [...this._map.stones, ...this._map.explosiveObjects];
+        if (this._player2) stopableArray.push(this._player2);
+        if (this._radar) stopableArray.push(this._radar);
+        if (this._headquarterUa) stopableArray.push(this._headquarterUa);
+        if (this._headquarterRu) stopableArray.push(this._headquarterRu);
+        // handle stop player when collide
+        this._scene.physics.add.collider(stopableArray, this, this.handlePlayerStop, null, this);
+        // handle player shooting
+        this._scene.physics.add.overlap(this._enemyVehicles, this.groupOfShells, this.handlePlayerShoot, null, this);
+    }
+
     protected boxesShellsCollision(box: Phaser.GameObjects.Sprite, shell: Shell): void {
         const position: StartPosition = { x: box.x, y: box.y };
         BangAnimation.generateBang(this._scene, position);
@@ -60,6 +104,18 @@ export default class Player extends Vehicle {
         const vector: Phaser.Math.Vector2 = this._scene.physics.velocityFromAngle(shell.angle + 270, +20); // +270 - trick to set sparkle just before the stone
         const position: StartPosition = { x: shell.x + vector.x, y: shell.y + vector.y };
         SparkleAnimation.generateBang(this._scene, position);
+        shell.setAlive(false);
+    }
+
+    protected handlePlayerStop(gameObject: Phaser.GameObjects.Sprite, player: Player): void {
+        gameObject.body.stop();
+        player.body.stop();
+    }
+
+    protected handlePlayerShoot(enemy: EnemyVehicle, shell: Shell): void {
+        const position: StartPosition = { x: enemy.x, y: enemy.y };
+        BangAnimation.generateBang(this._scene, position);
+        enemy.destroyEnemy(shell);
         shell.setAlive(false);
     }
     

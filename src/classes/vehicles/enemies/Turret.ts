@@ -6,6 +6,7 @@ import Shell from "../../shells/Shell";
 import BangAnimation from "../../animation/BangAnimation";
 import SparkleAnimation from "../../animation/SparkleAnimation";
 import Player2 from "../player/Player2";
+import XpointsAnimation from "../../animation/XpointsAnimation";
 
 export default class Turret {
     private static idCounter: number = 0;
@@ -106,10 +107,24 @@ export default class Turret {
             this.turret = null;
             this.platform.destroy();
             this.platform = null;
-            this._scene = null;
             this._groupOfShells = null;
+            const id: string = (shell.parentSprite as Player).id;
+            const position: StartPosition = { x: shell.x, y: shell.y };
+            XpointsAnimation.generateAnimation(this._scene, position, 3);
+            this.calculateExperiencePoints(id, 1.1);
+            this._scene = null;
             return true;
         }
         return false;
+    }
+
+    private calculateExperiencePoints(id: string, points: number): void {
+        if (this._player1 && id === "P1") {
+            this._player1.experience += points;
+            this._player1.turretsPerLevel++;
+        } else if (this._player2 && id === "P2") {
+            this._player2.experience += points;
+            this._player2.turretsPerLevel++;
+        }
     }
 }

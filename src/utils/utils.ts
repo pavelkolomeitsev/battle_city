@@ -39,7 +39,9 @@ export type LevelData = {
         experience: number,
         tanksPerLevel: number,
         bmpPerLevel: number,
-        btrPerLevel: number
+        btrPerLevel: number,
+        turretsPerLevel: number,
+        radarPerLevel: number
     },
     secondPlayer: {
         vehicle: string,
@@ -47,7 +49,9 @@ export type LevelData = {
         experience: number,
         tanksPerLevel: number,
         bmpPerLevel: number,
-        btrPerLevel: number
+        btrPerLevel: number,
+        turretsPerLevel: number,
+        radarPerLevel: number
     }
 };
 

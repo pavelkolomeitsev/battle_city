@@ -120,7 +120,22 @@ export default class Map {
     }
 
     public getRadarPosition(): StartPosition {
-        const radar: Phaser.Types.Tilemaps.TiledObject = this.tilemap.findObject("enemies" + this._level, playerObject => playerObject.name === "radar");
+        const radar: Phaser.Types.Tilemaps.TiledObject = this.tilemap.findObject("enemies" + this._level, playerObject => playerObject.name === "platform1");
+        const position: StartPosition = {x: radar.x, y: radar.y};
+        return position;
+    }
+
+    public getHeadquarterPosition(isEnemy: boolean): StartPosition {
+        let objectLayer: string = "";
+        let name: string = "";
+        if (isEnemy) {
+            objectLayer = "enemies" + this._level;
+            name = "headquarterRu";
+        } else {
+            objectLayer = "players" + this._level;
+            name = "headquarterUa";
+        }
+        const radar: Phaser.Types.Tilemaps.TiledObject = this.tilemap.findObject(objectLayer, playerObject => playerObject.name === name);
         const position: StartPosition = {x: radar.x, y: radar.y};
         return position;
     }

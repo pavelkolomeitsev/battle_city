@@ -8,6 +8,7 @@ import SparkleAnimation from "../../animation/SparkleAnimation";
 import Vehicle from "../Vehicle";
 import Player2 from "../player/Player2";
 import XpointsAnimation from "../../animation/XpointsAnimation";
+import Headquarter from "../../Headquarter";
 
 export default class EnemyVehicle extends Vehicle {
     private _vehicleSpeed: number = 0;
@@ -16,11 +17,12 @@ export default class EnemyVehicle extends Vehicle {
     private _timer: Phaser.Time.TimerEvent = null;
     private _player1: Player = null;
     private _player2: Player2 = null;
+    private _headquarterUa: Headquarter = null;
     private _groupOfShells: GroupOfShells;
     private _bases: StartPosition[] = [];
     public direction: string = DIRECTION.DOWN;
 
-    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, player1: Player, player2: Player2 = null) {
+    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, player1: Player, player2: Player2 = null, headquarterUa: Headquarter = null) {
         super(scene, position, atlasName, textureName, map);
 
         const shellType: string = this.setEnemiesType(textureName);
@@ -34,9 +36,13 @@ export default class EnemyVehicle extends Vehicle {
         this.initBases(map);
         this._player1 = player1;
         this._player2 = player2;
+        this._headquarterUa = headquarterUa;
         this.direction = DIRECTION.DOWN;
         // enemy shoots players
         this._scene.physics.add.overlap(this._player2 ? [this._player2, this._player1] : this._player1, this._groupOfShells, this.shellsPlayerCollision, null, this);
+        if (this._headquarterUa) {
+            this._scene.physics.add.overlap(this._headquarterUa, this._groupOfShells, this.shellsHeadquarterCollision, null, this);
+        }
         // enemy shoots boxes
         this._scene.physics.add.overlap(this._map.explosiveObjects, this._groupOfShells, this.shellsBoxesCollision, null, this);
         this._scene.physics.add.overlap(this._map.stones, this._groupOfShells, this.shellsStoneCollision, null, this);
@@ -85,6 +91,7 @@ export default class EnemyVehicle extends Vehicle {
                     const position: StartPosition = { x: shell.x, y: shell.y };
                     XpointsAnimation.generateAnimation(this._scene, position, 3);
                     this.calculateExperiencePoints(id, 1.1, ENEMY.TANK.TYPE);
+                    this._scene.events.emit("enemy_vehicle_dead");
                     return true;
                 }
                 break;
@@ -98,6 +105,7 @@ export default class EnemyVehicle extends Vehicle {
                     const position: StartPosition = { x: shell.x, y: shell.y };
                     XpointsAnimation.generateAnimation(this._scene, position, 2);
                     this.calculateExperiencePoints(id, 0.7, ENEMY.BMP.TYPE);
+                    this._scene.events.emit("enemy_vehicle_dead");
                     return true;
                 }       
                 break;
@@ -111,6 +119,7 @@ export default class EnemyVehicle extends Vehicle {
                     const position: StartPosition = { x: shell.x, y: shell.y };
                     XpointsAnimation.generateAnimation(this._scene, position, 1);
                     this.calculateExperiencePoints(id, 0.4, ENEMY.BTR.TYPE);
+                    this._scene.events.emit("enemy_vehicle_dead");
                     return true;
                 }       
                 break;
@@ -167,7 +176,6 @@ export default class EnemyVehicle extends Vehicle {
                 this.angle = 0;
             }
         });
-        if (!this._player1) return;
         // if enemy comes close enough to player, it will shoot
         if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 350) && this._player1.body && this.body) {
             this.body.stop();
@@ -178,15 +186,26 @@ export default class EnemyVehicle extends Vehicle {
             const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player1.x, this._player1.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
         }
+        if (this._player2) {
+            if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 350) && this._player2.body && this.body) {
+                this.body.stop();
+                const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
+                this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
+            } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 550) && this._player2.body && this.body) {
+                this.body.stop();
+                const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
+                this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
+            }
+        }
 
-        if (!this._player2) return;
-        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 350) && this._player2.body && this.body) {
+        if (!this._headquarterUa) return;
+        if ((this._type !== ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._headquarterUa) < 350) && this._headquarterUa.body && this.body) {
             this.body.stop();
-            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
+            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._headquarterUa.x, this._headquarterUa.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
-        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 550) && this._player2.body && this.body) {
+        } else if ((this._type === ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._headquarterUa) < 550) && this._headquarterUa.body && this.body) {
             this.body.stop();
-            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
+            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._headquarterUa.x, this._headquarterUa.y);
             this.rotation = angle - Math.PI / 2; // Math.PI / 2 - trick to turn tank`s barrel oposite to the player
         }
     }
@@ -196,6 +215,15 @@ export default class EnemyVehicle extends Vehicle {
         BangAnimation.generateBang(this._scene, position);
         shell.setAlive(false);
         player.destroyPlayer(shell);
+    }
+
+    private shellsHeadquarterCollision(headquarter: Headquarter, shell: Shell): void {
+        const position: StartPosition = { x: headquarter.x, y: headquarter.y };
+        BangAnimation.generateBang(this._scene, position);
+        shell.setAlive(false);
+        headquarter.body.destroy();
+        headquarter.destroy();
+        this._scene.events.emit("headquarter_destroyed");
     }
 
     private shellsBoxesCollision(target: Phaser.GameObjects.Sprite, shell: Shell): void {
