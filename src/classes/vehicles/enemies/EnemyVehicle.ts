@@ -1,4 +1,4 @@
-import { StartPosition, DIRECTION, ENEMY } from "../../../utils/utils";
+import { StartPosition, DIRECTION, ENEMY, goToOpositeDirection } from "../../../utils/utils";
 import BangAnimation from "../../animation/BangAnimation";
 import Map from "../../Map";
 import Player from "../player/Player";
@@ -18,11 +18,12 @@ export default class EnemyVehicle extends Vehicle {
     private _player1: Player = null;
     private _player2: Player2 = null;
     private _headquarterUa: Headquarter = null;
+    private _headquarterRu: Headquarter = null;
     private _groupOfShells: GroupOfShells;
     private _bases: StartPosition[] = [];
     public direction: string = DIRECTION.DOWN;
 
-    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, player1: Player, player2: Player2 = null, headquarterUa: Headquarter = null) {
+    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, map: Map, player1: Player, player2: Player2 = null, headquarterUa: Headquarter = null, headquarterRu: Headquarter = null) {
         super(scene, position, atlasName, textureName, map);
 
         const shellType: string = this.setEnemiesType(textureName);
@@ -37,16 +38,9 @@ export default class EnemyVehicle extends Vehicle {
         this._player1 = player1;
         this._player2 = player2;
         this._headquarterUa = headquarterUa;
+        this._headquarterRu = headquarterRu;
         this.direction = DIRECTION.DOWN;
-        // enemy shoots players
-        this._scene.physics.add.overlap(this._player2 ? [this._player2, this._player1] : this._player1, this._groupOfShells, this.shellsPlayerCollision, null, this);
-        if (this._headquarterUa) {
-            this._scene.physics.add.overlap(this._headquarterUa, this._groupOfShells, this.shellsHeadquarterCollision, null, this);
-        }
-        // enemy shoots boxes
-        this._scene.physics.add.overlap(this._map.explosiveObjects, this._groupOfShells, this.shellsBoxesCollision, null, this);
-        this._scene.physics.add.overlap(this._map.stones, this._groupOfShells, this.shellsStoneCollision, null, this);
-        this._scene.events.on("update", this.fire, this);
+        this.handleCollisions();
     }
 
     private setEnemiesType(textureName: string): string {
@@ -75,7 +69,23 @@ export default class EnemyVehicle extends Vehicle {
         }
     }
 
-    public destroyEnemy(shell: Shell): boolean {
+    private handleCollisions(): void {
+        // enemy shoots players
+        this._scene.physics.add.overlap(this._player2 ? [this._player2, this._player1] : this._player1, this._groupOfShells, this.shellsPlayerCollision, null, this);
+        if (this._headquarterUa) {
+            this._scene.physics.add.overlap(this._headquarterUa, this._groupOfShells, this.shellsHeadquarterCollision, null, this);
+        }
+        // enemy shoots boxes
+        this._scene.physics.add.overlap(this._map.explosiveObjects, this._groupOfShells, this.shellsBoxesCollision, null, this);
+        this._scene.physics.add.overlap(this._map.stones, this._groupOfShells, this.shellsStoneCollision, null, this);
+        // enemy collide objects
+        const stopableArray: Phaser.GameObjects.Sprite[] = [...this._map.stones, ...this._map.explosiveObjects];
+        if (this._headquarterRu) stopableArray.push(this._headquarterRu);
+        this._scene.physics.add.collider(stopableArray, this, this.handleEnemiesCollision, null, this);
+        this._scene.events.on("update", this.fire, this);
+    }
+
+    public destroyEnemy(shell: Shell): void {
         this._armour -= shell.damage;
         const id: string = (shell.parentSprite as Player).id;
         switch (this._type) {
@@ -91,8 +101,7 @@ export default class EnemyVehicle extends Vehicle {
                     const position: StartPosition = { x: shell.x, y: shell.y };
                     XpointsAnimation.generateAnimation(this._scene, position, 3);
                     this.calculateExperiencePoints(id, 1.1, ENEMY.TANK.TYPE);
-                    this._scene.events.emit("enemy_vehicle_dead");
-                    return true;
+                    this._scene.events.emit("enemy_dead", true, false);
                 }
                 break;
             case ENEMY.BMP.TYPE:
@@ -105,8 +114,7 @@ export default class EnemyVehicle extends Vehicle {
                     const position: StartPosition = { x: shell.x, y: shell.y };
                     XpointsAnimation.generateAnimation(this._scene, position, 2);
                     this.calculateExperiencePoints(id, 0.7, ENEMY.BMP.TYPE);
-                    this._scene.events.emit("enemy_vehicle_dead");
-                    return true;
+                    this._scene.events.emit("enemy_dead", true, false);
                 }       
                 break;
             case ENEMY.BTR.TYPE:
@@ -119,12 +127,10 @@ export default class EnemyVehicle extends Vehicle {
                     const position: StartPosition = { x: shell.x, y: shell.y };
                     XpointsAnimation.generateAnimation(this._scene, position, 1);
                     this.calculateExperiencePoints(id, 0.4, ENEMY.BTR.TYPE);
-                    this._scene.events.emit("enemy_vehicle_dead");
-                    return true;
+                    this._scene.events.emit("enemy_dead", true, false);
                 }       
                 break;
         }
-        return false;
     }
 
     public get velocity(): number {
@@ -223,7 +229,7 @@ export default class EnemyVehicle extends Vehicle {
         shell.setAlive(false);
         headquarter.body.destroy();
         headquarter.destroy();
-        this._scene.events.emit("headquarter_destroyed");
+        this._scene.events.emit("headquarterUa_destroyed");
     }
 
     private shellsBoxesCollision(target: Phaser.GameObjects.Sprite, shell: Shell): void {
@@ -238,6 +244,12 @@ export default class EnemyVehicle extends Vehicle {
         const position: StartPosition = { x: shell.x + vector.x, y: shell.y + vector.y };
         SparkleAnimation.generateBang(this._scene, position);
         shell.setAlive(false);
+    }
+
+    private handleEnemiesCollision(gameObject: Phaser.GameObjects.Sprite, enemy: EnemyVehicle): void {
+        goToOpositeDirection(enemy);
+        // handleDirection(enemy);
+        // enemy.changeDirection();
     }
 
     private calculateExperiencePoints(id: string, points: number, enemyType: string): void {

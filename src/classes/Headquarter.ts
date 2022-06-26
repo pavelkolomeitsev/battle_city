@@ -15,4 +15,14 @@ export default class Headquarter extends Phaser.GameObjects.Sprite {
         this.body.enable = true; // the physic body will be available for physic impacts
         this.body.setImmovable(true);
     }
+
+    public destroyHeadquarter(): void {
+        if (this.frame.name === "headquarterRu") {
+            this._scene.events.emit("enemy_headquarter_destroyed", false, true);
+        } else if (this.frame.name === "headquarterUa") {
+            this._scene.events.emit("headquarterUa_destroyed");
+        }
+        this._scene = null;
+        this.destroy();
+    }
 }

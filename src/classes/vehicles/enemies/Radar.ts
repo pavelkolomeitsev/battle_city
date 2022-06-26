@@ -20,4 +20,10 @@ export default class Radar extends Phaser.GameObjects.Sprite {
     private runRadar(): void {
         this.play(RADAR_ANIMATION);
     }
+
+    public destroyRadar(): void {
+        this._scene.events.emit("enemy_dead", true, false);
+        this._scene = null;
+        this.destroy();
+    }
 }

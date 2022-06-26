@@ -10,6 +10,7 @@ import Headquarter from "../../Headquarter";
 import Radar from "../enemies/Radar";
 import EnemyVehicle from "../enemies/EnemyVehicle";
 import GroupOfEnemies from "../enemies/GroupOfEnemies";
+import Turret from "../enemies/Turret";
 
 export default class Player extends Vehicle {
     private _cursor: Phaser.Types.Input.Keyboard.CursorKeys = null;
@@ -19,6 +20,9 @@ export default class Player extends Vehicle {
     protected _armour: number = 0;
     protected _vehicleType: string = "";
     protected _enemyVehicles: GroupOfEnemies = null;
+    protected _enemyTurrets: Turret[] = [];
+    protected _enemyTurretPlatforms: Phaser.GameObjects.Sprite[] = [];
+    protected _enemiesStatic: Phaser.GameObjects.Sprite[] = [];
     protected _radar: Radar = null;
     protected _headquarterUa: Headquarter = null;
     protected _headquarterRu: Headquarter = null;
@@ -61,6 +65,18 @@ export default class Player extends Vehicle {
         this._enemyVehicles = enemyVehicles;
     }
 
+    public set enemyTurrets(enemyTurrets: Turret[]) {
+        this._enemyTurrets = enemyTurrets;
+    }
+
+    public set enemyTurretPlatforms(enemyTurretPlatforms: Phaser.GameObjects.Sprite[]) {
+        this._enemyTurretPlatforms = enemyTurretPlatforms;
+    }
+
+    public set enemiesStatic(enemiesStatic: Phaser.GameObjects.Sprite[]) {
+        this._enemiesStatic = enemiesStatic;
+    }
+
     public set player2(player2: Player2) {
         this._player2 = player2;
     }
@@ -90,7 +106,9 @@ export default class Player extends Vehicle {
         // handle stop player when collide
         this._scene.physics.add.collider(stopableArray, this, this.handlePlayerStop, null, this);
         // handle player shooting
-        this._scene.physics.add.overlap(this._enemyVehicles, this.groupOfShells, this.handlePlayerShoot, null, this);
+        this._scene.physics.add.overlap(this._enemyVehicles, this.groupOfShells, this.handlePlayerShootOnEnemyVehicle, null, this);
+        this._scene.physics.add.overlap(this._enemyTurretPlatforms, this.groupOfShells, this.handlePlayerShootOnEnemiesTurrets, null, this);
+        this._scene.physics.add.overlap(this._enemiesStatic, this.groupOfShells, this.handlePlayerShootOnEnemiesStatic, null, this);
     }
 
     protected boxesShellsCollision(box: Phaser.GameObjects.Sprite, shell: Shell): void {
@@ -112,10 +130,43 @@ export default class Player extends Vehicle {
         player.body.stop();
     }
 
-    protected handlePlayerShoot(enemy: EnemyVehicle, shell: Shell): void {
+    protected handlePlayerShootOnEnemyVehicle(enemy: EnemyVehicle, shell: Shell): void {
         const position: StartPosition = { x: enemy.x, y: enemy.y };
         BangAnimation.generateBang(this._scene, position);
         enemy.destroyEnemy(shell);
+        shell.setAlive(false);
+    }
+
+    protected handlePlayerShootOnEnemiesTurrets(turretsPlatform: Phaser.GameObjects.Sprite, shell: Shell): void {
+        let position: StartPosition = null;
+        this._enemyTurrets.forEach((item: Turret) => {
+            if (turretsPlatform === item.platform) {
+                position = { x: item.turret.x, y: item.turret.y };
+                item.destroyTurret(shell);
+                BangAnimation.generateBang(this._scene, position);
+                shell.setAlive(false);
+            }
+        });
+    }
+
+    protected handlePlayerShootOnEnemiesStatic(enemy: Phaser.GameObjects.Sprite, shell: Shell): void {
+        let position: StartPosition = null;
+        position = { x: enemy.x, y: enemy.y };
+        if (enemy instanceof Radar) {
+            enemy.destroyRadar();
+        }
+        // if (enemy.frame.name === "platform1") {
+        //     (enemy as Radar).destroyRadar();
+        // }
+        // else if (enemy.frame.name === "headquarterRu") {
+        //     (enemy as Headquarter).destroyHeadquarter();
+        //     this._headquarterRu = null;
+        // }
+        else if (enemy instanceof Headquarter) {
+            enemy.destroyHeadquarter();
+            this._headquarterRu = null;
+        }
+        BangAnimation.generateBang(this._scene, position);
         shell.setAlive(false);
     }
     

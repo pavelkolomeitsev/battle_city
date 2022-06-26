@@ -1,14 +1,11 @@
-import BangAnimation from "../classes/animation/BangAnimation";
 import Headquarter from "../classes/Headquarter";
 import Map from "../classes/Map";
-import Shell from "../classes/shells/Shell";
-import EnemyVehicle from "../classes/vehicles/enemies/EnemyVehicle";
 import GroupOfEnemies from "../classes/vehicles/enemies/GroupOfEnemies";
 import Radar from "../classes/vehicles/enemies/Radar";
 import Turret from "../classes/vehicles/enemies/Turret";
 import Player from "../classes/vehicles/player/Player";
 import Player2 from "../classes/vehicles/player/Player2";
-import { createLevelText, createText, getPlayersRank, goToOpositeDirection, LevelData, StartPosition } from "../utils/utils";
+import { createLevelText, createText, getPlayersRank, LevelData, StartPosition } from "../utils/utils";
 
 export default class Level_3 extends Phaser.Scene {
     private _map: Map = null;
@@ -96,15 +93,23 @@ export default class Level_3 extends Phaser.Scene {
         this._headquarterRu = new Headquarter(this, this._map.getHeadquarterPosition(true), "objects", "headquarterRu");
         this._headquarterUa = new Headquarter(this, this._map.getHeadquarterPosition(false), "objects", "headquarterUa");
         this._enemiesCounter = this._enemiesArray.length;
-        this._enemies = new GroupOfEnemies(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2, this._headquarterUa);
+        this._enemies = new GroupOfEnemies(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2, this._headquarterUa, this._headquarterRu);
         let turretPosition: StartPosition = this._map.getTurretPosition(1);
         this._turret = new Turret(this, turretPosition, this._map, this._player1, this._player2);
         this._enemiesCounter++;
         turretPosition = this._map.getRadarPosition();
         this._radar = new Radar(this, turretPosition, "objects", "platform1");
+        this._turret.radar = this._radar;
         this._enemiesCounter++;
         this._enemiesText = createLevelText(this, 15, 30, `Enemies: ${this._enemiesCounter}`, this._style);
-        this.handleCollisions();
+        this.listenEvents();
+        
+        this._player1.enemyVehicles = this._enemies;
+        this._player1.enemyTurrets = [this._turret];
+        this._player1.enemyTurretPlatforms = [this._turret.platform];
+        this._player1.enemiesStatic = [this._radar, this._headquarterRu, this._headquarterUa];
+        this._player1.handleCollisions();
+
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels); // set map`s bounds as camera`s bounds
         this.cameras.main.startFollow(this._player1); // set camera to center on the player`s tank
         this._fightingMelody.play();
@@ -125,15 +130,12 @@ export default class Level_3 extends Phaser.Scene {
         sprite.depth = 10;
     }
 
-    private handleCollisions(): void {
-        // player shoots all enemies
-        this.physics.add.overlap(this._enemies, this._player2 ? [this._player1.groupOfShells, this._player2.groupOfShells] : this._player1.groupOfShells, this.shellsEnemyVehiclesCollision, null, this);
-        this.physics.add.overlap([this._turret.platform, this._radar, this._headquarterRu], this._player2 ? [this._player1.groupOfShells, this._player2.groupOfShells] : this._player1.groupOfShells, this.shellsOtherEnemiesCollision, null, this);
-        // handle enemies vs simple collision (not move objects)                                          
-        this.physics.add.collider([...this._map.explosiveObjects, ...this._map.stones, this._turret.platform, this._radar].concat(this._player2 ? [this._player2, this._player1] : this._player1), this._enemies, this.handleEnemiesCollision, null, this);
+    private listenEvents(): void {
         this.events.on("first_player_dead", this.firstPlayerDead, this);
         this.events.on("second_player_dead", this.secondPlayerDead, this);
-        this.events.on("headquarter_destroyed", this.headquarterDestroyed, this);
+        this.events.on("enemy_dead", this.enemyDead, this);
+        this.events.on("enemy_headquarter_destroyed", this.enemyDead, this);
+        this.events.on("headquarterUa_destroyed", this.headquarterDestroyed, this);
     }
 
     private createFinishText(): void {
@@ -142,15 +144,13 @@ export default class Level_3 extends Phaser.Scene {
         this._finishText.depth = 10;
     }
 
-    private shellsEnemyVehiclesCollision(enemy: EnemyVehicle, shell: Shell): void {
-        const position: StartPosition = { x: enemy.x, y: enemy.y };
-        BangAnimation.generateBang(this, position);
-        if (enemy.destroyEnemy(shell)) {
+    private enemyDead(toCount: boolean, isHeadquarterRuDestroyed: boolean): void {
+        if (toCount) {
             --this._enemies.counter;
             --this._enemiesCounter;
             this._enemiesText.setText(`Enemies: ${this._enemiesCounter}`);
         }
-        if (this._enemiesCounter <= 0 && !this._headquarterRu) {
+        if (this._enemiesCounter <= 0 && isHeadquarterRuDestroyed) {
             // create LevelData and pass it to the next scene
             this._levelData.nextLevelNumber = "level-4";
             this._levelData.nextLevelName = "?";
@@ -173,59 +173,6 @@ export default class Level_3 extends Phaser.Scene {
             this._fightingMelody.stop();
             this.scene.start("postlevel-scene", { data: this._levelData });
         }
-        shell.setAlive(false);
-    }
-
-    private shellsOtherEnemiesCollision(platform: Phaser.GameObjects.Sprite, shell: Shell): void {
-        let position: StartPosition = null;
-        if (platform === this._turret.platform) {
-            position = { x: this._turret.turret.x, y: this._turret.turret.y };
-        } else if (platform instanceof Radar) {
-            position = { x: platform.x, y: platform.y };
-            platform.destroy();
-            --this._enemiesCounter;
-            this._enemiesText.setText(`Enemies: ${this._enemiesCounter}`);
-        } else if (platform instanceof Headquarter) {
-            position = { x: platform.x, y: platform.y };
-            platform.destroy();
-            this._headquarterRu = null;
-        }
-        BangAnimation.generateBang(this, position);
-
-        if (platform === this._turret.platform && this._turret.destroyTurret(shell)) {
-            --this._enemiesCounter;
-            this._enemiesText.setText(`Enemies: ${this._enemiesCounter}`);
-        }
-        if (this._enemiesCounter <= 0 && !this._headquarterRu) {
-            // create LevelData and pass it to the next scene
-            this._levelData.nextLevelNumber = "level-4";
-            this._levelData.nextLevelName = "?";
-            if (this._player1 && this._levelData.firstPlayer) {
-                this._levelData.firstPlayer.experience = this._player1.experience;
-                this._levelData.firstPlayer.tanksPerLevel = this._player1.tanksPerLevel;
-                this._levelData.firstPlayer.bmpPerLevel = this._player1.bmpPerLevel;
-                this._levelData.firstPlayer.btrPerLevel = this._player1.btrPerLevel;
-                this._levelData.firstPlayer.turretsPerLevel = this._player1.turretsPerLevel;
-                this._levelData.firstPlayer.radarPerLevel = this._player1.radarPerLevel;
-            }
-            if (this._player2 && this._levelData.secondPlayer) {
-                this._levelData.secondPlayer.experience = this._player2.experience;
-                this._levelData.secondPlayer.tanksPerLevel = this._player2.tanksPerLevel;
-                this._levelData.secondPlayer.bmpPerLevel = this._player2.bmpPerLevel;
-                this._levelData.secondPlayer.btrPerLevel = this._player2.btrPerLevel;
-                this._levelData.secondPlayer.turretsPerLevel = this._player2.turretsPerLevel;
-                this._levelData.secondPlayer.radarPerLevel = this._player2.radarPerLevel;
-            }
-            this._fightingMelody.stop();
-            this.scene.start("postlevel-scene", { data: this._levelData });
-        }
-        shell.setAlive(false);
-    }
-
-    private handleEnemiesCollision(gameObject: Phaser.GameObjects.Sprite, enemy: EnemyVehicle): void {
-        goToOpositeDirection(enemy);
-        // handleDirection(enemy);
-        // enemy.changeDirection();
     }
 
     private firstPlayerDead(): void {
@@ -266,13 +213,6 @@ export default class Level_3 extends Phaser.Scene {
     update(): void {
         if (this._player1 && this._player1.active) this._player1.move();
         if (this._player2 && this._player2.active) this._player2.move();
-        if (this._turret.turret && this._player1.active) {
-            this._turret.runTurret(this._player1, this._map.checkPlayersPosition(this._radar, this._player1));
-        }
-        if (this._turret.turret && this._player2 && this._player2.active) {
-            this._turret.runTurret(this._player2, this._map.checkPlayersPosition(this._radar, this._player2));
-        }
-        
         this.checkMapBounds([...this._enemies.getChildren()].concat(this._player2 ? [this._player1, this._player2] : this._player1));
     }
 

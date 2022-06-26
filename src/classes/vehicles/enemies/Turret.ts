@@ -7,6 +7,7 @@ import BangAnimation from "../../animation/BangAnimation";
 import SparkleAnimation from "../../animation/SparkleAnimation";
 import Player2 from "../player/Player2";
 import XpointsAnimation from "../../animation/XpointsAnimation";
+import Radar from "./Radar";
 
 export default class Turret {
     private static idCounter: number = 0;
@@ -17,17 +18,21 @@ export default class Turret {
     private _player1: Player = null;
     private _player2: Player2 = null;
     private _groupOfShells: GroupOfShells = null;
+    private _baseNumber: number = 1;
+    private _radar: Radar = null;
     public platform: Phaser.GameObjects.Sprite = null;
     public turret: Phaser.GameObjects.Sprite = null;
     public isFiring: boolean = true;
     public id: number = 0;
 
-    constructor(scene: Phaser.Scene, position: StartPosition, map: Map, player1: Player, player2: Player2 = null) {
+    constructor(scene: Phaser.Scene, position: StartPosition, map: Map, player1: Player, player2: Player2 = null, radar: Radar = null, baseNumber: number = 1) {
         this._scene = scene;
         this._map = map;
         this._armour = ENEMY.TURRET.ARMOUR;
         this._player1 = player1;
         this._player2 = player2;
+        this._baseNumber = baseNumber;
+        this._radar = radar;
         this.init(position, this._map, ENEMY.TURRET.SHELL_TYPE);
         // handle shooting on player
         this._scene.physics.add.overlap(this._player2 ? [this._player1, this._player2] : this._player1, this._groupOfShells, this.shellsPlayerCollision, null, this);
@@ -36,8 +41,13 @@ export default class Turret {
         // handle shooting on stones
         this._scene.physics.add.overlap(this._map.stones, this._groupOfShells, this.stonesShellsCollision, null, this);
         this.id = ++Turret.idCounter;
+        this._scene.events.on("update", this.runTurret, this);
     }
 
+    public set radar(radar: Radar) {
+        this._radar = radar;
+    }
+    
     private init(position: StartPosition, map: Map, shellTexture: string): void {
         this.platform = new Phaser.GameObjects.Sprite(this._scene, position.x, position.y, "objects", "platform");
         this._scene.add.existing(this.platform);
@@ -72,7 +82,25 @@ export default class Turret {
         shell.setAlive(false);
     }
 
-    public runTurret(player: Player, isPlayerNear: boolean): void {
+    public runTurret(): void {
+        if (!this._radar) { // if it`s no radar, there are two turrets and two check areas
+            if (!this._player2) {
+                this.run(this._player1, this._map.checkPlayersPositionNoRadar(this._player1, this._baseNumber));
+            } else {
+                this.run(this._player1, this._map.checkPlayersPositionNoRadar(this._player1, this._baseNumber));
+                this.run(this._player2, this._map.checkPlayersPositionNoRadar(this._player2, this._baseNumber));
+            }
+        } else {
+            if (!this._player2) {
+                this.run(this._player1, this._map.checkPlayersPosition(this._radar, this._player1));
+            } else {
+                this.run(this._player1, this._map.checkPlayersPosition(this._radar, this._player1));
+                this.run(this._player2, this._map.checkPlayersPosition(this._radar, this._player2));
+            }
+        }
+    }
+
+    private run(player: Player, isPlayerNear: boolean): void {
         isPlayerNear ? this.watchAndFire(player) : this.watch(player);
     }
 
@@ -96,7 +124,7 @@ export default class Turret {
         if (this._groupOfShells && this.isFiring) this._groupOfShells.createFire(this.turret);
     }
 
-    public destroyTurret(shell: Shell): boolean {
+    public destroyTurret(shell: Shell): void {
         this._armour -= shell.damage;
         if ((this._armour <= 130) && (this._armour > 60)) {
             this.turret.setTexture("objects", "turret_2");
@@ -108,14 +136,15 @@ export default class Turret {
             this.platform.destroy();
             this.platform = null;
             this._groupOfShells = null;
+            this._radar = null;
             const id: string = (shell.parentSprite as Player).id;
             const position: StartPosition = { x: shell.x, y: shell.y };
             XpointsAnimation.generateAnimation(this._scene, position, 3);
             this.calculateExperiencePoints(id, 1.1);
+            this._scene.events.off("update", this.runTurret, this);
+            this._scene.events.emit("enemy_dead", true, false);
             this._scene = null;
-            return true;
         }
-        return false;
     }
 
     private calculateExperiencePoints(id: string, points: number): void {

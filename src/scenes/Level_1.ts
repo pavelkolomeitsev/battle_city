@@ -1,10 +1,7 @@
-import BangAnimation from "../classes/animation/BangAnimation";
 import Map from "../classes/Map";
 import Player from "../classes/vehicles/player/Player";
-import Shell from "../classes/shells/Shell";
-import { createLevelText, createText, getPlayersRank, goToOpositeDirection, handleDirection, LevelData, StartPosition } from "../utils/utils";
+import { createLevelText, createText, getPlayersRank, LevelData, StartPosition } from "../utils/utils";
 import GroupOfEnemies from "../classes/vehicles/enemies/GroupOfEnemies";
-import EnemyVehicle from "../classes/vehicles/enemies/EnemyVehicle";
 import Player2 from "../classes/vehicles/player/Player2";
 
 export default class Level_1 extends Phaser.Scene {
@@ -56,9 +53,11 @@ export default class Level_1 extends Phaser.Scene {
         this._enemiesCounter = this._enemiesArray.length;
         this._enemies = new GroupOfEnemies(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2);
         this._enemiesText = createLevelText(this, 15, 30, `Enemies: ${this._enemiesCounter}`, this._style);
-        this.handleCollisions();
+        this.listenEvents();
+
         this._player1.enemyVehicles = this._enemies;
         this._player1.handleCollisions();
+
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels); // set map`s bounds as camera`s bounds
         this.cameras.main.startFollow(this._player1); // set camera to center on the player`s tank
         this._fightingMelody.play();
@@ -79,14 +78,10 @@ export default class Level_1 extends Phaser.Scene {
         sprite.depth = 10;
     }
 
-    private handleCollisions(): void {
-        // player shoots all enemies
-        // this.physics.add.overlap(this._enemies, this._player2 ? [this._player1.groupOfShells, this._player2.groupOfShells] : this._player1.groupOfShells, this.shellsEnemiesCollision, null, this);
-        // handle enemies vs simple collision (not move objects)                                          
-        this.physics.add.collider([...this._map.explosiveObjects, ...this._map.stones].concat(this._player2 ? [this._player2, this._player1] : this._player1), this._enemies, this.handleEnemiesCollision, null, this);
+    private listenEvents(): void {
         this.events.on("first_player_dead", this.firstPlayerDead, this);
         this.events.on("second_player_dead", this.secondPlayerDead, this);
-        this.events.on("enemy_vehicle_dead", this.enemyDead, this);
+        this.events.on("enemy_dead", this.enemyDead, this);
     }
 
     private createFinishText(): void {
@@ -95,14 +90,12 @@ export default class Level_1 extends Phaser.Scene {
         this._finishText.depth = 10;
     }
 
-    private enemyDead(): void {
-        // const position: StartPosition = { x: enemy.x, y: enemy.y };
-        // BangAnimation.generateBang(this, position);
-        // if (enemy.destroyEnemy(shell)) {
-        --this._enemies.counter;
-        --this._enemiesCounter;
-        this._enemiesText.setText(`Enemies: ${this._enemiesCounter}`);
-        // }
+    private enemyDead(toCount: boolean, isHeadquarterRuDestroyed: boolean): void {
+        if (toCount) {
+            --this._enemies.counter;
+            --this._enemiesCounter;
+            this._enemiesText.setText(`Enemies: ${this._enemiesCounter}`);
+        }
         if (this._enemiesCounter <= 0) {
             // create LevelData and pass it to the next scene
             this._levelData.nextLevelNumber = "level-2";
@@ -126,13 +119,6 @@ export default class Level_1 extends Phaser.Scene {
             this._fightingMelody.stop();
             this.scene.start("postlevel-scene", { data: this._levelData });
         }
-        // shell.setAlive(false);
-    }
-
-    private handleEnemiesCollision(gameObject: Phaser.GameObjects.Sprite, enemy: EnemyVehicle): void {
-        goToOpositeDirection(enemy);
-        // handleDirection(enemy);
-        // enemy.changeDirection();
     }
 
     private firstPlayerDead(): void {
