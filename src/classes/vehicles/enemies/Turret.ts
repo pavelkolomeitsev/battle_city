@@ -1,4 +1,4 @@
-import { ENEMY, StartPosition } from "../../../utils/utils";
+import { ENEMY, goToOpositeDirection, StartPosition } from "../../../utils/utils";
 import GroupOfShells from "../../shells/GroupOfShells";
 import Map from "../../Map";
 import Player from "../player/Player";
@@ -8,6 +8,8 @@ import SparkleAnimation from "../../animation/SparkleAnimation";
 import Player2 from "../player/Player2";
 import XpointsAnimation from "../../animation/XpointsAnimation";
 import Radar from "./Radar";
+import EnemyVehicle from "./EnemyVehicle";
+import GroupOfEnemies from "./GroupOfEnemies";
 
 export default class Turret {
     private static idCounter: number = 0;
@@ -25,7 +27,7 @@ export default class Turret {
     public isFiring: boolean = true;
     public id: number = 0;
 
-    constructor(scene: Phaser.Scene, position: StartPosition, map: Map, player1: Player, player2: Player2 = null, radar: Radar = null, baseNumber: number = 1) {
+    constructor(scene: Phaser.Scene, position: StartPosition, map: Map, enemies: GroupOfEnemies, player1: Player, player2: Player2 = null, radar: Radar = null, baseNumber: number = 1) {
         this._scene = scene;
         this._map = map;
         this._armour = ENEMY.TURRET.ARMOUR;
@@ -40,6 +42,9 @@ export default class Turret {
         this._scene.physics.add.overlap(this._map.explosiveObjects, this._groupOfShells, this.boxesShellsCollision, null, this);
         // handle shooting on stones
         this._scene.physics.add.overlap(this._map.stones, this._groupOfShells, this.stonesShellsCollision, null, this);
+        // handle enemy vehicles collisions
+        const stopableArray: Phaser.GameObjects.GameObject[] = enemies.getChildren();
+        this._scene.physics.add.collider(stopableArray, this.platform, this.handleCollision, null, this);
         this.id = ++Turret.idCounter;
         this._scene.events.on("update", this.runTurret, this);
     }
@@ -80,6 +85,10 @@ export default class Turret {
         const position: StartPosition = { x: shell.x + vector.x, y: shell.y + vector.y };
         SparkleAnimation.generateBang(this._scene, position);
         shell.setAlive(false);
+    }
+
+    private handleCollision(enemy: EnemyVehicle, platform: Phaser.GameObjects.Sprite): void {
+        goToOpositeDirection(enemy);
     }
 
     public runTurret(): void {

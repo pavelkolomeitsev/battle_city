@@ -201,3 +201,17 @@ export function getPlayersRank(experience: number): string {
         return "lieutenant_general";
     } else return "second_lieutenant";
 }
+
+export function showPlayerExperience(scene: Phaser.Scene, style: Phaser.Types.GameObjects.Text.TextStyle, isFirst: boolean, experience: number) {
+    const width: number = scene.sys.game.canvas.width;
+    const rank: string = getPlayersRank(experience);
+    let sprite: Phaser.GameObjects.Sprite = null;
+    if (isFirst) {
+        createLevelText(scene, width - 80, 30, "1st", style);
+        sprite = scene.add.sprite(width - 40, 130, "objects", rank);
+    } else {
+        createLevelText(scene, width - 90, 200, "2nd", style);
+        sprite = scene.add.sprite(width - 40, 300, "objects", rank);
+    }
+    sprite.depth = 10;
+}

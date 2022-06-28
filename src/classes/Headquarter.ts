@@ -18,8 +18,10 @@ export default class Headquarter extends Phaser.GameObjects.Sprite {
 
     public destroyHeadquarter(): void {
         if (this.frame.name === "headquarterRu") {
+            this._scene.events.removeListener("enemy_headquarter_destroyed");
             this._scene.events.emit("enemy_headquarter_destroyed", false, true);
         } else if (this.frame.name === "headquarterUa") {
+            this._scene.events.removeListener("headquarterUa_destroyed");
             this._scene.events.emit("headquarterUa_destroyed");
         }
         this._scene = null;

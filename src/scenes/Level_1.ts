@@ -1,6 +1,6 @@
 import Map from "../classes/Map";
 import Player from "../classes/vehicles/player/Player";
-import { createLevelText, createText, getPlayersRank, LevelData, StartPosition } from "../utils/utils";
+import { createLevelText, createText, LevelData, showPlayerExperience, StartPosition } from "../utils/utils";
 import GroupOfEnemies from "../classes/vehicles/enemies/GroupOfEnemies";
 import Player2 from "../classes/vehicles/player/Player2";
 
@@ -13,8 +13,8 @@ export default class Level_1 extends Phaser.Scene {
     private _enemiesText: Phaser.GameObjects.Text = null;
     private _finishText: Phaser.GameObjects.Text = null;
     private _enemiesArray: number[] = null;
-    private _enemiesCounter: number = 0;
-    private _maxEnemies: number = 0;
+    private _enemiesLeft: number = 0;
+    private _maxEnemies: number = 6;
     private _style: Phaser.Types.GameObjects.Text.TextStyle = null;
     private _fightingMelody: Phaser.Sound.BaseSound = null;
     
@@ -35,9 +35,8 @@ export default class Level_1 extends Phaser.Scene {
         const player = this._map.getPlayer(1);
         let position: StartPosition = {x: player.x, y: player.y};
         this._player1 = new Player(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
-        this._maxEnemies = 6;
         const width: number = this.sys.game.canvas.width;
-        this.showFirstPlayerExperience(width);
+        showPlayerExperience(this, this._style, true, this._levelData.firstPlayer.experience);
         if (this._levelData.secondPlayer) {
             const player2 = this._map.getPlayer(2);
             position = {x: player2.x, y: player2.y};
@@ -48,11 +47,11 @@ export default class Level_1 extends Phaser.Scene {
             this._enemiesArray.forEach((item: number, _, array) => array.push(item)); // if there are two players -> twice enemies
             this._maxEnemies = 10;
             // create exp level 2 player
-            this.showSecondPlayerExperience(width);
+            showPlayerExperience(this, this._style, false, this._levelData.secondPlayer.experience);
         }
-        this._enemiesCounter = this._enemiesArray.length;
+        this._enemiesLeft = this._enemiesArray.length;
         this._enemies = new GroupOfEnemies(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2);
-        this._enemiesText = createLevelText(this, 15, 30, `Enemies: ${this._enemiesCounter}`, this._style);
+        this._enemiesText = createLevelText(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
         this.listenEvents();
 
         this._player1.enemyVehicles = this._enemies;
@@ -64,24 +63,17 @@ export default class Level_1 extends Phaser.Scene {
         this.createFinishText();
     }
 
-    private showFirstPlayerExperience(width: number): void {
-        createLevelText(this, width - 80, 30, "1st", this._style);
-        const rank: string = getPlayersRank(this._levelData.firstPlayer.experience);
-        const sprite: Phaser.GameObjects.Sprite = this.add.sprite(width - 40, 130, "objects", rank);
-        sprite.depth = 10;
-    }
-
-    private showSecondPlayerExperience(width: number): void {
-        createLevelText(this, width - 90, 200, "2nd", this._style);
-        const rank: string = getPlayersRank(this._levelData.secondPlayer.experience);
-        const sprite: Phaser.GameObjects.Sprite = this.add.sprite(window.innerWidth - 40, 300, "objects", rank);
-        sprite.depth = 10;
-    }
-
     private listenEvents(): void {
-        this.events.on("first_player_dead", this.firstPlayerDead, this);
-        this.events.on("second_player_dead", this.secondPlayerDead, this);
-        this.events.on("enemy_dead", this.enemyDead, this);
+        // when we assign custom event, "ON" adds this custom event to listeners` pool, it may add as many times the SAME CUSTOM event as we assign it
+        if (this.events.listeners("first_player_dead").length <= 0) {
+            this.events.on("first_player_dead", this.firstPlayerDead, this);
+        }
+        if (this.events.listeners("second_player_dead").length <= 0) {
+            this.events.on("second_player_dead", this.secondPlayerDead, this);
+        }
+        if (this.events.listeners("enemy_dead").length <= 0) {
+            this.events.on("enemy_dead", this.enemyDead, this);
+        }
     }
 
     private createFinishText(): void {
@@ -90,13 +82,13 @@ export default class Level_1 extends Phaser.Scene {
         this._finishText.depth = 10;
     }
 
-    private enemyDead(toCount: boolean, isHeadquarterRuDestroyed: boolean): void {
+    private enemyDead(toCount: boolean): void {
         if (toCount) {
             --this._enemies.counter;
-            --this._enemiesCounter;
-            this._enemiesText.setText(`Enemies: ${this._enemiesCounter}`);
+            --this._enemiesLeft;
+            this._enemiesText.setText(`Enemies: ${this._enemiesLeft}`);
         }
-        if (this._enemiesCounter <= 0) {
+        if (this._enemiesLeft <= 0) {
             // create LevelData and pass it to the next scene
             this._levelData.nextLevelNumber = "level-2";
             this._levelData.nextLevelName = "First Blood";
@@ -122,6 +114,9 @@ export default class Level_1 extends Phaser.Scene {
     }
 
     private firstPlayerDead(): void {
+        this.events.removeListener("first_player_dead");
+        this.events.removeListener("second_player_dead");
+        this.events.removeListener("enemy_dead");
         this.runTween();
         // if singleplayer game
         // if (!this._levelData.multiplayerGame) this.runTween();
@@ -132,6 +127,9 @@ export default class Level_1 extends Phaser.Scene {
     }
 
     private secondPlayerDead(): void {
+        this.events.removeListener("first_player_dead");
+        this.events.removeListener("second_player_dead");
+        this.events.removeListener("enemy_dead");
         this.runTween();
         // this._levelData.secondPlayer = null;
         // if (!this._levelData.firstPlayer) this.runTween();

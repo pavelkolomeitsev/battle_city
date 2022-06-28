@@ -1,6 +1,6 @@
 import Map from "../../Map";
 import EnemyVehicle from "./EnemyVehicle";
-import { goToOpositeDirection, handleDirection, StartPosition } from "../../../utils/utils";
+import { goToOpositeDirection, StartPosition } from "../../../utils/utils";
 import Player from "../player/Player";
 import Player2 from "../player/Player2";
 import Headquarter from "../../Headquarter";
@@ -15,7 +15,7 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     private _headquarterUa: Headquarter = null;
     private _headquarterRu: Headquarter = null;
     private _numberOfBase: number = 0;
-    private _maxEnemies: number = 0;
+    private _maxEnemies: number = 6;
     public counter: number = 0;
 
     constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, map: Map, enemies: number[], maxEnemies: number, numberOfBase: number, player1: Player, player2: Player2 = null, headquarterUa: Headquarter = null, headquarterRu: Headquarter = null) {
@@ -71,10 +71,7 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     }
 
     private handleEnemyVehicleCollision(firstEnemy: EnemyVehicle, secondEnemy: EnemyVehicle): void {
-        // handleDirection(firstEnemy);
-        // handleDirection(secondEnemy);
         goToOpositeDirection(firstEnemy);
-        // firstEnemy.changeDirection();
         secondEnemy.body.stop();
     }
 }

@@ -153,7 +153,7 @@ export default class Player extends Vehicle {
         let position: StartPosition = null;
         position = { x: enemy.x, y: enemy.y };
         if (enemy instanceof Radar) {
-            enemy.destroyRadar();
+            enemy.destroyRadar(shell);
         }
         // if (enemy.frame.name === "platform1") {
         //     (enemy as Radar).destroyRadar();
