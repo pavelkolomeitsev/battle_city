@@ -11,7 +11,7 @@ export default class Radar extends Phaser.GameObjects.Sprite {
     private _player1: Player = null;
     private _player2: Player2 = null;
 
-    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, enemies: GroupOfEnemies, player1: Player, player2: Player2 = null) {
+    constructor(scene: Phaser.Scene, position: StartPosition, atlasName: string, textureName: string, enemies: GroupOfEnemies, player1: Player = null, player2: Player2 = null) {
         super(scene, position.x, position.y, atlasName, textureName);
         this._scene = scene;
         this._player1 = player1;

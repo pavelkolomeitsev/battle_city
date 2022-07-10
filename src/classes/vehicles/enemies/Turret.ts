@@ -19,6 +19,7 @@ export default class Turret {
     private _armour: number = 0;
     private _player1: Player = null;
     private _player2: Player2 = null;
+    private _players: Player[] = [];
     private _groupOfShells: GroupOfShells = null;
     private _baseNumber: number = 1;
     private _radar: Radar = null;
@@ -33,11 +34,13 @@ export default class Turret {
         this._armour = ENEMY.TURRET.ARMOUR;
         this._player1 = player1;
         this._player2 = player2;
+        if (player1) this._players.push(player1);
+        if (player2) this._players.push(player2);
         this._baseNumber = baseNumber;
         this._radar = radar;
         this.init(position, this._map, ENEMY.TURRET.SHELL_TYPE);
         // handle shooting on player
-        this._scene.physics.add.overlap(this._player2 ? [this._player1, this._player2] : this._player1, this._groupOfShells, this.shellsPlayerCollision, null, this);
+        this._scene.physics.add.overlap(this._players, this._groupOfShells, this.shellsPlayerCollision, null, this);
         // handle shooting on boxes
         this._scene.physics.add.overlap(this._map.explosiveObjects, this._groupOfShells, this.boxesShellsCollision, null, this);
         // handle shooting on stones
@@ -93,19 +96,21 @@ export default class Turret {
 
     public runTurret(): void {
         if (!this._radar) { // if it`s no radar, there are two turrets and two check areas
-            if (!this._player2) {
-                this.run(this._player1, this._map.checkPlayersPositionNoRadar(this._player1, this._baseNumber));
-            } else {
-                this.run(this._player1, this._map.checkPlayersPositionNoRadar(this._player1, this._baseNumber));
-                this.run(this._player2, this._map.checkPlayersPositionNoRadar(this._player2, this._baseNumber));
-            }
+            this._players.forEach((player: Player) => this.run(player, this._map.checkPlayersPositionNoRadar(player, this._baseNumber)));
+            // if (!this._player2) {
+            //     this.run(this._player1, this._map.checkPlayersPositionNoRadar(this._player1, this._baseNumber));
+            // } else {
+            //     this.run(this._player1, this._map.checkPlayersPositionNoRadar(this._player1, this._baseNumber));
+            //     this.run(this._player2, this._map.checkPlayersPositionNoRadar(this._player2, this._baseNumber));
+            // }
         } else {
-            if (!this._player2) {
-                this.run(this._player1, this._map.checkPlayersPosition(this._radar, this._player1));
-            } else {
-                this.run(this._player1, this._map.checkPlayersPosition(this._radar, this._player1));
-                this.run(this._player2, this._map.checkPlayersPosition(this._radar, this._player2));
-            }
+            this._players.forEach((player: Player) => this.run(player, this._map.checkPlayersPosition(this._radar, player)));
+            // if (!this._player2) {
+            //     this.run(this._player1, this._map.checkPlayersPosition(this._radar, this._player1));
+            // } else {
+            //     this.run(this._player1, this._map.checkPlayersPosition(this._radar, this._player1));
+            //     this.run(this._player2, this._map.checkPlayersPosition(this._radar, this._player2));
+            // }
         }
     }
 

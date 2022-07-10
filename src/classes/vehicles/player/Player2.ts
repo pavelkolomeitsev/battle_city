@@ -29,6 +29,10 @@ export default class Player2 extends Player {
         if (this._headquarterRu) stopableArray.push(this._headquarterRu);
         // handle stop player when collide
         this._scene.physics.add.collider(stopableArray, this, this.handlePlayerStop, null, this);
+        // handle player shooting
+        this._scene.physics.add.overlap(this._enemyVehicles, this.groupOfShells, this.handlePlayerShootOnEnemyVehicle, null, this);
+        this._scene.physics.add.overlap(this._enemyTurretPlatforms, this.groupOfShells, this.handlePlayerShootOnEnemiesTurrets, null, this);
+        this._scene.physics.add.overlap(this._enemiesStatic, this.groupOfShells, this.handlePlayerShootOnEnemiesStatic, null, this);
     }
 
     protected get direction(): number {

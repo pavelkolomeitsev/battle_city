@@ -25,11 +25,9 @@ class Headquarter extends Phaser.GameObjects.Sprite {
     }
     destroyHeadquarter() {
         if (this.frame.name === "headquarterRu") {
-            this._scene.events.removeListener("enemy_headquarter_destroyed");
             this._scene.events.emit("enemy_headquarter_destroyed", false, true);
         }
         else if (this.frame.name === "headquarterUa") {
-            this._scene.events.removeListener("headquarterUa_destroyed");
             this._scene.events.emit("headquarterUa_destroyed");
         }
         this._scene = null;
@@ -507,7 +505,7 @@ const SparkleAnimation_1 = __importDefault(__webpack_require__(/*! ../../animati
 const Vehicle_1 = __importDefault(__webpack_require__(/*! ../Vehicle */ "./src/classes/vehicles/Vehicle.ts"));
 const XpointsAnimation_1 = __importDefault(__webpack_require__(/*! ../../animation/XpointsAnimation */ "./src/classes/animation/XpointsAnimation.ts"));
 class EnemyVehicle extends Vehicle_1.default {
-    constructor(scene, position, atlasName, textureName, map, player1, player2 = null, headquarterUa = null, headquarterRu = null) {
+    constructor(scene, position, atlasName, textureName, map, player1 = null, player2 = null, headquarterUa = null, headquarterRu = null) {
         super(scene, position, atlasName, textureName, map);
         this._vehicleSpeed = 0;
         this._type = "";
@@ -515,6 +513,7 @@ class EnemyVehicle extends Vehicle_1.default {
         this._timer = null;
         this._player1 = null;
         this._player2 = null;
+        this._players = [];
         this._headquarterUa = null;
         this._headquarterRu = null;
         this._bases = [];
@@ -530,6 +529,10 @@ class EnemyVehicle extends Vehicle_1.default {
         this.initBases(map);
         this._player1 = player1;
         this._player2 = player2;
+        if (player1)
+            this._players.push(player1);
+        if (player2)
+            this._players.push(player2);
         this._headquarterUa = headquarterUa;
         this._headquarterRu = headquarterRu;
         this.direction = utils_1.DIRECTION.DOWN;
@@ -560,7 +563,7 @@ class EnemyVehicle extends Vehicle_1.default {
         }
     }
     handleCollisions() {
-        this._scene.physics.add.overlap(this._player2 ? [this._player2, this._player1] : this._player1, this._groupOfShells, this.shellsPlayerCollision, null, this);
+        this._scene.physics.add.overlap(this._players, this._groupOfShells, this.shellsPlayerCollision, null, this);
         if (this._headquarterUa) {
             this._scene.physics.add.overlap(this._headquarterUa, this._groupOfShells, this.shellsHeadquarterCollision, null, this);
         }
@@ -670,28 +673,18 @@ class EnemyVehicle extends Vehicle_1.default {
                 this.angle = 0;
             }
         });
-        if ((this._type !== utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 350) && this._player1.body && this.body) {
-            this.body.stop();
-            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player1.x, this._player1.y);
-            this.rotation = angle - Math.PI / 2;
-        }
-        else if ((this._type === utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player1) < 550) && this._player1.body && this.body) {
-            this.body.stop();
-            const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player1.x, this._player1.y);
-            this.rotation = angle - Math.PI / 2;
-        }
-        if (this._player2) {
-            if ((this._type !== utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 350) && this._player2.body && this.body) {
+        this._players.forEach((player) => {
+            if ((this._type !== utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, player) < 350) && player.body && this.body) {
                 this.body.stop();
-                const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
+                const angle = Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y);
                 this.rotation = angle - Math.PI / 2;
             }
-            else if ((this._type === utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._player2) < 550) && this._player2.body && this.body) {
+            else if ((this._type === utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, player) < 550) && player.body && this.body) {
                 this.body.stop();
-                const angle = Phaser.Math.Angle.Between(this.x, this.y, this._player2.x, this._player2.y);
+                const angle = Phaser.Math.Angle.Between(this.x, this.y, player.x, player.y);
                 this.rotation = angle - Math.PI / 2;
             }
-        }
+        });
         if (!this._headquarterUa)
             return;
         if ((this._type !== utils_1.ENEMY.TANK.TYPE) && (Phaser.Math.Distance.BetweenPoints(this, this._headquarterUa) < 350) && this._headquarterUa.body && this.body) {
@@ -777,7 +770,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const EnemyVehicle_1 = __importDefault(__webpack_require__(/*! ./EnemyVehicle */ "./src/classes/vehicles/enemies/EnemyVehicle.ts"));
 const utils_1 = __webpack_require__(/*! ../../../utils/utils */ "./src/utils/utils.ts");
 class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
-    constructor(world, scene, map, enemies, maxEnemies, numberOfBase, player1, player2 = null, headquarterUa = null, headquarterRu = null) {
+    constructor(world, scene, map, enemies, maxEnemies, numberOfBase, player1 = null, player2 = null, headquarterUa = null, headquarterRu = null) {
         super(world, scene);
         this._scene = null;
         this._map = null;
@@ -856,7 +849,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const utils_1 = __webpack_require__(/*! ../../../utils/utils */ "./src/utils/utils.ts");
 const XpointsAnimation_1 = __importDefault(__webpack_require__(/*! ../../animation/XpointsAnimation */ "./src/classes/animation/XpointsAnimation.ts"));
 class Radar extends Phaser.GameObjects.Sprite {
-    constructor(scene, position, atlasName, textureName, enemies, player1, player2 = null) {
+    constructor(scene, position, atlasName, textureName, enemies, player1 = null, player2 = null) {
         super(scene, position.x, position.y, atlasName, textureName);
         this._scene = null;
         this._player1 = null;
@@ -929,6 +922,7 @@ class Turret {
         this._armour = 0;
         this._player1 = null;
         this._player2 = null;
+        this._players = [];
         this._groupOfShells = null;
         this._baseNumber = 1;
         this._radar = null;
@@ -941,10 +935,14 @@ class Turret {
         this._armour = utils_1.ENEMY.TURRET.ARMOUR;
         this._player1 = player1;
         this._player2 = player2;
+        if (player1)
+            this._players.push(player1);
+        if (player2)
+            this._players.push(player2);
         this._baseNumber = baseNumber;
         this._radar = radar;
         this.init(position, this._map, utils_1.ENEMY.TURRET.SHELL_TYPE);
-        this._scene.physics.add.overlap(this._player2 ? [this._player1, this._player2] : this._player1, this._groupOfShells, this.shellsPlayerCollision, null, this);
+        this._scene.physics.add.overlap(this._players, this._groupOfShells, this.shellsPlayerCollision, null, this);
         this._scene.physics.add.overlap(this._map.explosiveObjects, this._groupOfShells, this.boxesShellsCollision, null, this);
         this._scene.physics.add.overlap(this._map.stones, this._groupOfShells, this.stonesShellsCollision, null, this);
         const stopableArray = enemies.getChildren();
@@ -990,22 +988,10 @@ class Turret {
     }
     runTurret() {
         if (!this._radar) {
-            if (!this._player2) {
-                this.run(this._player1, this._map.checkPlayersPositionNoRadar(this._player1, this._baseNumber));
-            }
-            else {
-                this.run(this._player1, this._map.checkPlayersPositionNoRadar(this._player1, this._baseNumber));
-                this.run(this._player2, this._map.checkPlayersPositionNoRadar(this._player2, this._baseNumber));
-            }
+            this._players.forEach((player) => this.run(player, this._map.checkPlayersPositionNoRadar(player, this._baseNumber)));
         }
         else {
-            if (!this._player2) {
-                this.run(this._player1, this._map.checkPlayersPosition(this._radar, this._player1));
-            }
-            else {
-                this.run(this._player1, this._map.checkPlayersPosition(this._radar, this._player1));
-                this.run(this._player2, this._map.checkPlayersPosition(this._radar, this._player2));
-            }
+            this._players.forEach((player) => this.run(player, this._map.checkPlayersPosition(this._radar, player)));
         }
     }
     run(player, isPlayerNear) {
@@ -1345,6 +1331,9 @@ class Player2 extends Player_1.default {
         if (this._headquarterRu)
             stopableArray.push(this._headquarterRu);
         this._scene.physics.add.collider(stopableArray, this, this.handlePlayerStop, null, this);
+        this._scene.physics.add.overlap(this._enemyVehicles, this.groupOfShells, this.handlePlayerShootOnEnemyVehicle, null, this);
+        this._scene.physics.add.overlap(this._enemyTurretPlatforms, this.groupOfShells, this.handlePlayerShootOnEnemiesTurrets, null, this);
+        this._scene.physics.add.overlap(this._enemiesStatic, this.groupOfShells, this.handlePlayerShootOnEnemiesStatic, null, this);
     }
     get direction() {
         let direction = utils_1.PLAYER_SPEED.NONE;
@@ -1530,6 +1519,7 @@ class Level_1 extends Phaser.Scene {
         this._levelData = null;
         this._player1 = null;
         this._player2 = null;
+        this._players = [];
         this._enemies = null;
         this._enemiesText = null;
         this._finishText = null;
@@ -1551,14 +1541,14 @@ class Level_1 extends Phaser.Scene {
         const player = this._map.getPlayer(1);
         let position = { x: player.x, y: player.y };
         this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
-        const width = this.sys.game.canvas.width;
+        this._players.push(this._player1);
         (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
         if (this._levelData.secondPlayer) {
             const player2 = this._map.getPlayer(2);
             position = { x: player2.x, y: player2.y };
             this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
+            this._players.push(this._player2);
             this._player2.player1 = this._player1;
-            this._player2.handleCollisions();
             this._player1.player2 = this._player2;
             this._enemiesArray.forEach((item, _, array) => array.push(item));
             this._maxEnemies = 10;
@@ -1567,9 +1557,13 @@ class Level_1 extends Phaser.Scene {
         this._enemiesLeft = this._enemiesArray.length;
         this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2);
         this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
-        this.listenEvents();
         this._player1.enemyVehicles = this._enemies;
         this._player1.handleCollisions();
+        if (this._levelData.secondPlayer) {
+            this._player2.enemyVehicles = this._enemies;
+            this._player2.handleCollisions();
+        }
+        this.listenEvents();
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
         this.cameras.main.startFollow(this._player1);
         this._fightingMelody.play();
@@ -1621,16 +1615,24 @@ class Level_1 extends Phaser.Scene {
         }
     }
     firstPlayerDead() {
-        this.events.removeListener("first_player_dead");
-        this.events.removeListener("second_player_dead");
-        this.events.removeListener("enemy_dead");
-        this.runTween();
+        this._levelData.firstPlayer = null;
+        if (this._levelData.multiplayerGame && this._player2)
+            return;
+        else {
+            this.events.removeListener("first_player_dead");
+            this.events.removeListener("second_player_dead");
+            this.events.removeListener("enemy_dead");
+            this.runTween();
+        }
     }
     secondPlayerDead() {
-        this.events.removeListener("first_player_dead");
-        this.events.removeListener("second_player_dead");
-        this.events.removeListener("enemy_dead");
-        this.runTween();
+        this._levelData.secondPlayer = null;
+        if (this._levelData.multiplayerGame && !this._player1) {
+            this.events.removeListener("first_player_dead");
+            this.events.removeListener("second_player_dead");
+            this.events.removeListener("enemy_dead");
+            this.runTween();
+        }
     }
     runTween() {
         this.tweens.add({
@@ -1645,11 +1647,11 @@ class Level_1 extends Phaser.Scene {
         });
     }
     update() {
-        if (this._player1 && this._player1.active)
-            this._player1.move();
-        if (this._player2 && this._player2.active)
-            this._player2.move();
-        this.checkMapBounds([...this._enemies.getChildren()].concat(this._player2 ? [this._player1, this._player2] : this._player1));
+        this._players.forEach((player) => {
+            if (player && player.active)
+                player.move();
+        });
+        this.checkMapBounds([...this._enemies.getChildren(), ...this._players]);
     }
     checkMapBounds(vehicles) {
         if (vehicles && vehicles.length > 0) {
@@ -1701,6 +1703,7 @@ class Level_2 extends Phaser.Scene {
         this._levelData = null;
         this._player1 = null;
         this._player2 = null;
+        this._players = [];
         this._enemies = null;
         this._turret1 = null;
         this._turret2 = null;
@@ -1718,38 +1721,25 @@ class Level_2 extends Phaser.Scene {
         this._fightingMelody = this.sound.add("fightMelody", { volume: 0.1, loop: true });
     }
     create({ data }) {
-        const width = this.sys.game.canvas.width;
         this._map = new Map_1.default(this, 2);
         this._levelData = data;
         this._enemiesArray = [3, 1, 2, 2, 3, 1, 3, 1, 2, 2, 3, 1, 2, 1, 1, 3, 2, 1];
         let position = null;
-        if (this._levelData.multiplayerGame && this._levelData.firstPlayer && this._levelData.secondPlayer) {
+        if (this._levelData.multiplayerGame) {
             this._maxEnemies = 10;
             this._enemiesArray.forEach((item, _, array) => array.push(item));
-            const player = this._map.getPlayer(1);
-            position = { x: player.x, y: player.y };
-            this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
-            (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
-            const player2 = this._map.getPlayer(2);
-            position = { x: player2.x, y: player2.y };
-            this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
-            (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
-        }
-        else if (this._levelData.multiplayerGame && this._levelData.firstPlayer && !this._levelData.secondPlayer) {
-            this._maxEnemies = 10;
-            this._enemiesArray.forEach((item, _, array) => array.push(item));
-            const player = this._map.getPlayer(1);
-            position = { x: player.x, y: player.y };
-            this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
-            (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
-        }
-        else if (this._levelData.multiplayerGame && !this._levelData.firstPlayer && this._levelData.secondPlayer) {
-            this._maxEnemies = 10;
-            this._enemiesArray.forEach((item, _, array) => array.push(item));
-            const player = this._map.getPlayer(2);
-            position = { x: player.x, y: player.y };
-            this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
-            (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
+            if (this._levelData.firstPlayer) {
+                const player = this._map.getPlayer(1);
+                position = { x: player.x, y: player.y };
+                this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+            }
+            if (this._levelData.secondPlayer) {
+                const player2 = this._map.getPlayer(2);
+                position = { x: player2.x, y: player2.y };
+                this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
+            }
         }
         else {
             const player = this._map.getPlayer(1);
@@ -1766,13 +1756,27 @@ class Level_2 extends Phaser.Scene {
         this._turret2 = new Turret_1.default(this, turretPosition, this._map, this._enemies, this._player1, this._player2, null, 2);
         this._enemiesLeft++;
         this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
+        if (this._player1) {
+            this._players.push(this._player1);
+            this._player1.enemyVehicles = this._enemies;
+            this._player1.enemyTurrets = [this._turret1, this._turret2];
+            this._player1.enemyTurretPlatforms = [this._turret1.platform, this._turret2.platform];
+            if (this._player2)
+                this._player1.player2 = this._player2;
+            this._player1.handleCollisions();
+        }
+        if (this._player2) {
+            this._players.push(this._player2);
+            this._player2.enemyVehicles = this._enemies;
+            this._player2.enemyTurrets = [this._turret1, this._turret2];
+            this._player2.enemyTurretPlatforms = [this._turret1.platform, this._turret2.platform];
+            if (this._player1)
+                this._player2.player1 = this._player1;
+            this._player2.handleCollisions();
+        }
         this.listenEvents();
-        this._player1.enemyVehicles = this._enemies;
-        this._player1.enemyTurrets = [this._turret1, this._turret2];
-        this._player1.enemyTurretPlatforms = [this._turret1.platform, this._turret2.platform];
-        this._player1.handleCollisions();
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
-        this.cameras.main.startFollow(this._player1);
+        this._player1 ? this.cameras.main.startFollow(this._player1) : this.cameras.main.startFollow(this._player2);
         this._fightingMelody.play();
         this.createFinishText();
     }
@@ -1822,16 +1826,24 @@ class Level_2 extends Phaser.Scene {
         }
     }
     firstPlayerDead() {
-        this.events.removeListener("enemy_dead");
-        this.events.removeListener("second_player_dead");
-        this.events.removeListener("first_player_dead");
-        this.runTween();
+        this._levelData.firstPlayer = null;
+        if (this._levelData.multiplayerGame && this._player2)
+            return;
+        else {
+            this.events.removeListener("first_player_dead");
+            this.events.removeListener("second_player_dead");
+            this.events.removeListener("enemy_dead");
+            this.runTween();
+        }
     }
     secondPlayerDead() {
-        this.events.removeListener("enemy_dead");
-        this.events.removeListener("first_player_dead");
-        this.events.removeListener("second_player_dead");
-        this.runTween();
+        this._levelData.secondPlayer = null;
+        if (this._levelData.multiplayerGame && !this._player1) {
+            this.events.removeListener("first_player_dead");
+            this.events.removeListener("second_player_dead");
+            this.events.removeListener("enemy_dead");
+            this.runTween();
+        }
     }
     runTween() {
         this.tweens.add({
@@ -1846,11 +1858,11 @@ class Level_2 extends Phaser.Scene {
         });
     }
     update() {
-        if (this._player1 && this._player1.active)
-            this._player1.move();
-        if (this._player2 && this._player2.active)
-            this._player2.move();
-        this.checkMapBounds([...this._enemies.getChildren()].concat(this._player2 ? [this._player1, this._player2] : this._player1));
+        this._players.forEach((player) => {
+            if (player && player.active)
+                player.move();
+        });
+        this.checkMapBounds([...this._enemies.getChildren(), ...this._players]);
     }
     checkMapBounds(vehicles) {
         if (vehicles && vehicles.length > 0) {
@@ -1904,6 +1916,7 @@ class Level_3 extends Phaser.Scene {
         this._levelData = null;
         this._player1 = null;
         this._player2 = null;
+        this._players = [];
         this._enemies = null;
         this._turret = null;
         this._radar = null;
@@ -1923,38 +1936,25 @@ class Level_3 extends Phaser.Scene {
         this._fightingMelody = this.sound.add("fightMelody", { volume: 0.1, loop: true });
     }
     create({ data }) {
-        const width = this.sys.game.canvas.width;
         this._map = new Map_1.default(this, 3);
         this._levelData = data;
         this._enemiesArray = [3, 1, 2, 3, 2, 1, 1, 3, 2, 1, 1, 3, 2, 1, 2, 2, 3, 1, 2, 1];
         let position = null;
-        if (this._levelData.multiplayerGame && this._levelData.firstPlayer && this._levelData.secondPlayer) {
+        if (this._levelData.multiplayerGame) {
             this._maxEnemies = 10;
             this._enemiesArray.forEach((item, _, array) => array.push(item));
-            const player = this._map.getPlayer(1);
-            position = { x: player.x, y: player.y };
-            this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
-            (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
-            const player2 = this._map.getPlayer(2);
-            position = { x: player2.x, y: player2.y };
-            this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
-            (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
-        }
-        else if (this._levelData.multiplayerGame && this._levelData.firstPlayer && !this._levelData.secondPlayer) {
-            this._maxEnemies = 10;
-            this._enemiesArray.forEach((item, _, array) => array.push(item));
-            const player = this._map.getPlayer(1);
-            position = { x: player.x, y: player.y };
-            this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
-            (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
-        }
-        else if (this._levelData.multiplayerGame && !this._levelData.firstPlayer && this._levelData.secondPlayer) {
-            this._maxEnemies = 10;
-            this._enemiesArray.forEach((item, _, array) => array.push(item));
-            const player = this._map.getPlayer(2);
-            position = { x: player.x, y: player.y };
-            this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
-            (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
+            if (this._levelData.firstPlayer) {
+                const player = this._map.getPlayer(1);
+                position = { x: player.x, y: player.y };
+                this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+            }
+            if (this._levelData.secondPlayer) {
+                const player2 = this._map.getPlayer(2);
+                position = { x: player2.x, y: player2.y };
+                this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
+            }
         }
         else {
             const player = this._map.getPlayer(1);
@@ -1974,14 +1974,35 @@ class Level_3 extends Phaser.Scene {
         this._turret.radar = this._radar;
         this._enemiesLeft++;
         this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
+        if (this._player1) {
+            this._players.push(this._player1);
+            this._player1.enemyVehicles = this._enemies;
+            this._player1.enemyTurrets = [this._turret];
+            this._player1.enemyTurretPlatforms = [this._turret.platform];
+            this._player1.headquarterRu = this._headquarterRu;
+            this._player1.headquarterUa = this._headquarterUa;
+            this._player1.radar = this._radar;
+            this._player1.enemiesStatic = [this._headquarterRu, this._headquarterUa, this._radar];
+            if (this._player2)
+                this._player1.player2 = this._player2;
+            this._player1.handleCollisions();
+        }
+        if (this._player2) {
+            this._players.push(this._player2);
+            this._player2.enemyVehicles = this._enemies;
+            this._player2.enemyTurrets = [this._turret];
+            this._player2.enemyTurretPlatforms = [this._turret.platform];
+            this._player2.headquarterRu = this._headquarterRu;
+            this._player2.headquarterUa = this._headquarterUa;
+            this._player2.radar = this._radar;
+            this._player2.enemiesStatic = [this._headquarterRu, this._headquarterUa, this._radar];
+            if (this._player1)
+                this._player2.player1 = this._player1;
+            this._player2.handleCollisions();
+        }
         this.listenEvents();
-        this._player1.enemyVehicles = this._enemies;
-        this._player1.enemyTurrets = [this._turret];
-        this._player1.enemyTurretPlatforms = [this._turret.platform];
-        this._player1.enemiesStatic = [this._radar, this._headquarterRu, this._headquarterUa];
-        this._player1.handleCollisions();
         this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
-        this.cameras.main.startFollow(this._player1);
+        this._player1 ? this.cameras.main.startFollow(this._player1) : this.cameras.main.startFollow(this._player2);
         this._fightingMelody.play();
         this.createFinishText();
     }
@@ -2037,16 +2058,24 @@ class Level_3 extends Phaser.Scene {
         }
     }
     firstPlayerDead() {
-        this.events.removeListener("first_player_dead");
-        this.events.removeListener("second_player_dead");
-        this.events.removeListener("enemy_dead");
-        this.runTween();
+        this._levelData.firstPlayer = null;
+        if (this._levelData.multiplayerGame && this._player2)
+            return;
+        else {
+            this.events.removeListener("first_player_dead");
+            this.events.removeListener("second_player_dead");
+            this.events.removeListener("enemy_dead");
+            this.runTween();
+        }
     }
     secondPlayerDead() {
-        this.events.removeListener("first_player_dead");
-        this.events.removeListener("second_player_dead");
-        this.events.removeListener("enemy_dead");
-        this.runTween();
+        this._levelData.secondPlayer = null;
+        if (this._levelData.multiplayerGame && !this._player1) {
+            this.events.removeListener("first_player_dead");
+            this.events.removeListener("second_player_dead");
+            this.events.removeListener("enemy_dead");
+            this.runTween();
+        }
     }
     headquarterDestroyed() {
         this._headquarterUa = null;
@@ -2066,11 +2095,11 @@ class Level_3 extends Phaser.Scene {
         });
     }
     update() {
-        if (this._player1 && this._player1.active)
-            this._player1.move();
-        if (this._player2 && this._player2.active)
-            this._player2.move();
-        this.checkMapBounds([...this._enemies.getChildren()].concat(this._player2 ? [this._player1, this._player2] : this._player1));
+        this._players.forEach((player) => {
+            if (player && player.active)
+                player.move();
+        });
+        this.checkMapBounds([...this._enemies.getChildren(), ...this._players]);
     }
     checkMapBounds(vehicles) {
         if (vehicles && vehicles.length > 0) {
