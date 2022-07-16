@@ -1496,25 +1496,18 @@ exports["default"] = HelpScene;
 
 /***/ }),
 
-/***/ "./src/scenes/Level_1.ts":
-/*!*******************************!*\
-  !*** ./src/scenes/Level_1.ts ***!
-  \*******************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ "./src/scenes/Level.ts":
+/*!*****************************!*\
+  !*** ./src/scenes/Level.ts ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const Map_1 = __importDefault(__webpack_require__(/*! ../classes/Map */ "./src/classes/Map.ts"));
-const Player_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/player/Player */ "./src/classes/vehicles/player/Player.ts"));
 const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
-const GroupOfEnemies_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/enemies/GroupOfEnemies */ "./src/classes/vehicles/enemies/GroupOfEnemies.ts"));
-const Player2_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/player/Player2 */ "./src/classes/vehicles/player/Player2.ts"));
-class Level_1 extends Phaser.Scene {
-    constructor() {
-        super({ key: "level-1" });
+class Level extends Phaser.Scene {
+    constructor(levelName) {
+        super({ key: levelName });
         this._map = null;
         this._levelData = null;
         this._player1 = null;
@@ -1534,88 +1527,17 @@ class Level_1 extends Phaser.Scene {
         this._style = { fontFamily: "RussoOne", fontSize: "40px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
         this._fightingMelody = this.sound.add("fightMelody", { volume: 0.1, loop: true });
     }
-    create({ data }) {
-        this._map = new Map_1.default(this, 1);
-        this._levelData = data;
-        this._enemiesArray = [3, 1, 2, 2, 3, 1, 2, 1, 1, 3, 2, 1];
-        const player = this._map.getPlayer(1);
-        let position = { x: player.x, y: player.y };
-        this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
-        this._players.push(this._player1);
-        (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
-        if (this._levelData.secondPlayer) {
-            const player2 = this._map.getPlayer(2);
-            position = { x: player2.x, y: player2.y };
-            this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
-            this._players.push(this._player2);
-            this._player2.player1 = this._player1;
-            this._player1.player2 = this._player2;
-            this._enemiesArray.forEach((item, _, array) => array.push(item));
-            this._maxEnemies = 10;
-            (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
-        }
-        this._enemiesLeft = this._enemiesArray.length;
-        this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2);
-        this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
-        this._player1.enemyVehicles = this._enemies;
-        this._player1.handleCollisions();
-        if (this._levelData.secondPlayer) {
-            this._player2.enemyVehicles = this._enemies;
-            this._player2.handleCollisions();
-        }
-        this.listenEvents();
-        this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
-        this.cameras.main.startFollow(this._player1);
-        this._fightingMelody.play();
-        this.createFinishText();
-    }
-    listenEvents() {
-        if (this.events.listeners("first_player_dead").length <= 0) {
-            this.events.on("first_player_dead", this.firstPlayerDead, this);
-        }
-        if (this.events.listeners("second_player_dead").length <= 0) {
-            this.events.on("second_player_dead", this.secondPlayerDead, this);
-        }
-        if (this.events.listeners("enemy_dead").length <= 0) {
-            this.events.on("enemy_dead", this.enemyDead, this);
-        }
-    }
     createFinishText() {
         this._finishText = (0, utils_1.createText)(this, this.sys.game.canvas.width, this.sys.game.canvas.height + 150, "GAME OVER", { fontFamily: "RussoOne", fontSize: "90px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 });
         this._finishText.setX(this.sys.game.canvas.width / 2 - this._finishText.width / 2);
         this._finishText.depth = 10;
     }
-    enemyDead(toCount) {
-        if (toCount) {
-            --this._enemies.counter;
-            --this._enemiesLeft;
-            this._enemiesText.setText(`Enemies: ${this._enemiesLeft}`);
-        }
-        if (this._enemiesLeft <= 0) {
-            this._levelData.nextLevelNumber = "level-2";
-            this._levelData.nextLevelName = "First Blood";
-            if (this._player1 && this._levelData.firstPlayer) {
-                this._levelData.firstPlayer.experience = this._player1.experience;
-                this._levelData.firstPlayer.tanksPerLevel = this._player1.tanksPerLevel;
-                this._levelData.firstPlayer.bmpPerLevel = this._player1.bmpPerLevel;
-                this._levelData.firstPlayer.btrPerLevel = this._player1.btrPerLevel;
-                this._levelData.firstPlayer.turretsPerLevel = this._player1.turretsPerLevel;
-                this._levelData.firstPlayer.radarPerLevel = this._player1.radarPerLevel;
-            }
-            if (this._player2 && this._levelData.secondPlayer) {
-                this._levelData.secondPlayer.experience = this._player2.experience;
-                this._levelData.secondPlayer.tanksPerLevel = this._player2.tanksPerLevel;
-                this._levelData.secondPlayer.bmpPerLevel = this._player2.bmpPerLevel;
-                this._levelData.secondPlayer.btrPerLevel = this._player2.btrPerLevel;
-                this._levelData.secondPlayer.turretsPerLevel = this._player2.turretsPerLevel;
-                this._levelData.secondPlayer.radarPerLevel = this._player2.radarPerLevel;
-            }
-            this._fightingMelody.stop();
-            this.scene.start("postlevel-scene", { data: this._levelData });
-        }
-    }
+    listenEvents() { }
+    enemyDead(toCount, isHeadquarterRuDestroyed) { }
+    headquarterDestroyed() { }
     firstPlayerDead() {
         this._levelData.firstPlayer = null;
+        this._player1 = null;
         if (this._levelData.multiplayerGame && this._player2)
             return;
         else {
@@ -1627,6 +1549,7 @@ class Level_1 extends Phaser.Scene {
     }
     secondPlayerDead() {
         this._levelData.secondPlayer = null;
+        this._player2 = null;
         if (this._levelData.multiplayerGame && !this._player1) {
             this.events.removeListener("first_player_dead");
             this.events.removeListener("second_player_dead");
@@ -1674,6 +1597,106 @@ class Level_1 extends Phaser.Scene {
         }
     }
 }
+exports["default"] = Level;
+
+
+/***/ }),
+
+/***/ "./src/scenes/Level_1.ts":
+/*!*******************************!*\
+  !*** ./src/scenes/Level_1.ts ***!
+  \*******************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const Map_1 = __importDefault(__webpack_require__(/*! ../classes/Map */ "./src/classes/Map.ts"));
+const Player_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/player/Player */ "./src/classes/vehicles/player/Player.ts"));
+const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
+const GroupOfEnemies_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/enemies/GroupOfEnemies */ "./src/classes/vehicles/enemies/GroupOfEnemies.ts"));
+const Player2_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/player/Player2 */ "./src/classes/vehicles/player/Player2.ts"));
+const Level_2 = __importDefault(__webpack_require__(/*! ./Level */ "./src/scenes/Level.ts"));
+class Level_1 extends Level_2.default {
+    constructor() { super("level-1"); }
+    create({ data }) {
+        this._map = new Map_1.default(this, 1);
+        this._levelData = data;
+        this._enemiesArray = [3, 1, 2, 2, 3, 1, 2, 1, 1, 3, 2, 1];
+        const player = this._map.getPlayer(1);
+        let position = { x: player.x, y: player.y };
+        this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+        this._players.push(this._player1);
+        (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+        if (this._levelData.secondPlayer) {
+            const player2 = this._map.getPlayer(2);
+            position = { x: player2.x, y: player2.y };
+            this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
+            this._players.push(this._player2);
+            this._player2.player1 = this._player1;
+            this._player1.player2 = this._player2;
+            this._enemiesArray.forEach((item, _, array) => array.push(item));
+            this._maxEnemies = 10;
+            (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
+        }
+        this._enemiesLeft = this._enemiesArray.length;
+        this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2);
+        this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
+        this._player1.enemyVehicles = this._enemies;
+        this._player1.handleCollisions();
+        if (this._levelData.secondPlayer) {
+            this._player2.enemyVehicles = this._enemies;
+            this._player2.handleCollisions();
+        }
+        this.listenEvents();
+        this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
+        this.cameras.main.startFollow(this._player1);
+        this._fightingMelody.play();
+        this.createFinishText();
+    }
+    listenEvents() {
+        if (this.events.listeners("first_player_dead").length <= 0) {
+            this.events.on("first_player_dead", this.firstPlayerDead, this);
+        }
+        if (this.events.listeners("second_player_dead").length <= 0) {
+            this.events.on("second_player_dead", this.secondPlayerDead, this);
+        }
+        if (this.events.listeners("enemy_dead").length <= 0) {
+            this.events.on("enemy_dead", this.enemyDead, this);
+        }
+    }
+    enemyDead(toCount) {
+        if (toCount) {
+            --this._enemies.counter;
+            --this._enemiesLeft;
+            this._enemiesText.setText(`Enemies: ${this._enemiesLeft}`);
+        }
+        if (this._enemiesLeft <= 0) {
+            this._levelData.nextLevelNumber = "level-2";
+            this._levelData.nextLevelName = "First Blood";
+            if (this._player1 && this._levelData.firstPlayer) {
+                this._levelData.firstPlayer.experience = this._player1.experience;
+                this._levelData.firstPlayer.tanksPerLevel = this._player1.tanksPerLevel;
+                this._levelData.firstPlayer.bmpPerLevel = this._player1.bmpPerLevel;
+                this._levelData.firstPlayer.btrPerLevel = this._player1.btrPerLevel;
+                this._levelData.firstPlayer.turretsPerLevel = this._player1.turretsPerLevel;
+                this._levelData.firstPlayer.radarPerLevel = this._player1.radarPerLevel;
+            }
+            if (this._player2 && this._levelData.secondPlayer) {
+                this._levelData.secondPlayer.experience = this._player2.experience;
+                this._levelData.secondPlayer.tanksPerLevel = this._player2.tanksPerLevel;
+                this._levelData.secondPlayer.bmpPerLevel = this._player2.bmpPerLevel;
+                this._levelData.secondPlayer.btrPerLevel = this._player2.btrPerLevel;
+                this._levelData.secondPlayer.turretsPerLevel = this._player2.turretsPerLevel;
+                this._levelData.secondPlayer.radarPerLevel = this._player2.radarPerLevel;
+            }
+            this._fightingMelody.stop();
+            this.scene.start("postlevel-scene", { data: this._levelData });
+        }
+    }
+}
 exports["default"] = Level_1;
 
 
@@ -1696,29 +1719,12 @@ const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts"
 const GroupOfEnemies_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/enemies/GroupOfEnemies */ "./src/classes/vehicles/enemies/GroupOfEnemies.ts"));
 const Player2_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/player/Player2 */ "./src/classes/vehicles/player/Player2.ts"));
 const Turret_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/enemies/Turret */ "./src/classes/vehicles/enemies/Turret.ts"));
-class Level_2 extends Phaser.Scene {
+const Level_1 = __importDefault(__webpack_require__(/*! ./Level */ "./src/scenes/Level.ts"));
+class Level_2 extends Level_1.default {
     constructor() {
-        super({ key: "level-2" });
-        this._map = null;
-        this._levelData = null;
-        this._player1 = null;
-        this._player2 = null;
-        this._players = [];
-        this._enemies = null;
+        super("level-2");
         this._turret1 = null;
         this._turret2 = null;
-        this._enemiesText = null;
-        this._finishText = null;
-        this._enemiesArray = null;
-        this._enemiesLeft = 0;
-        this._maxEnemies = 6;
-        this._style = null;
-        this._fightingMelody = null;
-    }
-    preload() {
-        this.add.sprite(0, 0, "background").setOrigin(0);
-        this._style = { fontFamily: "RussoOne", fontSize: "40px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
-        this._fightingMelody = this.sound.add("fightMelody", { volume: 0.1, loop: true });
     }
     create({ data }) {
         this._map = new Map_1.default(this, 2);
@@ -1791,11 +1797,6 @@ class Level_2 extends Phaser.Scene {
             this.events.on("enemy_dead", this.enemyDead, this);
         }
     }
-    createFinishText() {
-        this._finishText = (0, utils_1.createText)(this, this.sys.game.canvas.width, this.sys.game.canvas.height + 150, "GAME OVER", { fontFamily: "RussoOne", fontSize: "90px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 });
-        this._finishText.setX(this.sys.game.canvas.width / 2 - this._finishText.width / 2);
-        this._finishText.depth = 10;
-    }
     enemyDead(toCount) {
         if (toCount) {
             --this._enemies.counter;
@@ -1825,65 +1826,6 @@ class Level_2 extends Phaser.Scene {
             this.scene.start("postlevel-scene", { data: this._levelData });
         }
     }
-    firstPlayerDead() {
-        this._levelData.firstPlayer = null;
-        if (this._levelData.multiplayerGame && this._player2)
-            return;
-        else {
-            this.events.removeListener("first_player_dead");
-            this.events.removeListener("second_player_dead");
-            this.events.removeListener("enemy_dead");
-            this.runTween();
-        }
-    }
-    secondPlayerDead() {
-        this._levelData.secondPlayer = null;
-        if (this._levelData.multiplayerGame && !this._player1) {
-            this.events.removeListener("first_player_dead");
-            this.events.removeListener("second_player_dead");
-            this.events.removeListener("enemy_dead");
-            this.runTween();
-        }
-    }
-    runTween() {
-        this.tweens.add({
-            targets: this._finishText,
-            y: this.sys.game.canvas.height / 2 - 70,
-            duration: 3000,
-            onComplete: () => {
-                this._fightingMelody.stop();
-                this.tweens.killAll();
-                this.scene.start("start-scene");
-            }
-        });
-    }
-    update() {
-        this._players.forEach((player) => {
-            if (player && player.active)
-                player.move();
-        });
-        this.checkMapBounds([...this._enemies.getChildren(), ...this._players]);
-    }
-    checkMapBounds(vehicles) {
-        if (vehicles && vehicles.length > 0) {
-            for (let i = 0; i < vehicles.length; i++) {
-                if (!vehicles[i].body)
-                    continue;
-                if (vehicles[i].body.y > this._map.tilemap.heightInPixels - 30) {
-                    vehicles[i].body.y = this._map.tilemap.heightInPixels - 30 - 20;
-                }
-                if (vehicles[i].body.y < 0) {
-                    vehicles[i].body.y = 20;
-                }
-                if (vehicles[i].body.x < 0) {
-                    vehicles[i].body.x = 20;
-                }
-                if (vehicles[i].body.x > this._map.tilemap.widthInPixels - 30) {
-                    vehicles[i].body.x = this._map.tilemap.widthInPixels - 30 - 20;
-                }
-            }
-        }
-    }
 }
 exports["default"] = Level_2;
 
@@ -1909,31 +1851,14 @@ const Turret_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/ene
 const Player_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/player/Player */ "./src/classes/vehicles/player/Player.ts"));
 const Player2_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/player/Player2 */ "./src/classes/vehicles/player/Player2.ts"));
 const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
-class Level_3 extends Phaser.Scene {
+const Level_1 = __importDefault(__webpack_require__(/*! ./Level */ "./src/scenes/Level.ts"));
+class Level_3 extends Level_1.default {
     constructor() {
-        super({ key: "level-3" });
-        this._map = null;
-        this._levelData = null;
-        this._player1 = null;
-        this._player2 = null;
-        this._players = [];
-        this._enemies = null;
+        super("level-3");
         this._turret = null;
         this._radar = null;
         this._headquarterRu = null;
         this._headquarterUa = null;
-        this._enemiesText = null;
-        this._finishText = null;
-        this._enemiesArray = null;
-        this._enemiesLeft = 0;
-        this._maxEnemies = 6;
-        this._style = null;
-        this._fightingMelody = null;
-    }
-    preload() {
-        this.add.sprite(0, 0, "background").setOrigin(0);
-        this._style = { fontFamily: "RussoOne", fontSize: "40px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
-        this._fightingMelody = this.sound.add("fightMelody", { volume: 0.1, loop: true });
     }
     create({ data }) {
         this._map = new Map_1.default(this, 3);
@@ -2023,11 +1948,6 @@ class Level_3 extends Phaser.Scene {
             this.events.on("headquarterUa_destroyed", this.headquarterDestroyed, this);
         }
     }
-    createFinishText() {
-        this._finishText = (0, utils_1.createText)(this, this.sys.game.canvas.width, this.sys.game.canvas.height + 150, "GAME OVER", { fontFamily: "RussoOne", fontSize: "90px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 });
-        this._finishText.setX(this.sys.game.canvas.width / 2 - this._finishText.width / 2);
-        this._finishText.depth = 10;
-    }
     enemyDead(toCount, isHeadquarterRuDestroyed) {
         if (toCount) {
             --this._enemies.counter;
@@ -2057,69 +1977,10 @@ class Level_3 extends Phaser.Scene {
             this.scene.start("postlevel-scene", { data: this._levelData });
         }
     }
-    firstPlayerDead() {
-        this._levelData.firstPlayer = null;
-        if (this._levelData.multiplayerGame && this._player2)
-            return;
-        else {
-            this.events.removeListener("first_player_dead");
-            this.events.removeListener("second_player_dead");
-            this.events.removeListener("enemy_dead");
-            this.runTween();
-        }
-    }
-    secondPlayerDead() {
-        this._levelData.secondPlayer = null;
-        if (this._levelData.multiplayerGame && !this._player1) {
-            this.events.removeListener("first_player_dead");
-            this.events.removeListener("second_player_dead");
-            this.events.removeListener("enemy_dead");
-            this.runTween();
-        }
-    }
     headquarterDestroyed() {
         this._headquarterUa = null;
         if (!this._headquarterUa)
             this.runTween();
-    }
-    runTween() {
-        this.tweens.add({
-            targets: this._finishText,
-            y: this.sys.game.canvas.height / 2 - 70,
-            duration: 3000,
-            onComplete: () => {
-                this._fightingMelody.stop();
-                this.tweens.killAll();
-                this.scene.start("start-scene");
-            }
-        });
-    }
-    update() {
-        this._players.forEach((player) => {
-            if (player && player.active)
-                player.move();
-        });
-        this.checkMapBounds([...this._enemies.getChildren(), ...this._players]);
-    }
-    checkMapBounds(vehicles) {
-        if (vehicles && vehicles.length > 0) {
-            for (let i = 0; i < vehicles.length; i++) {
-                if (!vehicles[i].body)
-                    continue;
-                if (vehicles[i].body.y > this._map.tilemap.heightInPixels - 30) {
-                    vehicles[i].body.y = this._map.tilemap.heightInPixels - 30 - 20;
-                }
-                if (vehicles[i].body.y < 0) {
-                    vehicles[i].body.y = 20;
-                }
-                if (vehicles[i].body.x < 0) {
-                    vehicles[i].body.x = 20;
-                }
-                if (vehicles[i].body.x > this._map.tilemap.widthInPixels - 30) {
-                    vehicles[i].body.x = this._map.tilemap.widthInPixels - 30 - 20;
-                }
-            }
-        }
     }
 }
 exports["default"] = Level_3;
