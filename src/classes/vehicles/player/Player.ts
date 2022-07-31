@@ -155,13 +155,6 @@ export default class Player extends Vehicle {
         if (enemy instanceof Radar) {
             enemy.destroyRadar(shell);
         }
-        // if (enemy.frame.name === "platform1") {
-        //     (enemy as Radar).destroyRadar();
-        // }
-        // else if (enemy.frame.name === "headquarterRu") {
-        //     (enemy as Headquarter).destroyHeadquarter();
-        //     this._headquarterRu = null;
-        // }
         else if (enemy instanceof Headquarter) {
             enemy.destroyHeadquarter();
             this._headquarterRu = null;

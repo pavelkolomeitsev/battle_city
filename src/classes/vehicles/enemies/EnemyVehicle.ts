@@ -1,4 +1,4 @@
-import { StartPosition, DIRECTION, ENEMY, goToOpositeDirection } from "../../../utils/utils";
+import { StartPosition, DIRECTION, ENEMY, goToOpositeDirection, goToAnotherDirection } from "../../../utils/utils";
 import BangAnimation from "../../animation/BangAnimation";
 import Map from "../../Map";
 import Player from "../player/Player";
@@ -151,20 +151,23 @@ export default class EnemyVehicle extends Vehicle {
     }
 
     private getVehiclesDirection(): [number, number, number] { // x, y, angle
-        const direction: number = Math.floor(Math.random() * 4) + 1; // get random value between 1 and 4
+        const direction: number = Math.floor(Math.random() * 5) + 1; // get random value between 1 and 4
         switch (direction) {
             case 1:
-                this.direction = DIRECTION.UP;
-                return [0, -this.velocity, 180]; // go up
-            case 2:
-                this.direction = DIRECTION.RIGHT;
-                return [this.velocity, 0, -90]; // go right
-            case 3:
                 this.direction = DIRECTION.DOWN;
                 return [0, this.velocity, 0]; // go down
+            case 2:
+                this.direction = DIRECTION.UP;
+                return [0, -this.velocity, 180]; // go up
+            case 3:
+                this.direction = DIRECTION.RIGHT;
+                return [this.velocity, 0, -90]; // go right
             case 4:
                 this.direction = DIRECTION.LEFT;
                 return [-this.velocity, 0, 90]; // go left
+            case 5:
+                this.direction = DIRECTION.DOWN;
+                return [0, this.velocity, 0]; // more often enemies go down
             default:
                 this.direction = DIRECTION.DOWN;
                 return [0, this.velocity, 0];
@@ -241,7 +244,8 @@ export default class EnemyVehicle extends Vehicle {
     }
 
     private handleEnemiesCollision(gameObject: Phaser.GameObjects.Sprite, enemy: EnemyVehicle): void {
-        goToOpositeDirection(enemy);
+        // goToOpositeDirection(enemy);
+        goToAnotherDirection(enemy);
     }
 
     private calculateExperiencePoints(id: string, points: number, enemyType: string): void {

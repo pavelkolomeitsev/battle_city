@@ -1,6 +1,6 @@
 import Map from "../../Map";
 import EnemyVehicle from "./EnemyVehicle";
-import { goToOpositeDirection, StartPosition } from "../../../utils/utils";
+import { goToAnotherDirection, goToOpositeDirection, StartPosition } from "../../../utils/utils";
 import Player from "../player/Player";
 import Player2 from "../player/Player2";
 import Headquarter from "../../Headquarter";
@@ -15,7 +15,7 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     private _headquarterUa: Headquarter = null;
     private _headquarterRu: Headquarter = null;
     private _numberOfBase: number = 0;
-    private _maxEnemies: number = 6;
+    private _maxEnemies: number = 0;
     public counter: number = 0;
 
     constructor(world: Phaser.Physics.Arcade.World, scene: Phaser.Scene, map: Map, enemies: number[], maxEnemies: number, numberOfBase: number, player1: Player = null, player2: Player2 = null, headquarterUa: Headquarter = null, headquarterRu: Headquarter = null) {
@@ -30,13 +30,13 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
         this._headquarterRu = headquarterRu;
         this._numberOfBase = numberOfBase;
         this._timer = this._scene.time.addEvent({ // add new enemy every 3 seconds
-            delay: 2700,
+            delay: 3000,
             loop: true,
             callback: this.addEnemy,
             callbackScope: this
         });
         // prevent enemy`s overlapping with each other
-        this._scene.physics.add.collider(this, this, this.handleEnemyVehicleCollision, null, this);
+        // this._scene.physics.add.collider(this, this, this.handleEnemyVehicleCollision, null, this);
     }
 
     private addEnemy(): void {
@@ -71,7 +71,10 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     }
 
     private handleEnemyVehicleCollision(firstEnemy: EnemyVehicle, secondEnemy: EnemyVehicle): void {
-        goToOpositeDirection(firstEnemy);
-        secondEnemy.body.stop();
+        // firstEnemy.body.stop();
+        // goToOpositeDirection(firstEnemy);
+        // goToOpositeDirection(secondEnemy);
+        // goToAnotherDirection(secondEnemy);
+        // secondEnemy.body.stop();
     }
 }

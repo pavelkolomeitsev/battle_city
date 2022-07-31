@@ -639,20 +639,23 @@ class EnemyVehicle extends Vehicle_1.default {
         this.angle = angle;
     }
     getVehiclesDirection() {
-        const direction = Math.floor(Math.random() * 4) + 1;
+        const direction = Math.floor(Math.random() * 5) + 1;
         switch (direction) {
             case 1:
-                this.direction = utils_1.DIRECTION.UP;
-                return [0, -this.velocity, 180];
-            case 2:
-                this.direction = utils_1.DIRECTION.RIGHT;
-                return [this.velocity, 0, -90];
-            case 3:
                 this.direction = utils_1.DIRECTION.DOWN;
                 return [0, this.velocity, 0];
+            case 2:
+                this.direction = utils_1.DIRECTION.UP;
+                return [0, -this.velocity, 180];
+            case 3:
+                this.direction = utils_1.DIRECTION.RIGHT;
+                return [this.velocity, 0, -90];
             case 4:
                 this.direction = utils_1.DIRECTION.LEFT;
                 return [-this.velocity, 0, 90];
+            case 5:
+                this.direction = utils_1.DIRECTION.DOWN;
+                return [0, this.velocity, 0];
             default:
                 this.direction = utils_1.DIRECTION.DOWN;
                 return [0, this.velocity, 0];
@@ -725,7 +728,7 @@ class EnemyVehicle extends Vehicle_1.default {
         shell.setAlive(false);
     }
     handleEnemiesCollision(gameObject, enemy) {
-        (0, utils_1.goToOpositeDirection)(enemy);
+        (0, utils_1.goToAnotherDirection)(enemy);
     }
     calculateExperiencePoints(id, points, enemyType) {
         if (this._player1 && id === "P1") {
@@ -768,7 +771,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const EnemyVehicle_1 = __importDefault(__webpack_require__(/*! ./EnemyVehicle */ "./src/classes/vehicles/enemies/EnemyVehicle.ts"));
-const utils_1 = __webpack_require__(/*! ../../../utils/utils */ "./src/utils/utils.ts");
 class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     constructor(world, scene, map, enemies, maxEnemies, numberOfBase, player1 = null, player2 = null, headquarterUa = null, headquarterRu = null) {
         super(world, scene);
@@ -781,7 +783,7 @@ class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
         this._headquarterUa = null;
         this._headquarterRu = null;
         this._numberOfBase = 0;
-        this._maxEnemies = 6;
+        this._maxEnemies = 0;
         this.counter = 0;
         this._scene = scene;
         this._map = map;
@@ -793,12 +795,11 @@ class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
         this._headquarterRu = headquarterRu;
         this._numberOfBase = numberOfBase;
         this._timer = this._scene.time.addEvent({
-            delay: 2700,
+            delay: 3000,
             loop: true,
             callback: this.addEnemy,
             callbackScope: this
         });
-        this._scene.physics.add.collider(this, this, this.handleEnemyVehicleCollision, null, this);
     }
     addEnemy() {
         var _a;
@@ -826,8 +827,6 @@ class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
         }
     }
     handleEnemyVehicleCollision(firstEnemy, secondEnemy) {
-        (0, utils_1.goToOpositeDirection)(firstEnemy);
-        secondEnemy.body.stop();
     }
 }
 exports["default"] = GroupOfEnemies;
@@ -891,7 +890,7 @@ class Radar extends Phaser.GameObjects.Sprite {
         }
     }
     handleCollision(enemy, radar) {
-        (0, utils_1.goToOpositeDirection)(enemy);
+        (0, utils_1.goToAnotherDirection)(enemy);
     }
 }
 exports["default"] = Radar;
@@ -984,7 +983,7 @@ class Turret {
         shell.setAlive(false);
     }
     handleCollision(enemy, platform) {
-        (0, utils_1.goToOpositeDirection)(enemy);
+        (0, utils_1.goToAnotherDirection)(enemy);
     }
     runTurret() {
         if (!this._radar) {
@@ -1035,7 +1034,6 @@ class Turret {
             this.calculateExperiencePoints(id, 1.1);
             this._scene.events.off("update", this.runTurret, this);
             this._scene.events.emit("enemy_dead", true, false);
-            this._scene = null;
         }
     }
     calculateExperiencePoints(id, points) {
@@ -1398,14 +1396,17 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const BootScene_1 = __importDefault(__webpack_require__(/*! ./scenes/BootScene */ "./src/scenes/BootScene.ts"));
 const PreloadScene_1 = __importDefault(__webpack_require__(/*! ./scenes/PreloadScene */ "./src/scenes/PreloadScene.ts"));
 const StartScene_1 = __importDefault(__webpack_require__(/*! ./scenes/StartScene */ "./src/scenes/StartScene.ts"));
-const Level_1_1 = __importDefault(__webpack_require__(/*! ./scenes/Level_1 */ "./src/scenes/Level_1.ts"));
+const Level_1_1 = __importDefault(__webpack_require__(/*! ./scenes/levels/Level_1 */ "./src/scenes/levels/Level_1.ts"));
 const PostStartScene_1 = __importDefault(__webpack_require__(/*! ./scenes/PostStartScene */ "./src/scenes/PostStartScene.ts"));
 const HelpScene_1 = __importDefault(__webpack_require__(/*! ./scenes/HelpScene */ "./src/scenes/HelpScene.ts"));
 const PrelevelScene_1 = __importDefault(__webpack_require__(/*! ./scenes/PrelevelScene */ "./src/scenes/PrelevelScene.ts"));
 const PostlevelScene_1 = __importDefault(__webpack_require__(/*! ./scenes/PostlevelScene */ "./src/scenes/PostlevelScene.ts"));
 const GameOverScene_1 = __importDefault(__webpack_require__(/*! ./scenes/GameOverScene */ "./src/scenes/GameOverScene.ts"));
-const Level_2_1 = __importDefault(__webpack_require__(/*! ./scenes/Level_2 */ "./src/scenes/Level_2.ts"));
-const Level_3_1 = __importDefault(__webpack_require__(/*! ./scenes/Level_3 */ "./src/scenes/Level_3.ts"));
+const Level_2_1 = __importDefault(__webpack_require__(/*! ./scenes/levels/Level_2 */ "./src/scenes/levels/Level_2.ts"));
+const Level_5_1 = __importDefault(__webpack_require__(/*! ./scenes/levels/Level_5 */ "./src/scenes/levels/Level_5.ts"));
+const Level_3_1 = __importDefault(__webpack_require__(/*! ./scenes/levels/Level_3 */ "./src/scenes/levels/Level_3.ts"));
+const Level_4_1 = __importDefault(__webpack_require__(/*! ./scenes/levels/Level_4 */ "./src/scenes/levels/Level_4.ts"));
+const Level_6_1 = __importDefault(__webpack_require__(/*! ./scenes/levels/Level_6 */ "./src/scenes/levels/Level_6.ts"));
 const config = {
     type: Phaser.AUTO,
     width: window.innerWidth,
@@ -1420,7 +1421,10 @@ const config = {
         new PostlevelScene_1.default(),
         new Level_1_1.default(),
         new Level_2_1.default(),
+        new Level_5_1.default(),
         new Level_3_1.default(),
+        new Level_4_1.default(),
+        new Level_6_1.default(),
         new GameOverScene_1.default()
     ],
     scale: {
@@ -1492,498 +1496,6 @@ class HelpScene extends Phaser.Scene {
     }
 }
 exports["default"] = HelpScene;
-
-
-/***/ }),
-
-/***/ "./src/scenes/Level.ts":
-/*!*****************************!*\
-  !*** ./src/scenes/Level.ts ***!
-  \*****************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
-class Level extends Phaser.Scene {
-    constructor(levelName) {
-        super({ key: levelName });
-        this._map = null;
-        this._levelData = null;
-        this._player1 = null;
-        this._player2 = null;
-        this._players = [];
-        this._enemies = null;
-        this._enemiesText = null;
-        this._finishText = null;
-        this._enemiesArray = null;
-        this._enemiesLeft = 0;
-        this._maxEnemies = 6;
-        this._style = null;
-        this._fightingMelody = null;
-    }
-    preload() {
-        this.add.sprite(0, 0, "background").setOrigin(0);
-        this._style = { fontFamily: "RussoOne", fontSize: "40px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
-        this._fightingMelody = this.sound.add("fightMelody", { volume: 0.1, loop: true });
-    }
-    createFinishText() {
-        this._finishText = (0, utils_1.createText)(this, this.sys.game.canvas.width, this.sys.game.canvas.height + 150, "GAME OVER", { fontFamily: "RussoOne", fontSize: "90px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 });
-        this._finishText.setX(this.sys.game.canvas.width / 2 - this._finishText.width / 2);
-        this._finishText.depth = 10;
-    }
-    listenEvents() { }
-    enemyDead(toCount, isHeadquarterRuDestroyed) { }
-    headquarterDestroyed() { }
-    firstPlayerDead() {
-        this._levelData.firstPlayer = null;
-        this._player1 = null;
-        if (this._levelData.multiplayerGame && this._player2)
-            return;
-        else {
-            this.events.removeListener("first_player_dead");
-            this.events.removeListener("second_player_dead");
-            this.events.removeListener("enemy_dead");
-            this.runTween();
-        }
-    }
-    secondPlayerDead() {
-        this._levelData.secondPlayer = null;
-        this._player2 = null;
-        if (this._levelData.multiplayerGame && !this._player1) {
-            this.events.removeListener("first_player_dead");
-            this.events.removeListener("second_player_dead");
-            this.events.removeListener("enemy_dead");
-            this.runTween();
-        }
-    }
-    runTween() {
-        this.tweens.add({
-            targets: this._finishText,
-            y: this.sys.game.canvas.height / 2 - 70,
-            duration: 3000,
-            onComplete: () => {
-                this._fightingMelody.stop();
-                this.tweens.killAll();
-                this.scene.start("start-scene");
-            }
-        });
-    }
-    update() {
-        this._players.forEach((player) => {
-            if (player && player.active)
-                player.move();
-        });
-        this.checkMapBounds([...this._enemies.getChildren(), ...this._players]);
-    }
-    checkMapBounds(vehicles) {
-        if (vehicles && vehicles.length > 0) {
-            for (let i = 0; i < vehicles.length; i++) {
-                if (!vehicles[i].body)
-                    continue;
-                if (vehicles[i].body.y > this._map.tilemap.heightInPixels - 30) {
-                    vehicles[i].body.y = this._map.tilemap.heightInPixels - 30 - 20;
-                }
-                if (vehicles[i].body.y < 0) {
-                    vehicles[i].body.y = 20;
-                }
-                if (vehicles[i].body.x < 0) {
-                    vehicles[i].body.x = 20;
-                }
-                if (vehicles[i].body.x > this._map.tilemap.widthInPixels - 30) {
-                    vehicles[i].body.x = this._map.tilemap.widthInPixels - 30 - 20;
-                }
-            }
-        }
-    }
-}
-exports["default"] = Level;
-
-
-/***/ }),
-
-/***/ "./src/scenes/Level_1.ts":
-/*!*******************************!*\
-  !*** ./src/scenes/Level_1.ts ***!
-  \*******************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const Map_1 = __importDefault(__webpack_require__(/*! ../classes/Map */ "./src/classes/Map.ts"));
-const Player_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/player/Player */ "./src/classes/vehicles/player/Player.ts"));
-const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
-const GroupOfEnemies_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/enemies/GroupOfEnemies */ "./src/classes/vehicles/enemies/GroupOfEnemies.ts"));
-const Player2_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/player/Player2 */ "./src/classes/vehicles/player/Player2.ts"));
-const Level_2 = __importDefault(__webpack_require__(/*! ./Level */ "./src/scenes/Level.ts"));
-class Level_1 extends Level_2.default {
-    constructor() { super("level-1"); }
-    create({ data }) {
-        this._map = new Map_1.default(this, 1);
-        this._levelData = data;
-        this._enemiesArray = [3, 1, 2, 2, 3, 1, 2, 1, 1, 3, 2, 1];
-        const player = this._map.getPlayer(1);
-        let position = { x: player.x, y: player.y };
-        this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
-        this._players.push(this._player1);
-        (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
-        if (this._levelData.secondPlayer) {
-            const player2 = this._map.getPlayer(2);
-            position = { x: player2.x, y: player2.y };
-            this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
-            this._players.push(this._player2);
-            this._player2.player1 = this._player1;
-            this._player1.player2 = this._player2;
-            this._enemiesArray.forEach((item, _, array) => array.push(item));
-            this._maxEnemies = 10;
-            (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
-        }
-        this._enemiesLeft = this._enemiesArray.length;
-        this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2);
-        this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
-        this._player1.enemyVehicles = this._enemies;
-        this._player1.handleCollisions();
-        if (this._levelData.secondPlayer) {
-            this._player2.enemyVehicles = this._enemies;
-            this._player2.handleCollisions();
-        }
-        this.listenEvents();
-        this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
-        this.cameras.main.startFollow(this._player1);
-        this._fightingMelody.play();
-        this.createFinishText();
-    }
-    listenEvents() {
-        if (this.events.listeners("first_player_dead").length <= 0) {
-            this.events.on("first_player_dead", this.firstPlayerDead, this);
-        }
-        if (this.events.listeners("second_player_dead").length <= 0) {
-            this.events.on("second_player_dead", this.secondPlayerDead, this);
-        }
-        if (this.events.listeners("enemy_dead").length <= 0) {
-            this.events.on("enemy_dead", this.enemyDead, this);
-        }
-    }
-    enemyDead(toCount) {
-        if (toCount) {
-            --this._enemies.counter;
-            --this._enemiesLeft;
-            this._enemiesText.setText(`Enemies: ${this._enemiesLeft}`);
-        }
-        if (this._enemiesLeft <= 0) {
-            this._levelData.nextLevelNumber = "level-2";
-            this._levelData.nextLevelName = "First Blood";
-            if (this._player1 && this._levelData.firstPlayer) {
-                this._levelData.firstPlayer.experience = this._player1.experience;
-                this._levelData.firstPlayer.tanksPerLevel = this._player1.tanksPerLevel;
-                this._levelData.firstPlayer.bmpPerLevel = this._player1.bmpPerLevel;
-                this._levelData.firstPlayer.btrPerLevel = this._player1.btrPerLevel;
-                this._levelData.firstPlayer.turretsPerLevel = this._player1.turretsPerLevel;
-                this._levelData.firstPlayer.radarPerLevel = this._player1.radarPerLevel;
-            }
-            if (this._player2 && this._levelData.secondPlayer) {
-                this._levelData.secondPlayer.experience = this._player2.experience;
-                this._levelData.secondPlayer.tanksPerLevel = this._player2.tanksPerLevel;
-                this._levelData.secondPlayer.bmpPerLevel = this._player2.bmpPerLevel;
-                this._levelData.secondPlayer.btrPerLevel = this._player2.btrPerLevel;
-                this._levelData.secondPlayer.turretsPerLevel = this._player2.turretsPerLevel;
-                this._levelData.secondPlayer.radarPerLevel = this._player2.radarPerLevel;
-            }
-            this._fightingMelody.stop();
-            this.scene.start("postlevel-scene", { data: this._levelData });
-        }
-    }
-}
-exports["default"] = Level_1;
-
-
-/***/ }),
-
-/***/ "./src/scenes/Level_2.ts":
-/*!*******************************!*\
-  !*** ./src/scenes/Level_2.ts ***!
-  \*******************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const Map_1 = __importDefault(__webpack_require__(/*! ../classes/Map */ "./src/classes/Map.ts"));
-const Player_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/player/Player */ "./src/classes/vehicles/player/Player.ts"));
-const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
-const GroupOfEnemies_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/enemies/GroupOfEnemies */ "./src/classes/vehicles/enemies/GroupOfEnemies.ts"));
-const Player2_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/player/Player2 */ "./src/classes/vehicles/player/Player2.ts"));
-const Turret_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/enemies/Turret */ "./src/classes/vehicles/enemies/Turret.ts"));
-const Level_1 = __importDefault(__webpack_require__(/*! ./Level */ "./src/scenes/Level.ts"));
-class Level_2 extends Level_1.default {
-    constructor() {
-        super("level-2");
-        this._turret1 = null;
-        this._turret2 = null;
-    }
-    create({ data }) {
-        this._map = new Map_1.default(this, 2);
-        this._levelData = data;
-        this._enemiesArray = [3, 1, 2, 2, 3, 1, 3, 1, 2, 2, 3, 1, 2, 1, 1, 3, 2, 1];
-        let position = null;
-        if (this._levelData.multiplayerGame) {
-            this._maxEnemies = 10;
-            this._enemiesArray.forEach((item, _, array) => array.push(item));
-            if (this._levelData.firstPlayer) {
-                const player = this._map.getPlayer(1);
-                position = { x: player.x, y: player.y };
-                this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
-                (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
-            }
-            if (this._levelData.secondPlayer) {
-                const player2 = this._map.getPlayer(2);
-                position = { x: player2.x, y: player2.y };
-                this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
-                (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
-            }
-        }
-        else {
-            const player = this._map.getPlayer(1);
-            let position = { x: player.x, y: player.y };
-            this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
-            (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
-        }
-        this._enemiesLeft = this._enemiesArray.length;
-        this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2);
-        let turretPosition = this._map.getTurretPosition(1);
-        this._turret1 = new Turret_1.default(this, turretPosition, this._map, this._enemies, this._player1, this._player2, null, 1);
-        this._enemiesLeft++;
-        turretPosition = this._map.getTurretPosition(2);
-        this._turret2 = new Turret_1.default(this, turretPosition, this._map, this._enemies, this._player1, this._player2, null, 2);
-        this._enemiesLeft++;
-        this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
-        if (this._player1) {
-            this._players.push(this._player1);
-            this._player1.enemyVehicles = this._enemies;
-            this._player1.enemyTurrets = [this._turret1, this._turret2];
-            this._player1.enemyTurretPlatforms = [this._turret1.platform, this._turret2.platform];
-            if (this._player2)
-                this._player1.player2 = this._player2;
-            this._player1.handleCollisions();
-        }
-        if (this._player2) {
-            this._players.push(this._player2);
-            this._player2.enemyVehicles = this._enemies;
-            this._player2.enemyTurrets = [this._turret1, this._turret2];
-            this._player2.enemyTurretPlatforms = [this._turret1.platform, this._turret2.platform];
-            if (this._player1)
-                this._player2.player1 = this._player1;
-            this._player2.handleCollisions();
-        }
-        this.listenEvents();
-        this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
-        this._player1 ? this.cameras.main.startFollow(this._player1) : this.cameras.main.startFollow(this._player2);
-        this._fightingMelody.play();
-        this.createFinishText();
-    }
-    listenEvents() {
-        if (this.events.listeners("first_player_dead").length <= 0) {
-            this.events.on("first_player_dead", this.firstPlayerDead, this);
-        }
-        if (this.events.listeners("second_player_dead").length <= 0) {
-            this.events.on("second_player_dead", this.secondPlayerDead, this);
-        }
-        if (this.events.listeners("enemy_dead").length <= 0) {
-            this.events.on("enemy_dead", this.enemyDead, this);
-        }
-    }
-    enemyDead(toCount) {
-        if (toCount) {
-            --this._enemies.counter;
-            --this._enemiesLeft;
-            this._enemiesText.setText(`Enemies: ${this._enemiesLeft}`);
-        }
-        if (this._enemiesLeft <= 0) {
-            this._levelData.nextLevelNumber = "level-3";
-            this._levelData.nextLevelName = "Protect and Destroy";
-            if (this._player1 && this._levelData.firstPlayer) {
-                this._levelData.firstPlayer.experience = this._player1.experience;
-                this._levelData.firstPlayer.tanksPerLevel = this._player1.tanksPerLevel;
-                this._levelData.firstPlayer.bmpPerLevel = this._player1.bmpPerLevel;
-                this._levelData.firstPlayer.btrPerLevel = this._player1.btrPerLevel;
-                this._levelData.firstPlayer.turretsPerLevel = this._player1.turretsPerLevel;
-                this._levelData.firstPlayer.radarPerLevel = this._player1.radarPerLevel;
-            }
-            if (this._player2 && this._levelData.secondPlayer) {
-                this._levelData.secondPlayer.experience = this._player2.experience;
-                this._levelData.secondPlayer.tanksPerLevel = this._player2.tanksPerLevel;
-                this._levelData.secondPlayer.bmpPerLevel = this._player2.bmpPerLevel;
-                this._levelData.secondPlayer.btrPerLevel = this._player2.btrPerLevel;
-                this._levelData.secondPlayer.turretsPerLevel = this._player2.turretsPerLevel;
-                this._levelData.secondPlayer.radarPerLevel = this._player2.radarPerLevel;
-            }
-            this._fightingMelody.stop();
-            this.scene.start("postlevel-scene", { data: this._levelData });
-        }
-    }
-}
-exports["default"] = Level_2;
-
-
-/***/ }),
-
-/***/ "./src/scenes/Level_3.ts":
-/*!*******************************!*\
-  !*** ./src/scenes/Level_3.ts ***!
-  \*******************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const Headquarter_1 = __importDefault(__webpack_require__(/*! ../classes/Headquarter */ "./src/classes/Headquarter.ts"));
-const Map_1 = __importDefault(__webpack_require__(/*! ../classes/Map */ "./src/classes/Map.ts"));
-const GroupOfEnemies_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/enemies/GroupOfEnemies */ "./src/classes/vehicles/enemies/GroupOfEnemies.ts"));
-const Radar_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/enemies/Radar */ "./src/classes/vehicles/enemies/Radar.ts"));
-const Turret_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/enemies/Turret */ "./src/classes/vehicles/enemies/Turret.ts"));
-const Player_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/player/Player */ "./src/classes/vehicles/player/Player.ts"));
-const Player2_1 = __importDefault(__webpack_require__(/*! ../classes/vehicles/player/Player2 */ "./src/classes/vehicles/player/Player2.ts"));
-const utils_1 = __webpack_require__(/*! ../utils/utils */ "./src/utils/utils.ts");
-const Level_1 = __importDefault(__webpack_require__(/*! ./Level */ "./src/scenes/Level.ts"));
-class Level_3 extends Level_1.default {
-    constructor() {
-        super("level-3");
-        this._turret = null;
-        this._radar = null;
-        this._headquarterRu = null;
-        this._headquarterUa = null;
-    }
-    create({ data }) {
-        this._map = new Map_1.default(this, 3);
-        this._levelData = data;
-        this._enemiesArray = [3, 1, 2, 3, 2, 1, 1, 3, 2, 1, 1, 3, 2, 1, 2, 2, 3, 1, 2, 1];
-        let position = null;
-        if (this._levelData.multiplayerGame) {
-            this._maxEnemies = 10;
-            this._enemiesArray.forEach((item, _, array) => array.push(item));
-            if (this._levelData.firstPlayer) {
-                const player = this._map.getPlayer(1);
-                position = { x: player.x, y: player.y };
-                this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
-                (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
-            }
-            if (this._levelData.secondPlayer) {
-                const player2 = this._map.getPlayer(2);
-                position = { x: player2.x, y: player2.y };
-                this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
-                (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
-            }
-        }
-        else {
-            const player = this._map.getPlayer(1);
-            let position = { x: player.x, y: player.y };
-            this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
-            (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
-        }
-        this._headquarterRu = new Headquarter_1.default(this, this._map.getHeadquarterPosition(true), "objects", "headquarterRu");
-        this._headquarterUa = new Headquarter_1.default(this, this._map.getHeadquarterPosition(false), "objects", "headquarterUa");
-        this._enemiesLeft = this._enemiesArray.length;
-        this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2, this._headquarterUa, this._headquarterRu);
-        let turretPosition = this._map.getTurretPosition(1);
-        this._turret = new Turret_1.default(this, turretPosition, this._map, this._enemies, this._player1, this._player2);
-        this._enemiesLeft++;
-        turretPosition = this._map.getRadarPosition();
-        this._radar = new Radar_1.default(this, turretPosition, "objects", "platform1", this._enemies, this._player1, this._player2);
-        this._turret.radar = this._radar;
-        this._enemiesLeft++;
-        this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
-        if (this._player1) {
-            this._players.push(this._player1);
-            this._player1.enemyVehicles = this._enemies;
-            this._player1.enemyTurrets = [this._turret];
-            this._player1.enemyTurretPlatforms = [this._turret.platform];
-            this._player1.headquarterRu = this._headquarterRu;
-            this._player1.headquarterUa = this._headquarterUa;
-            this._player1.radar = this._radar;
-            this._player1.enemiesStatic = [this._headquarterRu, this._headquarterUa, this._radar];
-            if (this._player2)
-                this._player1.player2 = this._player2;
-            this._player1.handleCollisions();
-        }
-        if (this._player2) {
-            this._players.push(this._player2);
-            this._player2.enemyVehicles = this._enemies;
-            this._player2.enemyTurrets = [this._turret];
-            this._player2.enemyTurretPlatforms = [this._turret.platform];
-            this._player2.headquarterRu = this._headquarterRu;
-            this._player2.headquarterUa = this._headquarterUa;
-            this._player2.radar = this._radar;
-            this._player2.enemiesStatic = [this._headquarterRu, this._headquarterUa, this._radar];
-            if (this._player1)
-                this._player2.player1 = this._player1;
-            this._player2.handleCollisions();
-        }
-        this.listenEvents();
-        this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
-        this._player1 ? this.cameras.main.startFollow(this._player1) : this.cameras.main.startFollow(this._player2);
-        this._fightingMelody.play();
-        this.createFinishText();
-    }
-    listenEvents() {
-        if (this.events.listeners("first_player_dead").length <= 0) {
-            this.events.on("first_player_dead", this.firstPlayerDead, this);
-        }
-        if (this.events.listeners("second_player_dead").length <= 0) {
-            this.events.on("second_player_dead", this.secondPlayerDead, this);
-        }
-        if (this.events.listeners("enemy_dead").length <= 0) {
-            this.events.on("enemy_dead", this.enemyDead, this);
-        }
-        if (this.events.listeners("enemy_headquarter_destroyed").length <= 0) {
-            this.events.on("enemy_headquarter_destroyed", this.enemyDead, this);
-        }
-        if (this.events.listeners("headquarterUa_destroyed").length <= 0) {
-            this.events.on("headquarterUa_destroyed", this.headquarterDestroyed, this);
-        }
-    }
-    enemyDead(toCount, isHeadquarterRuDestroyed) {
-        if (toCount) {
-            --this._enemies.counter;
-            --this._enemiesLeft;
-            this._enemiesText.setText(`Enemies: ${this._enemiesLeft}`);
-        }
-        if (this._enemiesLeft <= 0 && isHeadquarterRuDestroyed) {
-            this._levelData.nextLevelNumber = "level-4";
-            this._levelData.nextLevelName = "?";
-            if (this._player1 && this._levelData.firstPlayer) {
-                this._levelData.firstPlayer.experience = this._player1.experience;
-                this._levelData.firstPlayer.tanksPerLevel = this._player1.tanksPerLevel;
-                this._levelData.firstPlayer.bmpPerLevel = this._player1.bmpPerLevel;
-                this._levelData.firstPlayer.btrPerLevel = this._player1.btrPerLevel;
-                this._levelData.firstPlayer.turretsPerLevel = this._player1.turretsPerLevel;
-                this._levelData.firstPlayer.radarPerLevel = this._player1.radarPerLevel;
-            }
-            if (this._player2 && this._levelData.secondPlayer) {
-                this._levelData.secondPlayer.experience = this._player2.experience;
-                this._levelData.secondPlayer.tanksPerLevel = this._player2.tanksPerLevel;
-                this._levelData.secondPlayer.bmpPerLevel = this._player2.bmpPerLevel;
-                this._levelData.secondPlayer.btrPerLevel = this._player2.btrPerLevel;
-                this._levelData.secondPlayer.turretsPerLevel = this._player2.turretsPerLevel;
-                this._levelData.secondPlayer.radarPerLevel = this._player2.radarPerLevel;
-            }
-            this._fightingMelody.stop();
-            this.scene.start("postlevel-scene", { data: this._levelData });
-        }
-    }
-    headquarterDestroyed() {
-        this._headquarterUa = null;
-        if (!this._headquarterUa)
-            this.runTween();
-    }
-}
-exports["default"] = Level_3;
 
 
 /***/ }),
@@ -2593,6 +2105,908 @@ exports["default"] = StartScene;
 
 /***/ }),
 
+/***/ "./src/scenes/levels/Level.ts":
+/*!************************************!*\
+  !*** ./src/scenes/levels/Level.ts ***!
+  \************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const utils_1 = __webpack_require__(/*! ../../utils/utils */ "./src/utils/utils.ts");
+class Level extends Phaser.Scene {
+    constructor(levelName) {
+        super({ key: levelName });
+        this._map = null;
+        this._levelData = null;
+        this._player1 = null;
+        this._player2 = null;
+        this._players = [];
+        this._enemies = null;
+        this._enemiesText = null;
+        this._finishText = null;
+        this._enemiesArray = null;
+        this._enemiesLeft = 0;
+        this._maxEnemies = 5;
+        this._style = null;
+        this._fightingMelody = null;
+    }
+    preload() {
+        this.add.sprite(0, 0, "background").setOrigin(0);
+        this._style = { fontFamily: "RussoOne", fontSize: "40px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 };
+        this._fightingMelody = this.sound.add("fightMelody", { volume: 0.1, loop: true });
+    }
+    createFinishText() {
+        this._finishText = (0, utils_1.createText)(this, this.sys.game.canvas.width, this.sys.game.canvas.height + 150, "GAME OVER", { fontFamily: "RussoOne", fontSize: "90px", color: "#E62B0D", stroke: "#000000", strokeThickness: 3 });
+        this._finishText.setX(this.sys.game.canvas.width / 2 - this._finishText.width / 2);
+        this._finishText.depth = 10;
+    }
+    listenEvents() { }
+    enemyDead(toCount, isHeadquarterRuDestroyed) { }
+    headquarterDestroyed() { }
+    firstPlayerDead() {
+        this._levelData.firstPlayer = null;
+        this._player1 = null;
+        if (this._levelData.multiplayerGame && this._player2)
+            return;
+        else {
+            this.events.removeListener("first_player_dead");
+            this.events.removeListener("second_player_dead");
+            this.events.removeListener("enemy_dead");
+            this.runTween();
+        }
+    }
+    secondPlayerDead() {
+        this._levelData.secondPlayer = null;
+        this._player2 = null;
+        if (this._levelData.multiplayerGame && !this._player1) {
+            this.events.removeListener("first_player_dead");
+            this.events.removeListener("second_player_dead");
+            this.events.removeListener("enemy_dead");
+            this.runTween();
+        }
+    }
+    runTween() {
+        this.tweens.add({
+            targets: this._finishText,
+            y: this.sys.game.canvas.height / 2 - 70,
+            duration: 3000,
+            onComplete: () => {
+                this._fightingMelody.stop();
+                this.tweens.killAll();
+                this.scene.start("start-scene");
+            }
+        });
+    }
+    update() {
+        this._players.forEach((player) => {
+            if (player && player.active)
+                player.move();
+        });
+        this.checkMapBounds([...this._enemies.getChildren(), ...this._players]);
+    }
+    checkMapBounds(vehicles) {
+        if (vehicles && vehicles.length > 0) {
+            for (let i = 0; i < vehicles.length; i++) {
+                if (!vehicles[i].body)
+                    continue;
+                if (vehicles[i].body.y > this._map.tilemap.heightInPixels - 30) {
+                    vehicles[i].body.y = this._map.tilemap.heightInPixels - 30 - 20;
+                }
+                if (vehicles[i].body.y < 0) {
+                    vehicles[i].body.y = 20;
+                }
+                if (vehicles[i].body.x < 0) {
+                    vehicles[i].body.x = 20;
+                }
+                if (vehicles[i].body.x > this._map.tilemap.widthInPixels - 30) {
+                    vehicles[i].body.x = this._map.tilemap.widthInPixels - 30 - 20;
+                }
+            }
+        }
+    }
+}
+exports["default"] = Level;
+
+
+/***/ }),
+
+/***/ "./src/scenes/levels/Level_1.ts":
+/*!**************************************!*\
+  !*** ./src/scenes/levels/Level_1.ts ***!
+  \**************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const Map_1 = __importDefault(__webpack_require__(/*! ../../classes/Map */ "./src/classes/Map.ts"));
+const Player_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/player/Player */ "./src/classes/vehicles/player/Player.ts"));
+const utils_1 = __webpack_require__(/*! ../../utils/utils */ "./src/utils/utils.ts");
+const GroupOfEnemies_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/enemies/GroupOfEnemies */ "./src/classes/vehicles/enemies/GroupOfEnemies.ts"));
+const Player2_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/player/Player2 */ "./src/classes/vehicles/player/Player2.ts"));
+const Level_2 = __importDefault(__webpack_require__(/*! ./Level */ "./src/scenes/levels/Level.ts"));
+class Level_1 extends Level_2.default {
+    constructor() { super("level-1"); }
+    create({ data }) {
+        this._map = new Map_1.default(this, 1);
+        this._levelData = data;
+        this._enemiesArray = [3, 1, 2, 3, 1, 2, 3, 2, 1, 2, 1];
+        const player = this._map.getPlayer(1);
+        let position = { x: player.x, y: player.y };
+        this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+        this._players.push(this._player1);
+        (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+        if (this._levelData.secondPlayer) {
+            const player2 = this._map.getPlayer(2);
+            position = { x: player2.x, y: player2.y };
+            this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
+            this._players.push(this._player2);
+            this._player2.player1 = this._player1;
+            this._player1.player2 = this._player2;
+            this._enemiesArray.forEach((item, _, array) => array.push(item));
+            this._maxEnemies = 8;
+            (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
+        }
+        this._enemiesLeft = this._enemiesArray.length;
+        this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2);
+        this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
+        this._player1.enemyVehicles = this._enemies;
+        this._player1.handleCollisions();
+        if (this._levelData.secondPlayer) {
+            this._player2.enemyVehicles = this._enemies;
+            this._player2.handleCollisions();
+        }
+        this.listenEvents();
+        this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
+        this.cameras.main.startFollow(this._player1);
+        this._fightingMelody.play();
+        this.createFinishText();
+    }
+    listenEvents() {
+        if (this.events.listeners("first_player_dead").length <= 0) {
+            this.events.on("first_player_dead", this.firstPlayerDead, this);
+        }
+        if (this.events.listeners("second_player_dead").length <= 0) {
+            this.events.on("second_player_dead", this.secondPlayerDead, this);
+        }
+        if (this.events.listeners("enemy_dead").length <= 0) {
+            this.events.on("enemy_dead", this.enemyDead, this);
+        }
+    }
+    enemyDead(toCount) {
+        if (toCount) {
+            --this._enemies.counter;
+            --this._enemiesLeft;
+            this._enemiesText.setText(`Enemies: ${this._enemiesLeft}`);
+        }
+        if (this._enemiesLeft <= 0) {
+            this._levelData.nextLevelNumber = "level-2";
+            this._levelData.nextLevelName = "First Blood";
+            if (this._player1 && this._levelData.firstPlayer) {
+                this._levelData.firstPlayer.experience = this._player1.experience;
+                this._levelData.firstPlayer.tanksPerLevel = this._player1.tanksPerLevel;
+                this._levelData.firstPlayer.bmpPerLevel = this._player1.bmpPerLevel;
+                this._levelData.firstPlayer.btrPerLevel = this._player1.btrPerLevel;
+                this._levelData.firstPlayer.turretsPerLevel = this._player1.turretsPerLevel;
+                this._levelData.firstPlayer.radarPerLevel = this._player1.radarPerLevel;
+            }
+            if (this._player2 && this._levelData.secondPlayer) {
+                this._levelData.secondPlayer.experience = this._player2.experience;
+                this._levelData.secondPlayer.tanksPerLevel = this._player2.tanksPerLevel;
+                this._levelData.secondPlayer.bmpPerLevel = this._player2.bmpPerLevel;
+                this._levelData.secondPlayer.btrPerLevel = this._player2.btrPerLevel;
+                this._levelData.secondPlayer.turretsPerLevel = this._player2.turretsPerLevel;
+                this._levelData.secondPlayer.radarPerLevel = this._player2.radarPerLevel;
+            }
+            this._fightingMelody.stop();
+            this.scene.start("postlevel-scene", { data: this._levelData });
+        }
+    }
+}
+exports["default"] = Level_1;
+
+
+/***/ }),
+
+/***/ "./src/scenes/levels/Level_2.ts":
+/*!**************************************!*\
+  !*** ./src/scenes/levels/Level_2.ts ***!
+  \**************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const Map_1 = __importDefault(__webpack_require__(/*! ../../classes/Map */ "./src/classes/Map.ts"));
+const Player_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/player/Player */ "./src/classes/vehicles/player/Player.ts"));
+const utils_1 = __webpack_require__(/*! ../../utils/utils */ "./src/utils/utils.ts");
+const GroupOfEnemies_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/enemies/GroupOfEnemies */ "./src/classes/vehicles/enemies/GroupOfEnemies.ts"));
+const Player2_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/player/Player2 */ "./src/classes/vehicles/player/Player2.ts"));
+const Turret_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/enemies/Turret */ "./src/classes/vehicles/enemies/Turret.ts"));
+const Level_1 = __importDefault(__webpack_require__(/*! ./Level */ "./src/scenes/levels/Level.ts"));
+class Level_2 extends Level_1.default {
+    constructor() {
+        super("level-2");
+        this._turret1 = null;
+        this._turret2 = null;
+    }
+    create({ data }) {
+        this._map = new Map_1.default(this, 2);
+        this._levelData = data;
+        this._enemiesArray = [3, 1, 2, 3, 1, 3, 2, 1, 2, 1, 3, 2, 1];
+        let position = null;
+        if (this._levelData.multiplayerGame) {
+            this._maxEnemies = 8;
+            this._enemiesArray.forEach((item, _, array) => array.push(item));
+            if (this._levelData.firstPlayer) {
+                const player = this._map.getPlayer(1);
+                position = { x: player.x, y: player.y };
+                this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+            }
+            if (this._levelData.secondPlayer) {
+                const player2 = this._map.getPlayer(2);
+                position = { x: player2.x, y: player2.y };
+                this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
+            }
+        }
+        else {
+            const player = this._map.getPlayer(1);
+            let position = { x: player.x, y: player.y };
+            this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+            (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+        }
+        this._enemiesLeft = this._enemiesArray.length;
+        this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2);
+        let turretPosition = this._map.getTurretPosition(1);
+        this._turret1 = new Turret_1.default(this, turretPosition, this._map, this._enemies, this._player1, this._player2, null, 1);
+        this._enemiesLeft++;
+        turretPosition = this._map.getTurretPosition(2);
+        this._turret2 = new Turret_1.default(this, turretPosition, this._map, this._enemies, this._player1, this._player2, null, 2);
+        this._enemiesLeft++;
+        this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
+        if (this._player1) {
+            this._players.push(this._player1);
+            this._player1.enemyVehicles = this._enemies;
+            this._player1.enemyTurrets = [this._turret1, this._turret2];
+            this._player1.enemyTurretPlatforms = [this._turret1.platform, this._turret2.platform];
+            if (this._player2)
+                this._player1.player2 = this._player2;
+            this._player1.handleCollisions();
+        }
+        if (this._player2) {
+            this._players.push(this._player2);
+            this._player2.enemyVehicles = this._enemies;
+            this._player2.enemyTurrets = [this._turret1, this._turret2];
+            this._player2.enemyTurretPlatforms = [this._turret1.platform, this._turret2.platform];
+            if (this._player1)
+                this._player2.player1 = this._player1;
+            this._player2.handleCollisions();
+        }
+        this.listenEvents();
+        this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
+        this._player1 ? this.cameras.main.startFollow(this._player1) : this.cameras.main.startFollow(this._player2);
+        this._fightingMelody.play();
+        this.createFinishText();
+    }
+    listenEvents() {
+        if (this.events.listeners("first_player_dead").length <= 0) {
+            this.events.on("first_player_dead", this.firstPlayerDead, this);
+        }
+        if (this.events.listeners("second_player_dead").length <= 0) {
+            this.events.on("second_player_dead", this.secondPlayerDead, this);
+        }
+        if (this.events.listeners("enemy_dead").length <= 0) {
+            this.events.on("enemy_dead", this.enemyDead, this);
+        }
+    }
+    enemyDead(toCount) {
+        if (toCount) {
+            --this._enemies.counter;
+            --this._enemiesLeft;
+            this._enemiesText.setText(`Enemies: ${this._enemiesLeft}`);
+        }
+        if (this._enemiesLeft <= 0) {
+            this._levelData.nextLevelNumber = "level-3";
+            this._levelData.nextLevelName = "Sneaky Forest";
+            if (this._player1 && this._levelData.firstPlayer) {
+                this._levelData.firstPlayer.experience = this._player1.experience;
+                this._levelData.firstPlayer.tanksPerLevel = this._player1.tanksPerLevel;
+                this._levelData.firstPlayer.bmpPerLevel = this._player1.bmpPerLevel;
+                this._levelData.firstPlayer.btrPerLevel = this._player1.btrPerLevel;
+                this._levelData.firstPlayer.turretsPerLevel = this._player1.turretsPerLevel;
+                this._levelData.firstPlayer.radarPerLevel = this._player1.radarPerLevel;
+            }
+            if (this._player2 && this._levelData.secondPlayer) {
+                this._levelData.secondPlayer.experience = this._player2.experience;
+                this._levelData.secondPlayer.tanksPerLevel = this._player2.tanksPerLevel;
+                this._levelData.secondPlayer.bmpPerLevel = this._player2.bmpPerLevel;
+                this._levelData.secondPlayer.btrPerLevel = this._player2.btrPerLevel;
+                this._levelData.secondPlayer.turretsPerLevel = this._player2.turretsPerLevel;
+                this._levelData.secondPlayer.radarPerLevel = this._player2.radarPerLevel;
+            }
+            this._fightingMelody.stop();
+            this.scene.start("postlevel-scene", { data: this._levelData });
+        }
+    }
+}
+exports["default"] = Level_2;
+
+
+/***/ }),
+
+/***/ "./src/scenes/levels/Level_3.ts":
+/*!**************************************!*\
+  !*** ./src/scenes/levels/Level_3.ts ***!
+  \**************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const Level_1 = __importDefault(__webpack_require__(/*! ./Level */ "./src/scenes/levels/Level.ts"));
+const Map_1 = __importDefault(__webpack_require__(/*! ../../classes/Map */ "./src/classes/Map.ts"));
+const utils_1 = __webpack_require__(/*! ../../utils/utils */ "./src/utils/utils.ts");
+const Player_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/player/Player */ "./src/classes/vehicles/player/Player.ts"));
+const Player2_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/player/Player2 */ "./src/classes/vehicles/player/Player2.ts"));
+const GroupOfEnemies_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/enemies/GroupOfEnemies */ "./src/classes/vehicles/enemies/GroupOfEnemies.ts"));
+const Headquarter_1 = __importDefault(__webpack_require__(/*! ../../classes/Headquarter */ "./src/classes/Headquarter.ts"));
+class Level_3 extends Level_1.default {
+    constructor() {
+        super("level-3");
+        this._headquarterUa = null;
+    }
+    create({ data }) {
+        this._map = new Map_1.default(this, 4);
+        this._levelData = data;
+        this._enemiesArray = [3, 1, 3, 1, 3, 2, 3, 1, 3, 2, 1, 1];
+        let position = null;
+        if (this._levelData.multiplayerGame) {
+            this._maxEnemies = 8;
+            this._enemiesArray.forEach((item, _, array) => array.push(item));
+            if (this._levelData.firstPlayer) {
+                const player = this._map.getPlayer(1);
+                position = { x: player.x, y: player.y };
+                this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+            }
+            if (this._levelData.secondPlayer) {
+                const player2 = this._map.getPlayer(2);
+                position = { x: player2.x, y: player2.y };
+                this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
+            }
+        }
+        else {
+            const player = this._map.getPlayer(1);
+            let position = { x: player.x, y: player.y };
+            this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+            (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+        }
+        this._headquarterUa = new Headquarter_1.default(this, this._map.getHeadquarterPosition(false), "objects", "headquarterUa");
+        this._enemiesLeft = this._enemiesArray.length;
+        this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2, this._headquarterUa);
+        this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
+        if (this._player1) {
+            this._players.push(this._player1);
+            this._player1.enemyVehicles = this._enemies;
+            this._player1.headquarterUa = this._headquarterUa;
+            this._player1.enemiesStatic = [this._headquarterUa];
+            if (this._player2)
+                this._player1.player2 = this._player2;
+            this._player1.handleCollisions();
+        }
+        if (this._player2) {
+            this._players.push(this._player2);
+            this._player2.enemyVehicles = this._enemies;
+            this._player2.headquarterUa = this._headquarterUa;
+            this._player2.enemiesStatic = [this._headquarterUa];
+            if (this._player1)
+                this._player2.player1 = this._player1;
+            this._player2.handleCollisions();
+        }
+        this.listenEvents();
+        this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
+        this._player1 ? this.cameras.main.startFollow(this._player1) : this.cameras.main.startFollow(this._player2);
+        this._fightingMelody.play();
+        this.createFinishText();
+    }
+    listenEvents() {
+        if (this.events.listeners("first_player_dead").length <= 0) {
+            this.events.on("first_player_dead", this.firstPlayerDead, this);
+        }
+        if (this.events.listeners("second_player_dead").length <= 0) {
+            this.events.on("second_player_dead", this.secondPlayerDead, this);
+        }
+        if (this.events.listeners("enemy_dead").length <= 0) {
+            this.events.on("enemy_dead", this.enemyDead, this);
+        }
+        if (this.events.listeners("headquarterUa_destroyed").length <= 0) {
+            this.events.on("headquarterUa_destroyed", this.headquarterDestroyed, this);
+        }
+    }
+    enemyDead(toCount) {
+        if (toCount) {
+            --this._enemies.counter;
+            --this._enemiesLeft;
+            this._enemiesText.setText(`Enemies: ${this._enemiesLeft}`);
+        }
+        if (this._enemiesLeft <= 0) {
+            this._levelData.nextLevelNumber = "level-4";
+            this._levelData.nextLevelName = "Horde";
+            if (this._player1 && this._levelData.firstPlayer) {
+                this._levelData.firstPlayer.experience = this._player1.experience;
+                this._levelData.firstPlayer.tanksPerLevel = this._player1.tanksPerLevel;
+                this._levelData.firstPlayer.bmpPerLevel = this._player1.bmpPerLevel;
+                this._levelData.firstPlayer.btrPerLevel = this._player1.btrPerLevel;
+                this._levelData.firstPlayer.turretsPerLevel = this._player1.turretsPerLevel;
+                this._levelData.firstPlayer.radarPerLevel = this._player1.radarPerLevel;
+            }
+            if (this._player2 && this._levelData.secondPlayer) {
+                this._levelData.secondPlayer.experience = this._player2.experience;
+                this._levelData.secondPlayer.tanksPerLevel = this._player2.tanksPerLevel;
+                this._levelData.secondPlayer.bmpPerLevel = this._player2.bmpPerLevel;
+                this._levelData.secondPlayer.btrPerLevel = this._player2.btrPerLevel;
+                this._levelData.secondPlayer.turretsPerLevel = this._player2.turretsPerLevel;
+                this._levelData.secondPlayer.radarPerLevel = this._player2.radarPerLevel;
+            }
+            this._fightingMelody.stop();
+            this.scene.start("postlevel-scene", { data: this._levelData });
+        }
+    }
+    headquarterDestroyed() {
+        this._headquarterUa = null;
+        if (!this._headquarterUa)
+            this.runTween();
+    }
+}
+exports["default"] = Level_3;
+
+
+/***/ }),
+
+/***/ "./src/scenes/levels/Level_4.ts":
+/*!**************************************!*\
+  !*** ./src/scenes/levels/Level_4.ts ***!
+  \**************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const Level_1 = __importDefault(__webpack_require__(/*! ./Level */ "./src/scenes/levels/Level.ts"));
+const Map_1 = __importDefault(__webpack_require__(/*! ../../classes/Map */ "./src/classes/Map.ts"));
+const utils_1 = __webpack_require__(/*! ../../utils/utils */ "./src/utils/utils.ts");
+const Player_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/player/Player */ "./src/classes/vehicles/player/Player.ts"));
+const Player2_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/player/Player2 */ "./src/classes/vehicles/player/Player2.ts"));
+const Headquarter_1 = __importDefault(__webpack_require__(/*! ../../classes/Headquarter */ "./src/classes/Headquarter.ts"));
+const GroupOfEnemies_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/enemies/GroupOfEnemies */ "./src/classes/vehicles/enemies/GroupOfEnemies.ts"));
+class Level_4 extends Level_1.default {
+    constructor() {
+        super("level-4");
+        this._headquarterRu = null;
+        this._isHeadquarterRuDestroyed = false;
+    }
+    create({ data }) {
+        this._map = new Map_1.default(this, 5);
+        this._levelData = data;
+        this._enemiesArray = [3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1];
+        let position = null;
+        if (this._levelData.multiplayerGame) {
+            this._maxEnemies = 8;
+            this._enemiesArray.forEach((item, _, array) => array.push(item));
+            if (this._levelData.firstPlayer) {
+                const player = this._map.getPlayer(1);
+                position = { x: player.x, y: player.y };
+                this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+            }
+            if (this._levelData.secondPlayer) {
+                const player2 = this._map.getPlayer(2);
+                position = { x: player2.x, y: player2.y };
+                this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
+            }
+        }
+        else {
+            const player = this._map.getPlayer(1);
+            let position = { x: player.x, y: player.y };
+            this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+            (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+        }
+        this._headquarterRu = new Headquarter_1.default(this, this._map.getHeadquarterPosition(true), "objects", "headquarterRu");
+        this._enemiesLeft = this._enemiesArray.length;
+        this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2, null, this._headquarterRu);
+        this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
+        if (this._player1) {
+            this._players.push(this._player1);
+            this._player1.enemyVehicles = this._enemies;
+            this._player1.headquarterRu = this._headquarterRu;
+            this._player1.enemiesStatic = [this._headquarterRu];
+            if (this._player2)
+                this._player1.player2 = this._player2;
+            this._player1.handleCollisions();
+        }
+        if (this._player2) {
+            this._players.push(this._player2);
+            this._player2.enemyVehicles = this._enemies;
+            this._player2.headquarterRu = this._headquarterRu;
+            this._player2.enemiesStatic = [this._headquarterRu];
+            if (this._player1)
+                this._player2.player1 = this._player1;
+            this._player2.handleCollisions();
+        }
+        this.listenEvents();
+        this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
+        this._player1 ? this.cameras.main.startFollow(this._player1) : this.cameras.main.startFollow(this._player2);
+        this._fightingMelody.play();
+        this.createFinishText();
+    }
+    listenEvents() {
+        if (this.events.listeners("first_player_dead").length <= 0) {
+            this.events.on("first_player_dead", this.firstPlayerDead, this);
+        }
+        if (this.events.listeners("second_player_dead").length <= 0) {
+            this.events.on("second_player_dead", this.secondPlayerDead, this);
+        }
+        if (this.events.listeners("enemy_dead").length <= 0) {
+            this.events.on("enemy_dead", this.enemyDead, this);
+        }
+        if (this.events.listeners("enemy_headquarter_destroyed").length <= 0) {
+            this.events.on("enemy_headquarter_destroyed", this.enemyDead, this);
+        }
+    }
+    enemyDead(toCount, isHeadquarterRuDestroyed) {
+        if (isHeadquarterRuDestroyed)
+            this._isHeadquarterRuDestroyed = isHeadquarterRuDestroyed;
+        if (toCount) {
+            --this._enemies.counter;
+            --this._enemiesLeft;
+            this._enemiesText.setText(`Enemies: ${this._enemiesLeft}`);
+        }
+        if (this._enemiesLeft <= 0 && this._isHeadquarterRuDestroyed) {
+            this._levelData.nextLevelNumber = "level-5";
+            this._levelData.nextLevelName = "Protect and Destroy";
+            if (this._player1 && this._levelData.firstPlayer) {
+                this._levelData.firstPlayer.experience = this._player1.experience;
+                this._levelData.firstPlayer.tanksPerLevel = this._player1.tanksPerLevel;
+                this._levelData.firstPlayer.bmpPerLevel = this._player1.bmpPerLevel;
+                this._levelData.firstPlayer.btrPerLevel = this._player1.btrPerLevel;
+                this._levelData.firstPlayer.turretsPerLevel = this._player1.turretsPerLevel;
+                this._levelData.firstPlayer.radarPerLevel = this._player1.radarPerLevel;
+            }
+            if (this._player2 && this._levelData.secondPlayer) {
+                this._levelData.secondPlayer.experience = this._player2.experience;
+                this._levelData.secondPlayer.tanksPerLevel = this._player2.tanksPerLevel;
+                this._levelData.secondPlayer.bmpPerLevel = this._player2.bmpPerLevel;
+                this._levelData.secondPlayer.btrPerLevel = this._player2.btrPerLevel;
+                this._levelData.secondPlayer.turretsPerLevel = this._player2.turretsPerLevel;
+                this._levelData.secondPlayer.radarPerLevel = this._player2.radarPerLevel;
+            }
+            this._fightingMelody.stop();
+            this.scene.start("postlevel-scene", { data: this._levelData });
+        }
+    }
+}
+exports["default"] = Level_4;
+
+
+/***/ }),
+
+/***/ "./src/scenes/levels/Level_5.ts":
+/*!**************************************!*\
+  !*** ./src/scenes/levels/Level_5.ts ***!
+  \**************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const Headquarter_1 = __importDefault(__webpack_require__(/*! ../../classes/Headquarter */ "./src/classes/Headquarter.ts"));
+const Map_1 = __importDefault(__webpack_require__(/*! ../../classes/Map */ "./src/classes/Map.ts"));
+const GroupOfEnemies_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/enemies/GroupOfEnemies */ "./src/classes/vehicles/enemies/GroupOfEnemies.ts"));
+const Radar_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/enemies/Radar */ "./src/classes/vehicles/enemies/Radar.ts"));
+const Turret_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/enemies/Turret */ "./src/classes/vehicles/enemies/Turret.ts"));
+const Player_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/player/Player */ "./src/classes/vehicles/player/Player.ts"));
+const Player2_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/player/Player2 */ "./src/classes/vehicles/player/Player2.ts"));
+const utils_1 = __webpack_require__(/*! ../../utils/utils */ "./src/utils/utils.ts");
+const Level_1 = __importDefault(__webpack_require__(/*! ./Level */ "./src/scenes/levels/Level.ts"));
+class Level_5 extends Level_1.default {
+    constructor() {
+        super("level-5");
+        this._turret = null;
+        this._radar = null;
+        this._headquarterRu = null;
+        this._headquarterUa = null;
+        this._isHeadquarterRuDestroyed = false;
+    }
+    create({ data }) {
+        this._map = new Map_1.default(this, 3);
+        this._levelData = data;
+        this._enemiesArray = [3, 1, 2, 3, 1, 3, 2, 1, 2, 1];
+        let position = null;
+        if (this._levelData.multiplayerGame) {
+            this._maxEnemies = 8;
+            this._enemiesArray.forEach((item, _, array) => array.push(item));
+            if (this._levelData.firstPlayer) {
+                const player = this._map.getPlayer(1);
+                position = { x: player.x, y: player.y };
+                this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+            }
+            if (this._levelData.secondPlayer) {
+                const player2 = this._map.getPlayer(2);
+                position = { x: player2.x, y: player2.y };
+                this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
+            }
+        }
+        else {
+            const player = this._map.getPlayer(1);
+            let position = { x: player.x, y: player.y };
+            this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+            (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+        }
+        this._headquarterRu = new Headquarter_1.default(this, this._map.getHeadquarterPosition(true), "objects", "headquarterRu");
+        this._headquarterUa = new Headquarter_1.default(this, this._map.getHeadquarterPosition(false), "objects", "headquarterUa");
+        this._enemiesLeft = this._enemiesArray.length;
+        this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2, this._headquarterUa, this._headquarterRu);
+        let turretPosition = this._map.getTurretPosition(1);
+        this._turret = new Turret_1.default(this, turretPosition, this._map, this._enemies, this._player1, this._player2);
+        this._enemiesLeft++;
+        turretPosition = this._map.getRadarPosition();
+        this._radar = new Radar_1.default(this, turretPosition, "objects", "platform1", this._enemies, this._player1, this._player2);
+        this._turret.radar = this._radar;
+        this._enemiesLeft++;
+        this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
+        if (this._player1) {
+            this._players.push(this._player1);
+            this._player1.enemyVehicles = this._enemies;
+            this._player1.enemyTurrets = [this._turret];
+            this._player1.enemyTurretPlatforms = [this._turret.platform];
+            this._player1.headquarterRu = this._headquarterRu;
+            this._player1.headquarterUa = this._headquarterUa;
+            this._player1.radar = this._radar;
+            this._player1.enemiesStatic = [this._headquarterRu, this._headquarterUa, this._radar];
+            if (this._player2)
+                this._player1.player2 = this._player2;
+            this._player1.handleCollisions();
+        }
+        if (this._player2) {
+            this._players.push(this._player2);
+            this._player2.enemyVehicles = this._enemies;
+            this._player2.enemyTurrets = [this._turret];
+            this._player2.enemyTurretPlatforms = [this._turret.platform];
+            this._player2.headquarterRu = this._headquarterRu;
+            this._player2.headquarterUa = this._headquarterUa;
+            this._player2.radar = this._radar;
+            this._player2.enemiesStatic = [this._headquarterRu, this._headquarterUa, this._radar];
+            if (this._player1)
+                this._player2.player1 = this._player1;
+            this._player2.handleCollisions();
+        }
+        this.listenEvents();
+        this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
+        this._player1 ? this.cameras.main.startFollow(this._player1) : this.cameras.main.startFollow(this._player2);
+        this._fightingMelody.play();
+        this.createFinishText();
+    }
+    listenEvents() {
+        if (this.events.listeners("first_player_dead").length <= 0) {
+            this.events.on("first_player_dead", this.firstPlayerDead, this);
+        }
+        if (this.events.listeners("second_player_dead").length <= 0) {
+            this.events.on("second_player_dead", this.secondPlayerDead, this);
+        }
+        if (this.events.listeners("enemy_dead").length <= 0) {
+            this.events.on("enemy_dead", this.enemyDead, this);
+        }
+        if (this.events.listeners("enemy_headquarter_destroyed").length <= 0) {
+            this.events.on("enemy_headquarter_destroyed", this.enemyDead, this);
+        }
+        if (this.events.listeners("headquarterUa_destroyed").length <= 0) {
+            this.events.on("headquarterUa_destroyed", this.headquarterDestroyed, this);
+        }
+    }
+    enemyDead(toCount, isHeadquarterRuDestroyed) {
+        if (isHeadquarterRuDestroyed)
+            this._isHeadquarterRuDestroyed = isHeadquarterRuDestroyed;
+        if (toCount) {
+            --this._enemies.counter;
+            --this._enemiesLeft;
+            this._enemiesText.setText(`Enemies: ${this._enemiesLeft}`);
+        }
+        if (this._enemiesLeft <= 0 && this._isHeadquarterRuDestroyed) {
+            this._levelData.nextLevelNumber = "level-6";
+            this._levelData.nextLevelName = "Dangerous Zone";
+            if (this._player1 && this._levelData.firstPlayer) {
+                this._levelData.firstPlayer.experience = this._player1.experience;
+                this._levelData.firstPlayer.tanksPerLevel = this._player1.tanksPerLevel;
+                this._levelData.firstPlayer.bmpPerLevel = this._player1.bmpPerLevel;
+                this._levelData.firstPlayer.btrPerLevel = this._player1.btrPerLevel;
+                this._levelData.firstPlayer.turretsPerLevel = this._player1.turretsPerLevel;
+                this._levelData.firstPlayer.radarPerLevel = this._player1.radarPerLevel;
+            }
+            if (this._player2 && this._levelData.secondPlayer) {
+                this._levelData.secondPlayer.experience = this._player2.experience;
+                this._levelData.secondPlayer.tanksPerLevel = this._player2.tanksPerLevel;
+                this._levelData.secondPlayer.bmpPerLevel = this._player2.bmpPerLevel;
+                this._levelData.secondPlayer.btrPerLevel = this._player2.btrPerLevel;
+                this._levelData.secondPlayer.turretsPerLevel = this._player2.turretsPerLevel;
+                this._levelData.secondPlayer.radarPerLevel = this._player2.radarPerLevel;
+            }
+            this._fightingMelody.stop();
+            this._isHeadquarterRuDestroyed = false;
+            this.scene.start("postlevel-scene", { data: this._levelData });
+        }
+    }
+    headquarterDestroyed() {
+        this._headquarterUa = null;
+        if (!this._headquarterUa)
+            this.runTween();
+    }
+}
+exports["default"] = Level_5;
+
+
+/***/ }),
+
+/***/ "./src/scenes/levels/Level_6.ts":
+/*!**************************************!*\
+  !*** ./src/scenes/levels/Level_6.ts ***!
+  \**************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const Map_1 = __importDefault(__webpack_require__(/*! ../../classes/Map */ "./src/classes/Map.ts"));
+const Player_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/player/Player */ "./src/classes/vehicles/player/Player.ts"));
+const utils_1 = __webpack_require__(/*! ../../utils/utils */ "./src/utils/utils.ts");
+const GroupOfEnemies_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/enemies/GroupOfEnemies */ "./src/classes/vehicles/enemies/GroupOfEnemies.ts"));
+const Player2_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/player/Player2 */ "./src/classes/vehicles/player/Player2.ts"));
+const Turret_1 = __importDefault(__webpack_require__(/*! ../../classes/vehicles/enemies/Turret */ "./src/classes/vehicles/enemies/Turret.ts"));
+const Level_1 = __importDefault(__webpack_require__(/*! ./Level */ "./src/scenes/levels/Level.ts"));
+const Headquarter_1 = __importDefault(__webpack_require__(/*! ../../classes/Headquarter */ "./src/classes/Headquarter.ts"));
+class Level_6 extends Level_1.default {
+    constructor() {
+        super("level-6");
+        this._turret1 = null;
+        this._turret2 = null;
+        this._headquarterRu = null;
+        this._isHeadquarterRuDestroyed = false;
+    }
+    create({ data }) {
+        this._map = new Map_1.default(this, 6);
+        this._levelData = data;
+        this._enemiesArray = [3, 3, 1, 3, 2, 3, 1, 3, 2, 1, 2, 2, 1, 1, 3, 2, 1];
+        let position = null;
+        if (this._levelData.multiplayerGame) {
+            this._maxEnemies = 8;
+            this._enemiesArray.forEach((item, _, array) => array.push(item));
+            if (this._levelData.firstPlayer) {
+                const player = this._map.getPlayer(1);
+                position = { x: player.x, y: player.y };
+                this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+            }
+            if (this._levelData.secondPlayer) {
+                const player2 = this._map.getPlayer(2);
+                position = { x: player2.x, y: player2.y };
+                this._player2 = new Player2_1.default(this, position, "objects", `player_${this._levelData.secondPlayer.vehicle}`, this._map, this._levelData.secondPlayer.shellType, this._levelData.secondPlayer.experience);
+                (0, utils_1.showPlayerExperience)(this, this._style, false, this._levelData.secondPlayer.experience);
+            }
+        }
+        else {
+            const player = this._map.getPlayer(1);
+            let position = { x: player.x, y: player.y };
+            this._player1 = new Player_1.default(this, position, "objects", `player_${this._levelData.firstPlayer.vehicle}`, this._map, this._levelData.firstPlayer.shellType, this._levelData.firstPlayer.experience);
+            (0, utils_1.showPlayerExperience)(this, this._style, true, this._levelData.firstPlayer.experience);
+        }
+        this._headquarterRu = new Headquarter_1.default(this, this._map.getHeadquarterPosition(true), "objects", "headquarterRu");
+        this._enemiesLeft = this._enemiesArray.length;
+        this._enemies = new GroupOfEnemies_1.default(this.physics.world, this, this._map, this._enemiesArray, this._maxEnemies, 3, this._player1, this._player2, null, this._headquarterRu);
+        let turretPosition = this._map.getTurretPosition(1);
+        this._turret1 = new Turret_1.default(this, turretPosition, this._map, this._enemies, this._player1, this._player2, null, 1);
+        this._enemiesLeft++;
+        turretPosition = this._map.getTurretPosition(2);
+        this._turret2 = new Turret_1.default(this, turretPosition, this._map, this._enemies, this._player1, this._player2, null, 2);
+        this._enemiesLeft++;
+        this._enemiesText = (0, utils_1.createLevelText)(this, 15, 30, `Enemies: ${this._enemiesLeft}`, this._style);
+        if (this._player1) {
+            this._players.push(this._player1);
+            this._player1.enemyVehicles = this._enemies;
+            this._player1.enemyTurrets = [this._turret1, this._turret2];
+            this._player1.enemyTurretPlatforms = [this._turret1.platform, this._turret2.platform];
+            this._player1.headquarterRu = this._headquarterRu;
+            this._player1.enemiesStatic = [this._headquarterRu];
+            if (this._player2)
+                this._player1.player2 = this._player2;
+            this._player1.handleCollisions();
+        }
+        if (this._player2) {
+            this._players.push(this._player2);
+            this._player2.enemyVehicles = this._enemies;
+            this._player2.enemyTurrets = [this._turret1, this._turret2];
+            this._player2.enemyTurretPlatforms = [this._turret1.platform, this._turret2.platform];
+            this._player2.headquarterRu = this._headquarterRu;
+            this._player2.enemiesStatic = [this._headquarterRu];
+            if (this._player1)
+                this._player2.player1 = this._player1;
+            this._player2.handleCollisions();
+        }
+        this.listenEvents();
+        this.cameras.main.setBounds(0, 0, this._map.tilemap.widthInPixels, this._map.tilemap.heightInPixels);
+        this._player1 ? this.cameras.main.startFollow(this._player1) : this.cameras.main.startFollow(this._player2);
+        this._fightingMelody.play();
+        this.createFinishText();
+    }
+    listenEvents() {
+        if (this.events.listeners("first_player_dead").length <= 0) {
+            this.events.on("first_player_dead", this.firstPlayerDead, this);
+        }
+        if (this.events.listeners("second_player_dead").length <= 0) {
+            this.events.on("second_player_dead", this.secondPlayerDead, this);
+        }
+        if (this.events.listeners("enemy_dead").length <= 0) {
+            this.events.on("enemy_dead", this.enemyDead, this);
+        }
+        if (this.events.listeners("enemy_headquarter_destroyed").length <= 0) {
+            this.events.on("enemy_headquarter_destroyed", this.enemyDead, this);
+        }
+    }
+    enemyDead(toCount, isHeadquarterRuDestroyed) {
+        if (isHeadquarterRuDestroyed)
+            this._isHeadquarterRuDestroyed = isHeadquarterRuDestroyed;
+        if (toCount) {
+            --this._enemies.counter;
+            --this._enemiesLeft;
+            this._enemiesText.setText(`Enemies: ${this._enemiesLeft}`);
+        }
+        if (this._enemiesLeft <= 0 && this._isHeadquarterRuDestroyed) {
+            this._levelData.nextLevelNumber = "level-7";
+            this._levelData.nextLevelName = "?";
+            if (this._player1 && this._levelData.firstPlayer) {
+                this._levelData.firstPlayer.experience = this._player1.experience;
+                this._levelData.firstPlayer.tanksPerLevel = this._player1.tanksPerLevel;
+                this._levelData.firstPlayer.bmpPerLevel = this._player1.bmpPerLevel;
+                this._levelData.firstPlayer.btrPerLevel = this._player1.btrPerLevel;
+                this._levelData.firstPlayer.turretsPerLevel = this._player1.turretsPerLevel;
+                this._levelData.firstPlayer.radarPerLevel = this._player1.radarPerLevel;
+            }
+            if (this._player2 && this._levelData.secondPlayer) {
+                this._levelData.secondPlayer.experience = this._player2.experience;
+                this._levelData.secondPlayer.tanksPerLevel = this._player2.tanksPerLevel;
+                this._levelData.secondPlayer.bmpPerLevel = this._player2.bmpPerLevel;
+                this._levelData.secondPlayer.btrPerLevel = this._player2.btrPerLevel;
+                this._levelData.secondPlayer.turretsPerLevel = this._player2.turretsPerLevel;
+                this._levelData.secondPlayer.radarPerLevel = this._player2.radarPerLevel;
+            }
+            this._fightingMelody.stop();
+            this._isHeadquarterRuDestroyed = false;
+            this.scene.start("postlevel-scene", { data: this._levelData });
+        }
+    }
+}
+exports["default"] = Level_6;
+
+
+/***/ }),
+
 /***/ "./src/utils/LoadingBar.ts":
 /*!*********************************!*\
   !*** ./src/utils/LoadingBar.ts ***!
@@ -2652,7 +3066,7 @@ exports.LoadingBar = LoadingBar;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.showPlayerExperience = exports.getPlayersRank = exports.createLevelText = exports.createRectangleFrame = exports.createTextButton = exports.createText = exports.goToOpositeDirection = exports.handleDirection = exports.PLAYER = exports.ENEMY = exports.DIRECTION = exports.XPOINTS_3_ANIMATION = exports.XPOINTS_2_ANIMATION = exports.XPOINTS_1_ANIMATION = exports.SHOOTING_ANIMATION = exports.SPARKLE_ANIMATION = exports.RADAR_ANIMATION = exports.BANG_ANIMATION = exports.FRICTIONS = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.PLAYER_SPEED = void 0;
+exports.showPlayerExperience = exports.getPlayersRank = exports.createLevelText = exports.createRectangleFrame = exports.createTextButton = exports.createText = exports.goToAnotherDirection = exports.goToOpositeDirection = exports.handleDirection = exports.PLAYER = exports.ENEMY = exports.DIRECTION = exports.XPOINTS_3_ANIMATION = exports.XPOINTS_2_ANIMATION = exports.XPOINTS_1_ANIMATION = exports.SHOOTING_ANIMATION = exports.SPARKLE_ANIMATION = exports.RADAR_ANIMATION = exports.BANG_ANIMATION = exports.FRICTIONS = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.PLAYER_SPEED = void 0;
 var PLAYER_SPEED;
 (function (PLAYER_SPEED) {
     PLAYER_SPEED[PLAYER_SPEED["NONE"] = 0] = "NONE";
@@ -2775,6 +3189,48 @@ function goToOpositeDirection(enemy) {
     }
 }
 exports.goToOpositeDirection = goToOpositeDirection;
+function goToAnotherDirection(enemy) {
+    switch (enemy.direction) {
+        case DIRECTION.DOWN:
+            setCorrectDirection(enemy, 1);
+            break;
+        case DIRECTION.LEFT:
+            setCorrectDirection(enemy, 2);
+            break;
+        case DIRECTION.UP:
+            setCorrectDirection(enemy, 3);
+            break;
+        case DIRECTION.RIGHT:
+            setCorrectDirection(enemy, 4);
+            break;
+    }
+}
+exports.goToAnotherDirection = goToAnotherDirection;
+function setCorrectDirection(enemy, oldDirection) {
+    var _a, _b, _c, _d;
+    let newDirection = oldDirection;
+    while (newDirection === oldDirection) {
+        newDirection = Math.floor(Math.random() * 4) + 1;
+    }
+    switch (newDirection) {
+        case 1:
+            (_a = enemy.body) === null || _a === void 0 ? void 0 : _a.setVelocity(0, -enemy.velocity);
+            enemy.angle = 180;
+            break;
+        case 2:
+            (_b = enemy.body) === null || _b === void 0 ? void 0 : _b.setVelocity(enemy.velocity, 0);
+            enemy.angle = -90;
+            break;
+        case 3:
+            (_c = enemy.body) === null || _c === void 0 ? void 0 : _c.setVelocity(0, enemy.velocity);
+            enemy.angle = 0;
+            break;
+        case 4:
+            (_d = enemy.body) === null || _d === void 0 ? void 0 : _d.setVelocity(-enemy.velocity, 0);
+            enemy.angle = 90;
+            break;
+    }
+}
 function createText(scene, positionX, positionY, text, style) {
     return scene.add.text(positionX, positionY, text, style).setOrigin(0);
 }

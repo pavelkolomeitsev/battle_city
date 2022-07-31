@@ -1,8 +1,8 @@
-import Map from "../classes/Map";
-import Player from "../classes/vehicles/player/Player";
-import { createLevelText, showPlayerExperience, StartPosition } from "../utils/utils";
-import GroupOfEnemies from "../classes/vehicles/enemies/GroupOfEnemies";
-import Player2 from "../classes/vehicles/player/Player2";
+import Map from "../../classes/Map";
+import Player from "../../classes/vehicles/player/Player";
+import { createLevelText, showPlayerExperience, StartPosition } from "../../utils/utils";
+import GroupOfEnemies from "../../classes/vehicles/enemies/GroupOfEnemies";
+import Player2 from "../../classes/vehicles/player/Player2";
 import Level from "./Level";
 
 export default class Level_1 extends Level {
@@ -12,7 +12,7 @@ export default class Level_1 extends Level {
         this._map = new Map(this, 1);
         this._levelData = data;
         // add all enemies 1 - enemy BTR, 2 - enemy BMP, 3 - enemy tank, count reverse! number of bases on each level is different!!!
-        this._enemiesArray = [3, 1, 2, 2, 3, 1, 2, 1, 1, 3, 2, 1];
+        this._enemiesArray = [3, 1, 2, 3, 1, 2, 3, 2, 1, 2, 1];
         // add player/s
         const player = this._map.getPlayer(1);
         let position: StartPosition = {x: player.x, y: player.y};
@@ -27,7 +27,7 @@ export default class Level_1 extends Level {
             this._player2.player1 = this._player1;
             this._player1.player2 = this._player2;
             this._enemiesArray.forEach((item: number, _, array) => array.push(item)); // if there are two players -> twice enemies
-            this._maxEnemies = 10;
+            this._maxEnemies = 8;
             // create exp level 2 player
             showPlayerExperience(this, this._style, false, this._levelData.secondPlayer.experience);
         }

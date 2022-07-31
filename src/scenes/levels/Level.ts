@@ -1,8 +1,8 @@
-import Map from "../classes/Map";
-import GroupOfEnemies from "../classes/vehicles/enemies/GroupOfEnemies";
-import Player from "../classes/vehicles/player/Player";
-import Player2 from "../classes/vehicles/player/Player2";
-import { createText, LevelData } from "../utils/utils";
+import Map from "../../classes/Map";
+import GroupOfEnemies from "../../classes/vehicles/enemies/GroupOfEnemies";
+import Player from "../../classes/vehicles/player/Player";
+import Player2 from "../../classes/vehicles/player/Player2";
+import { createText, LevelData } from "../../utils/utils";
 
 export default class Level extends Phaser.Scene {
     protected _map: Map = null;
@@ -15,7 +15,7 @@ export default class Level extends Phaser.Scene {
     protected _finishText: Phaser.GameObjects.Text = null;
     protected _enemiesArray: number[] = null;
     protected _enemiesLeft: number = 0;
-    protected _maxEnemies: number = 6;
+    protected _maxEnemies: number = 5;
     protected _style: Phaser.Types.GameObjects.Text.TextStyle = null;
     protected _fightingMelody: Phaser.Sound.BaseSound = null;
 

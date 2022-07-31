@@ -1,4 +1,4 @@
-import { goToOpositeDirection, RADAR_ANIMATION, StartPosition } from "../../../utils/utils";
+import { goToAnotherDirection, goToOpositeDirection, RADAR_ANIMATION, StartPosition } from "../../../utils/utils";
 import XpointsAnimation from "../../animation/XpointsAnimation";
 import Shell from "../../shells/Shell";
 import Player from "../player/Player";
@@ -54,6 +54,7 @@ export default class Radar extends Phaser.GameObjects.Sprite {
     }
 
     private handleCollision(enemy: EnemyVehicle, radar: Phaser.GameObjects.Sprite): void {
-        goToOpositeDirection(enemy);
+        // goToOpositeDirection(enemy);
+        goToAnotherDirection(enemy)
     }
 }

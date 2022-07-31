@@ -1,4 +1,4 @@
-import { ENEMY, goToOpositeDirection, StartPosition } from "../../../utils/utils";
+import { ENEMY, goToAnotherDirection, goToOpositeDirection, StartPosition } from "../../../utils/utils";
 import GroupOfShells from "../../shells/GroupOfShells";
 import Map from "../../Map";
 import Player from "../player/Player";
@@ -91,26 +91,15 @@ export default class Turret {
     }
 
     private handleCollision(enemy: EnemyVehicle, platform: Phaser.GameObjects.Sprite): void {
-        goToOpositeDirection(enemy);
+        // goToOpositeDirection(enemy);
+        goToAnotherDirection(enemy)
     }
 
     public runTurret(): void {
         if (!this._radar) { // if it`s no radar, there are two turrets and two check areas
             this._players.forEach((player: Player) => this.run(player, this._map.checkPlayersPositionNoRadar(player, this._baseNumber)));
-            // if (!this._player2) {
-            //     this.run(this._player1, this._map.checkPlayersPositionNoRadar(this._player1, this._baseNumber));
-            // } else {
-            //     this.run(this._player1, this._map.checkPlayersPositionNoRadar(this._player1, this._baseNumber));
-            //     this.run(this._player2, this._map.checkPlayersPositionNoRadar(this._player2, this._baseNumber));
-            // }
         } else {
             this._players.forEach((player: Player) => this.run(player, this._map.checkPlayersPosition(this._radar, player)));
-            // if (!this._player2) {
-            //     this.run(this._player1, this._map.checkPlayersPosition(this._radar, this._player1));
-            // } else {
-            //     this.run(this._player1, this._map.checkPlayersPosition(this._radar, this._player1));
-            //     this.run(this._player2, this._map.checkPlayersPosition(this._radar, this._player2));
-            // }
         }
     }
 
@@ -157,7 +146,6 @@ export default class Turret {
             this.calculateExperiencePoints(id, 1.1);
             this._scene.events.off("update", this.runTurret, this);
             this._scene.events.emit("enemy_dead", true, false);
-            this._scene = null;
         }
     }
 
