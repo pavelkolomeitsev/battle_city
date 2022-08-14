@@ -155,47 +155,47 @@ export function goToOpositeDirection(enemy: EnemyVehicle): void {
     }
 }
 
-export function goToAnotherDirection(enemy: EnemyVehicle): void {
-    switch (enemy.direction) {
-        case DIRECTION.DOWN: // 1
-            setCorrectDirection(enemy, 1);
-            break;
-        case DIRECTION.LEFT: // 2
-            setCorrectDirection(enemy, 2);
-            break;
-        case DIRECTION.UP: // 3
-            setCorrectDirection(enemy, 3);
-            break;
-        case DIRECTION.RIGHT: // 4
-            setCorrectDirection(enemy, 4);
-            break;
-    }
-}
+// export function goToAnotherDirection(enemy: EnemyVehicle): void {
+//     switch (enemy.direction) {
+//         case DIRECTION.DOWN: // 1
+//             setCorrectDirection(enemy, 1);
+//             break;
+//         case DIRECTION.LEFT: // 2
+//             setCorrectDirection(enemy, 2);
+//             break;
+//         case DIRECTION.UP: // 3
+//             setCorrectDirection(enemy, 3);
+//             break;
+//         case DIRECTION.RIGHT: // 4
+//             setCorrectDirection(enemy, 4);
+//             break;
+//     }
+// }
 
-function setCorrectDirection(enemy: EnemyVehicle, oldDirection: number): void {
-    let newDirection: number = oldDirection;
-    while (newDirection === oldDirection) {
-        newDirection = Math.floor(Math.random() * 4) + 1;
-    }
-    switch (newDirection) {
-        case 1:
-            enemy.body?.setVelocity(0, -enemy.velocity); // set direction
-            enemy.angle = 180; // set correct sprite`s angle       
-            break;
-        case 2:
-            enemy.body?.setVelocity(enemy.velocity, 0); // set direction
-            enemy.angle = -90; // set correct sprite`s angle
-            break;
-        case 3:
-            enemy.body?.setVelocity(0, enemy.velocity); // set direction
-            enemy.angle = 0; // set correct sprite`s angle
-            break;
-        case 4:
-            enemy.body?.setVelocity(-enemy.velocity, 0); // set direction
-            enemy.angle = 90; // set correct sprite`s angle
-            break;
-    }
-}
+// function setCorrectDirection(enemy: EnemyVehicle, oldDirection: number): void {
+//     let newDirection: number = oldDirection;
+//     while (newDirection === oldDirection) {
+//         newDirection = Math.floor(Math.random() * 4) + 1;
+//     }
+//     switch (newDirection) {
+//         case 1:
+//             enemy.body?.setVelocity(0, -enemy.velocity); // set direction
+//             enemy.angle = 180; // set correct sprite`s angle       
+//             break;
+//         case 2:
+//             enemy.body?.setVelocity(enemy.velocity, 0); // set direction
+//             enemy.angle = -90; // set correct sprite`s angle
+//             break;
+//         case 3:
+//             enemy.body?.setVelocity(0, enemy.velocity); // set direction
+//             enemy.angle = 0; // set correct sprite`s angle
+//             break;
+//         case 4:
+//             enemy.body?.setVelocity(-enemy.velocity, 0); // set direction
+//             enemy.angle = 90; // set correct sprite`s angle
+//             break;
+//     }
+// }
 
 export function createText(scene: Phaser.Scene, positionX: number, positionY: number, text: string, style: Phaser.Types.GameObjects.Text.TextStyle): Phaser.GameObjects.Text {
     return scene.add.text(positionX, positionY, text, style).setOrigin(0);

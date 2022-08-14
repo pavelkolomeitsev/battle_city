@@ -1,4 +1,4 @@
-import { ENEMY, goToAnotherDirection, goToOpositeDirection, StartPosition } from "../../../utils/utils";
+import { ENEMY, StartPosition } from "../../../utils/utils";
 import GroupOfShells from "../../shells/GroupOfShells";
 import Map from "../../Map";
 import Player from "../player/Player";
@@ -92,7 +92,8 @@ export default class Turret {
 
     private handleCollision(enemy: EnemyVehicle, platform: Phaser.GameObjects.Sprite): void {
         // goToOpositeDirection(enemy);
-        goToAnotherDirection(enemy)
+        // goToAnotherDirection(enemy)
+        enemy.goToAnotherDirection();
     }
 
     public runTurret(): void {

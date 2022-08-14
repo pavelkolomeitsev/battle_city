@@ -1,4 +1,4 @@
-import { StartPosition, DIRECTION, ENEMY, goToOpositeDirection, goToAnotherDirection } from "../../../utils/utils";
+import { StartPosition, DIRECTION, ENEMY } from "../../../utils/utils";
 import BangAnimation from "../../animation/BangAnimation";
 import Map from "../../Map";
 import Player from "../player/Player";
@@ -245,7 +245,7 @@ export default class EnemyVehicle extends Vehicle {
 
     private handleEnemiesCollision(gameObject: Phaser.GameObjects.Sprite, enemy: EnemyVehicle): void {
         // goToOpositeDirection(enemy);
-        goToAnotherDirection(enemy);
+        this.goToAnotherDirection();
     }
 
     private calculateExperiencePoints(id: string, points: number, enemyType: string): void {
@@ -268,6 +268,48 @@ export default class EnemyVehicle extends Vehicle {
                 break;
             case ENEMY.BTR.TYPE:
                 player.btrPerLevel++;
+                break;
+        }
+    }
+
+    public goToAnotherDirection(): void {
+        switch (this.direction) {
+            case DIRECTION.DOWN: // 1
+                this.setCorrectDirection(1);
+                break;
+            case DIRECTION.LEFT: // 2
+                this.setCorrectDirection(2);
+                break;
+            case DIRECTION.UP: // 3
+                this.setCorrectDirection(3);
+                break;
+            case DIRECTION.RIGHT: // 4
+                this.setCorrectDirection(4);
+                break;
+        }
+    }
+
+    private setCorrectDirection(oldDirection: number): void {
+        let newDirection: number = oldDirection;
+        while (newDirection === oldDirection) {
+            newDirection = Math.floor(Math.random() * 4) + 1;
+        }
+        switch (newDirection) {
+            case 1:
+                this.body?.setVelocity(0, -this.velocity); // set direction
+                this.angle = 180; // set correct sprite`s angle       
+                break;
+            case 2:
+                this.body?.setVelocity(this.velocity, 0); // set direction
+                this.angle = -90; // set correct sprite`s angle
+                break;
+            case 3:
+                this.body?.setVelocity(0, this.velocity); // set direction
+                this.angle = 0; // set correct sprite`s angle
+                break;
+            case 4:
+                this.body?.setVelocity(-this.velocity, 0); // set direction
+                this.angle = 90; // set correct sprite`s angle
                 break;
         }
     }

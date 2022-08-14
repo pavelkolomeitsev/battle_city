@@ -728,7 +728,7 @@ class EnemyVehicle extends Vehicle_1.default {
         shell.setAlive(false);
     }
     handleEnemiesCollision(gameObject, enemy) {
-        (0, utils_1.goToAnotherDirection)(enemy);
+        this.goToAnotherDirection();
     }
     calculateExperiencePoints(id, points, enemyType) {
         if (this._player1 && id === "P1") {
@@ -750,6 +750,47 @@ class EnemyVehicle extends Vehicle_1.default {
                 break;
             case utils_1.ENEMY.BTR.TYPE:
                 player.btrPerLevel++;
+                break;
+        }
+    }
+    goToAnotherDirection() {
+        switch (this.direction) {
+            case utils_1.DIRECTION.DOWN:
+                this.setCorrectDirection(1);
+                break;
+            case utils_1.DIRECTION.LEFT:
+                this.setCorrectDirection(2);
+                break;
+            case utils_1.DIRECTION.UP:
+                this.setCorrectDirection(3);
+                break;
+            case utils_1.DIRECTION.RIGHT:
+                this.setCorrectDirection(4);
+                break;
+        }
+    }
+    setCorrectDirection(oldDirection) {
+        var _a, _b, _c, _d;
+        let newDirection = oldDirection;
+        while (newDirection === oldDirection) {
+            newDirection = Math.floor(Math.random() * 4) + 1;
+        }
+        switch (newDirection) {
+            case 1:
+                (_a = this.body) === null || _a === void 0 ? void 0 : _a.setVelocity(0, -this.velocity);
+                this.angle = 180;
+                break;
+            case 2:
+                (_b = this.body) === null || _b === void 0 ? void 0 : _b.setVelocity(this.velocity, 0);
+                this.angle = -90;
+                break;
+            case 3:
+                (_c = this.body) === null || _c === void 0 ? void 0 : _c.setVelocity(0, this.velocity);
+                this.angle = 0;
+                break;
+            case 4:
+                (_d = this.body) === null || _d === void 0 ? void 0 : _d.setVelocity(-this.velocity, 0);
+                this.angle = 90;
                 break;
         }
     }
@@ -800,6 +841,7 @@ class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
             callback: this.addEnemy,
             callbackScope: this
         });
+        this._scene.physics.add.collider(this, this, this.handleEnemyVehicleCollision, null, this);
     }
     addEnemy() {
         var _a;
@@ -827,6 +869,8 @@ class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
         }
     }
     handleEnemyVehicleCollision(firstEnemy, secondEnemy) {
+        firstEnemy.goToAnotherDirection();
+        secondEnemy.goToAnotherDirection();
     }
 }
 exports["default"] = GroupOfEnemies;
@@ -890,7 +934,7 @@ class Radar extends Phaser.GameObjects.Sprite {
         }
     }
     handleCollision(enemy, radar) {
-        (0, utils_1.goToAnotherDirection)(enemy);
+        enemy.goToAnotherDirection();
     }
 }
 exports["default"] = Radar;
@@ -983,7 +1027,7 @@ class Turret {
         shell.setAlive(false);
     }
     handleCollision(enemy, platform) {
-        (0, utils_1.goToAnotherDirection)(enemy);
+        enemy.goToAnotherDirection();
     }
     runTurret() {
         if (!this._radar) {
@@ -3066,7 +3110,7 @@ exports.LoadingBar = LoadingBar;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.showPlayerExperience = exports.getPlayersRank = exports.createLevelText = exports.createRectangleFrame = exports.createTextButton = exports.createText = exports.goToAnotherDirection = exports.goToOpositeDirection = exports.handleDirection = exports.PLAYER = exports.ENEMY = exports.DIRECTION = exports.XPOINTS_3_ANIMATION = exports.XPOINTS_2_ANIMATION = exports.XPOINTS_1_ANIMATION = exports.SHOOTING_ANIMATION = exports.SPARKLE_ANIMATION = exports.RADAR_ANIMATION = exports.BANG_ANIMATION = exports.FRICTIONS = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.PLAYER_SPEED = void 0;
+exports.showPlayerExperience = exports.getPlayersRank = exports.createLevelText = exports.createRectangleFrame = exports.createTextButton = exports.createText = exports.goToOpositeDirection = exports.handleDirection = exports.PLAYER = exports.ENEMY = exports.DIRECTION = exports.XPOINTS_3_ANIMATION = exports.XPOINTS_2_ANIMATION = exports.XPOINTS_1_ANIMATION = exports.SHOOTING_ANIMATION = exports.SPARKLE_ANIMATION = exports.RADAR_ANIMATION = exports.BANG_ANIMATION = exports.FRICTIONS = exports.GROUND_FRICTION = exports.SPEED = exports.TURNS = exports.PLAYER_SPEED = void 0;
 var PLAYER_SPEED;
 (function (PLAYER_SPEED) {
     PLAYER_SPEED[PLAYER_SPEED["NONE"] = 0] = "NONE";
@@ -3189,48 +3233,6 @@ function goToOpositeDirection(enemy) {
     }
 }
 exports.goToOpositeDirection = goToOpositeDirection;
-function goToAnotherDirection(enemy) {
-    switch (enemy.direction) {
-        case DIRECTION.DOWN:
-            setCorrectDirection(enemy, 1);
-            break;
-        case DIRECTION.LEFT:
-            setCorrectDirection(enemy, 2);
-            break;
-        case DIRECTION.UP:
-            setCorrectDirection(enemy, 3);
-            break;
-        case DIRECTION.RIGHT:
-            setCorrectDirection(enemy, 4);
-            break;
-    }
-}
-exports.goToAnotherDirection = goToAnotherDirection;
-function setCorrectDirection(enemy, oldDirection) {
-    var _a, _b, _c, _d;
-    let newDirection = oldDirection;
-    while (newDirection === oldDirection) {
-        newDirection = Math.floor(Math.random() * 4) + 1;
-    }
-    switch (newDirection) {
-        case 1:
-            (_a = enemy.body) === null || _a === void 0 ? void 0 : _a.setVelocity(0, -enemy.velocity);
-            enemy.angle = 180;
-            break;
-        case 2:
-            (_b = enemy.body) === null || _b === void 0 ? void 0 : _b.setVelocity(enemy.velocity, 0);
-            enemy.angle = -90;
-            break;
-        case 3:
-            (_c = enemy.body) === null || _c === void 0 ? void 0 : _c.setVelocity(0, enemy.velocity);
-            enemy.angle = 0;
-            break;
-        case 4:
-            (_d = enemy.body) === null || _d === void 0 ? void 0 : _d.setVelocity(-enemy.velocity, 0);
-            enemy.angle = 90;
-            break;
-    }
-}
 function createText(scene, positionX, positionY, text, style) {
     return scene.add.text(positionX, positionY, text, style).setOrigin(0);
 }

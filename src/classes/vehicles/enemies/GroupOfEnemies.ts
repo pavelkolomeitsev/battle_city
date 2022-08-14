@@ -1,6 +1,6 @@
 import Map from "../../Map";
 import EnemyVehicle from "./EnemyVehicle";
-import { goToAnotherDirection, goToOpositeDirection, StartPosition } from "../../../utils/utils";
+import { StartPosition } from "../../../utils/utils";
 import Player from "../player/Player";
 import Player2 from "../player/Player2";
 import Headquarter from "../../Headquarter";
@@ -36,7 +36,7 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
             callbackScope: this
         });
         // prevent enemy`s overlapping with each other
-        // this._scene.physics.add.collider(this, this, this.handleEnemyVehicleCollision, null, this);
+        this._scene.physics.add.collider(this, this, this.handleEnemyVehicleCollision, null, this);
     }
 
     private addEnemy(): void {
@@ -71,6 +71,8 @@ export default class GroupOfEnemies extends Phaser.Physics.Arcade.Group {
     }
 
     private handleEnemyVehicleCollision(firstEnemy: EnemyVehicle, secondEnemy: EnemyVehicle): void {
+        firstEnemy.goToAnotherDirection();
+        secondEnemy.goToAnotherDirection();
         // firstEnemy.body.stop();
         // goToOpositeDirection(firstEnemy);
         // goToOpositeDirection(secondEnemy);
